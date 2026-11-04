@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "./icon";
 import { useApp } from "@/lib/app-context";
+import { usePassport, useWallets } from "@/lib/queries";
 import type { ApprovalDTO, OrderDTO, RequestDTO } from "@/lib/dto";
 
 /**
@@ -14,17 +15,24 @@ export function SetupChecklist({ requests, orders, approvals, ready }: {
   requests: RequestDTO[]; orders: OrderDTO[]; approvals: ApprovalDTO[]; ready: boolean;
 }) {
   const { business } = useApp();
+  const wallets = useWallets();
+  const passport = usePassport();
+  const walletLinked = (wallets.data ?? []).some((w) => w.status === "active");
+  const passportOn = passport.data?.enabled === true;
   const key = `procura_checklist_dismissed_${business.id}`;
   const [dismissed, setDismissed] = useState(true); // hidden until we know, to avoid a flash
   useEffect(() => { try { setDismissed(localStorage.getItem(key) === "1"); } catch { setDismissed(false); } }, [key]);
 
   const comparing = requests.find((r) => r.status === "comparing");
   const steps = [
-    { done: true, title: "Set up your business", sub: "Profile and spending limits are saved.", href: "/settings/business", cta: "Review" },
-    { done: requests.length > 0, title: "Create your first procurement", sub: "Describe what you need and let Procura source it.", href: "/procurement/new", cta: "Create" },
-    { done: orders.length > 0, title: "Compare quotes and create an order", sub: "Pick a supplier from the comparison.", href: comparing ? `/procurement/${comparing.id}/compare` : "/procurement", cta: "Compare" },
-    { done: orders.some((o) => o.approvedAt) || approvals.some((a) => a.destination?.status === "approved"), title: "Approve a payment address and an order", sub: "Only addresses you approve can ever be paid.", href: "/approvals", cta: "Review" },
-    { done: false, soon: true, title: "Connect Kite Passport", sub: "Lets the agent pay inside limits you set. Coming with the Kite integration.", href: "/settings/integrations", cta: "Details" },
+    { done: true, title: "Set up your buyer", sub: "Your limits are saved.", href: "/settings/agent-permissions", cta: "Review" },
+    { done: requests.length > 0, title: "Make your first request", sub: "Describe what you need and let Procura search for it.", href: "/procurement/new", cta: "Create" },
+    { done: orders.length > 0, title: "Compare options and make an order", sub: "Pick the one you want from the comparison.", href: comparing ? `/procurement/${comparing.id}/compare` : "/procurement", cta: "Compare" },
+    { done: orders.some((o) => o.approvedAt) || approvals.some((a) => a.destination?.status === "approved"), title: "Approve your first order", sub: "Only addresses you approve can ever be paid.", href: "/approvals", cta: "Review" },
+    { done: walletLinked, title: "Connect your wallet", sub: "Link the wallet you pay from by signing a message. Nothing moves and Procura never holds your keys.", href: "/settings/wallets", cta: "Connect" },
+    ...(passport.isLoading ? [] : [passportOn
+      ? { done: passport.data?.agent != null && passport.data.sessions.some((s) => s.status === "active"), title: "Approve a Kite Passport session", sub: "Set the limits your agent must stay inside, then approve with your passkey.", href: "/settings/passport", cta: "Open" }
+      : { done: false, soon: true, title: "Connect Kite Passport", sub: "Lets the agent pay inside limits you set. It needs to be switched on for your account.", href: "/settings/passport", cta: "Details" }]),
   ];
   const core = steps.filter((s) => !("soon" in s));
   const doneCount = core.filter((s) => s.done).length;

@@ -19,7 +19,7 @@ export default function PaymentsPage() {
 
   return (
     <>
-      <PageHead title="Payments" sub="Track payments made through your authorised procurement agents." />
+      <PageHead title="Payments" sub="Every payment your buyer has made, and what it cost." />
       <Async query={payments}>
         {(rows) => {
           const asset = rows[0]?.asset ?? "USDC.e";
@@ -40,7 +40,7 @@ export default function PaymentsPage() {
               ) : (
                 <div className="tbl-wrap" data-tour="payments-table">
                   <table className="tbl">
-                    <thead><tr><th>Transaction</th><th>Supplier</th><th>PO</th><th>Amount</th><th>Network</th><th>Status</th><th>Date</th></tr></thead>
+                    <thead><tr><th>Transaction</th><th>Seller</th><th>Order</th><th>Amount</th><th>Network</th><th>Status</th><th>Date</th></tr></thead>
                     <tbody>
                       {rows.map((p) => (
                         <tr key={p.id} className="row-link" onClick={() => setOpen(p)}>

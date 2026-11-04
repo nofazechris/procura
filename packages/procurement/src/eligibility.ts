@@ -69,10 +69,15 @@ export function evaluateEligibility(
   if (ev.identityVerified === false) hard.push("IDENTITY_FAILED");
   else if (ev.identityVerified === null) { review.push("IDENTITY_NOT_VERIFIED"); missingEvidence.push("business_identity"); }
 
-  if (ev.contactVerified !== true) { review.push("CONTACT_NOT_VERIFIED"); missingEvidence.push("contact_information"); }
+  // A marketplace is paid through its own checkout, so there is no supplier contact to call and no payout
+  // address to match. Direct suppliers keep both checks, and a missing one is never treated as passed.
+  const directPayout = (supplier.paymentRoute ?? "supplier_payout") === "supplier_payout";
+  if (directPayout) {
+    if (ev.contactVerified !== true) { review.push("CONTACT_NOT_VERIFIED"); missingEvidence.push("contact_information"); }
 
-  if (ev.paymentDestinationMatched === false) hard.push("PAYMENT_DESTINATION_MISMATCH");
-  else if (ev.paymentDestinationMatched === null) { review.push("PAYMENT_DESTINATION_NOT_VERIFIED"); missingEvidence.push("payment_destination"); }
+    if (ev.paymentDestinationMatched === false) hard.push("PAYMENT_DESTINATION_MISMATCH");
+    else if (ev.paymentDestinationMatched === null) { review.push("PAYMENT_DESTINATION_NOT_VERIFIED"); missingEvidence.push("payment_destination"); }
+  }
 
   if (!ev.historicalPerformanceAvailable) {
     // A concern, not a blocker: a new supplier can still be a sound choice.

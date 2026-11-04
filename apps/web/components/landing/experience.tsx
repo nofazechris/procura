@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LandingData } from "@/lib/landing/data";
 import { buildChapters, buildLedger, CHAPTER_EDGES } from "./chapters";
+import { sceneDataOf } from "./scene-data";
 import type { RackScene } from "./rack-scene";
 import { SignupPrompt } from "./signup-prompt";
 
@@ -59,11 +60,7 @@ export function Experience({ data }: { data: LandingData }) {
         ]);
         const { createRackScene } = await import("./rack-scene");
         if (cancelled) return;
-        scene = createRackScene(cv, {
-          request: { number: data.request.number, lines: data.request.items.map((i) => `${i.quantity} ${i.unit} ${i.name.toLowerCase()}`), budget: `$${Number(data.request.budget).toLocaleString("en-US")}` },
-          suppliers: data.suppliers.map((s) => ({ name: s.name, total: s.total, days: s.days, verdict: s.verdict, evidence: { identity: s.evidence.identity, contact: s.evidence.contact, payment: s.evidence.payment } })),
-          order: { number: data.order.number, total: data.order.total, fingerprint: data.order.fingerprint },
-        }, { reducedMotion: reduced });
+        scene = createRackScene(cv, sceneDataOf(data), { reducedMotion: reduced });
         onResize();
         setReady(true);
       } catch {

@@ -27,7 +27,7 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
   const policy = usePolicy();
   const canDecide = useCan("approvals:decide");
 
-  if (!order) return <Modal open={false} onClose={onClose} label="Approve purchase order">{null}</Modal>;
+  if (!order) return <Modal open={false} onClose={onClose} label="Approve order">{null}</Modal>;
   const dest = order.destination;
   const addressOk = dest?.status === "approved";
 
@@ -52,14 +52,14 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
         <h3>Approve {order.orderNumber}</h3>
         <p>Check who will be paid and how much. Approving records your decision. It does not move money.</p>
         <div className="modal-sum">
-          <div className="r"><span className="mut">Supplier</span><b>{order.supplierName}</b></div>
+          <div className="r"><span className="mut">Seller</span><b>{order.supplierName}</b></div>
           <div className="r"><span className="mut">Order total</span><b className="num">{amount(order.total)} {order.currency}</b></div>
           <div className="r"><span className="mut">Payable as</span><b className="num">{amount(order.paymentAmount)} {order.paymentAsset}</b></div>
           <div className="r"><span className="mut">Pays to</span><b title={dest?.address}>{dest ? shortAddress(dest.address) : "No address"}</b></div>
           {policy.data ? <div className="r"><span className="mut">Per-purchase limit</span><b className="num">{amount(policy.data.maxTransactionAmount, 0)} {policy.data.currency}</b></div> : null}
         </div>
         {!dest ? (
-          <div className="callout err"><Icon name="alert" /><div>This supplier has no payment address. Add one before approving.</div></div>
+          <div className="callout err"><Icon name="alert" /><div>This seller has no payment address. Add one before approving.</div></div>
         ) : addressOk ? (
           <div className="callout ok"><Icon name="check" /><div>The payment address is approved. Only this address can be paid.</div></div>
         ) : (
@@ -71,7 +71,7 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
             </div>
           </div>
         )}
-        {!canDecide ? <div className="callout info" style={{ marginTop: 10 }}><Icon name="alert" /><div>Only owners, admins and finance managers can approve spending.</div></div> : null}
+        {!canDecide ? <div className="callout info" style={{ marginTop: 10 }}><Icon name="alert" /><div>Only you can approve spending.</div></div> : null}
       </div>
       <div className="modal-foot">
         <button className="btn btn-sec" style={{ flex: 1 }} onClick={onClose}>Cancel</button>

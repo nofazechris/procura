@@ -124,7 +124,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
               })}
             </div>
             <p className="mut3" style={{ fontSize: 11.5, marginTop: 14 }}>
-              {mode === "live" ? "Sourcing uses the demo supplier provider. SERV Reasoning is not connected yet." : "Demo: the stages replay on sample data."}
+              {mode === "live" ? "Sourcing runs on the source you chose: live Amazon search through Kite Passport, or the demo supplier set." : "Demo: the stages replay on sample data."}
             </p>
           </div>
         </div>

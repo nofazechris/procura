@@ -1,7 +1,8 @@
 import { desc, eq } from "drizzle-orm";
-import { supplierEvidence, suppliers } from "@procura/database";
+import { recordAudit, supplierEvidence, suppliers } from "@procura/database";
 import { summariseEvidence } from "@procura/procurement";
-import { handle, ok } from "@/lib/api";
+import { CreateSupplierSchema, ServiceError } from "@procura/shared";
+import { handle, ok, readJson } from "@/lib/api";
 import { inTenant, requireAccess } from "@/lib/guard";
 
 export const runtime = "nodejs";
@@ -24,4 +25,29 @@ export const GET = handle(async (req: Request) => {
   });
   // sourceType lets the UI label fictional demo suppliers as demo data.
   return ok(data);
+});
+
+/**
+ * Add a supplier by hand. Everything the person types is "supplier provided": it counts as verified
+ * only after an evidence check says so, never because it was entered.
+ */
+export const POST = handle(async (req: Request) => {
+  const body = CreateSupplierSchema.parse(await readJson(req));
+  const access = await requireAccess(req, "suppliers:write");
+  return ok(
+    await inTenant(access, async (tx) => {
+      const [created] = await tx.insert(suppliers).values({
+        businessId: access.businessId, name: body.name, legalName: body.legalName ?? null, website: body.website ?? null,
+        countryCode: body.countryCode ?? null, city: body.city ?? null, email: body.email ?? null, phone: body.phone ?? null,
+        categories: body.categories, sourceType: "manual", verificationStatus: "unknown",
+      }).returning();
+      if (!created) throw new ServiceError("INTERNAL", "Could not add the supplier.", 500);
+      await recordAudit(tx, {
+        businessId: access.businessId, actorType: "user", actorId: access.userId, action: "supplier.created",
+        resourceType: "supplier", resourceId: created.id, newState: { name: created.name, sourceType: "manual" },
+      });
+      return created;
+    }),
+    201,
+  );
 });

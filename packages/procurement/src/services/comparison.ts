@@ -4,10 +4,10 @@ import {
   procurementItems, procurementRequests, quotations, spendingPolicies, supplierEvidence, suppliers, type DbLike,
 } from "@procura/database";
 import { decimalString, ServiceError, type SupplierEvidenceSummary } from "@procura/shared";
-import { compareQuotations, type ComparisonView } from "../comparison";
+import { compareQuotations, type ComparisonLine, type ComparisonView } from "../comparison";
 import { evaluateEligibility } from "../eligibility";
 import { summariseEvidence } from "../evidence";
-import type { Priority, Quote, Requirement, SupplierContext } from "../types";
+import type { PaymentRoute, Priority, Quote, Requirement, SupplierContext } from "../types";
 import type { ServiceContext } from "./context";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -16,6 +16,30 @@ const DAY = 24 * 60 * 60 * 1000;
 const LinesSchema = z.array(z.object({
   description: z.string().min(1), quantity: decimalString, unitPrice: decimalString,
 }));
+
+/**
+ * Lines as stored, with the listing a marketplace quote was built from. Supplier-provided and so
+ * untrusted: the title is length-capped and the link must be an https page on the retailer's own site.
+ */
+const AMAZON_HOST = /(^|\.)amazon\.[a-z.]{2,6}$/;
+const safeLink = (v: string) => { try { const u = new URL(v); return u.protocol === "https:" && AMAZON_HOST.test(u.hostname); } catch { return false; } };
+const ViewLinesSchema = z.array(z.object({
+  description: z.string().min(1), quantity: decimalString, unitPrice: decimalString,
+  listing: z.object({
+    id: z.string().min(1).max(40), title: z.string().min(1).max(300).transform((t) => t.trim()),
+    link: z.string().max(2000).refine(safeLink), rating: z.number().min(0).max(5).nullable(), reviews: z.number().int().nonnegative().nullable(),
+  }).optional(),
+}));
+
+export function linesForView(raw: unknown): ComparisonLine[] {
+  const parsed = ViewLinesSchema.safeParse(raw);
+  if (parsed.success) return parsed.data;
+  // A bad listing must not hide the quote: fall back to the plain, validated lines.
+  const plain = LinesSchema.safeParse(raw);
+  return plain.success ? plain.data : [];
+}
+
+const routeOf = (sourceType: string): PaymentRoute => (sourceType === "marketplace" ? "marketplace_checkout" : "supplier_payout");
 
 type QuoteRow = typeof quotations.$inferSelect;
 
@@ -81,10 +105,11 @@ export async function loadComparison(tx: DbLike, ctx: ServiceContext, requestId:
   }
 
   const quotes = quoteRows.map(rowToQuote);
+  const sourceOf = new Map(supplierRows.map((s) => [s.id, s.sourceType]));
   const eligibilities = quotes.map((q) => {
     const supplier: SupplierContext = {
       supplierId: q.supplierId, restricted: restricted.has(q.supplierId),
-      evidence: evidenceBySupplier.get(q.supplierId)!,
+      evidence: evidenceBySupplier.get(q.supplierId)!, paymentRoute: routeOf(sourceOf.get(q.supplierId) ?? "manual"),
     };
     return evaluateEligibility(q, requirement, supplier, ctx.now);
   });
@@ -96,6 +121,7 @@ export async function loadComparison(tx: DbLike, ctx: ServiceContext, requestId:
 
   return {
     comparison,
+    lines: Object.fromEntries(quoteRows.map((r) => [r.id, linesForView(r.lineItems)])),
     suppliers: supplierRows.map((s) => ({ id: s.id, name: s.name, sourceType: s.sourceType })),
     evidence: Object.fromEntries(evidenceBySupplier),
   };

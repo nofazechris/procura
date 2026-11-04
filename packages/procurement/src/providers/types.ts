@@ -41,11 +41,22 @@ export interface SupplierSearchResult {
   payoutDestination?: PayoutDestinationInput;
 }
 
+/** The marketplace listing behind a quote line, kept so a person can see exactly what would be bought. */
+export interface ListingRef {
+  /** The retailer's own product id (an Amazon ASIN). */
+  id: string;
+  title: string;
+  /** Link to the listing on the retailer's site. */
+  link: string;
+  rating: number | null;
+  reviews: number | null;
+}
+
 export interface QuotationResult {
   supplierExternalRef: string;
   supplierQuoteReference: string;
   currency: string;
-  lines: { description: string; quantity: string; unitPrice: string }[];
+  lines: { description: string; quantity: string; unitPrice: string; listing?: ListingRef }[];
   deliveryCost: string;
   additionalCosts: string;
   unknownCosts: string[];

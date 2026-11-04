@@ -13,61 +13,62 @@ export interface Chapter {
 }
 
 const usd = (v: string, places = 0) => `$${Number(v).toLocaleString("en-US", { minimumFractionDigits: places, maximumFractionDigits: places })}`;
+const two = (v: string) => usd(v, 2);
 
 /** Every figure comes from the engine run in lib/landing/data.ts. */
 export function buildChapters(d: LandingData): Chapter[] {
-  const eligible = d.suppliers.filter((s) => s.verdict === "eligible");
-  const review = d.suppliers.filter((s) => s.verdict !== "eligible");
-  const rec = d.suppliers.find((s) => s.id === d.recommendedId)!;
-  const totals = d.suppliers.map((s) => usd(s.total)).join("  ·  ");
+  const eligible = d.options.filter((o) => o.verdict === "eligible");
+  const held = d.options.filter((o) => o.verdict === "review_required");
+  const rec = d.options.find((o) => o.id === d.recommendedId)!;
+  const totals = d.options.map((o) => two(o.total)).join("  ·  ");
   return [
     {
-      kicker: "Autonomous procurement",
-      headline: "Procurement, on autopilot.",
-      data: "agents source, prove, compare and order",
-      body: "A chain of agents does the buying. A person holds the key to every payment.",
+      kicker: "A safe AI buyer",
+      headline: "An AI buyer that cannot overspend.",
+      data: "find  ·  prove  ·  compare  ·  you approve  ·  capped payment",
+      body: "The agent does the research and the buying. Kite Passport enforces how much it can spend, and a person approves every purchase.",
     },
     {
       kicker: "01  Instruct",
       headline: "Tell it what you need.",
-      data: `${d.request.items.map((i) => `${i.quantity} ${i.unit}`).join("  ·  ")}  ·  ${usd(d.request.budget)} budget`,
-      body: "Describe the purchase. It becomes one structured request, saved before anything runs.",
+      data: `${d.request.items.map((i) => `${i.quantity} ${i.name.toLowerCase()}`).join("  ·  ")}  ·  ${usd(d.request.budget)} budget`,
+      body: "Describe the purchase in plain words. The agent turns it into one structured request, and you review it before anything runs.",
     },
     {
-      kicker: "02  Source",
-      headline: "Suppliers, found and quoted.",
-      data: `${d.suppliers.length} suppliers  ·  ${d.suppliers.length} quotes  ·  sample dataset`,
-      body: "The agent gathers comparable quotes. It never invents one: if a supplier has no quote, there is no row.",
+      kicker: "02  Find",
+      headline: "It looks where you cannot.",
+      data: `live Amazon search  ·  ${d.options.length} options  ·  sample catalogue`,
+      body: "The agent searches real listings through Kite Passport. Searching is free and buys nothing. It builds comparable baskets, with the actual product behind every line.",
     },
     {
       kicker: "03  Prove",
       headline: "Evidence, or it does not count.",
-      data: `${eligible.length} suppliers fully evidenced  ·  ${review.length} with gaps`,
-      body: "Missing evidence is shown as unknown, never as verified. A supplier with gaps is held for review, not recommended.",
+      data: `${eligible.length} ready  ·  ${held.length} held for review`,
+      body: "A cheaper supplier whose contact and payout details are unverified is held for review, not recommended. Unknown is never shown as verified.",
     },
     {
       kicker: "04  Compare",
       headline: "Cheapest is not the only test.",
-      data: `${totals}  ·  saves ${usd(d.savings)} (estimated)`,
-      body: "A deterministic filter decides who is eligible before anything is ranked. Savings are estimates against a stated baseline, never claimed as realised.",
+      data: `${totals}  ·  ${usd(d.request.budget)} budget`,
+      body: "A deterministic filter decides who is eligible before anything is ranked. Over budget is out. Savings are estimates, never claimed as realised.",
     },
     {
       kicker: "05  Order",
       headline: "Every total, recalculated.",
-      data: `${d.order.subtotal.replace(/0{4}$/, "")} + ${d.order.delivery.replace(/0{4}$/, "")} = ${d.order.total.replace(/0{4}$/, "")} ${d.request.currency}`,
-      body: "Totals come from unit prices on the server, never from a form or a model. The order is stamped with a fingerprint of everything payable.",
+      data: `${two(d.order.subtotal)} before shipping and tax`,
+      body: "Totals come from unit prices on the server, never from a form or a model. The order is sealed with a fingerprint of everything payable.",
     },
     {
-      kicker: "06  Authorise",
-      headline: "Responsibility, not unlimited authority.",
-      data: `session ${usd(d.session.budget)}  ·  per payment ${usd(d.session.perTransaction)}  ·  ${d.session.minutes} min`,
-      body: "Nothing moves until a person turns the key. The agent cannot raise its limits, change the payee or edit an approved order.",
+      kicker: "06  Approve",
+      headline: "Your key, every time.",
+      data: `session ${two(d.session.budget)}  ·  cap ${two(d.session.cap)} + $1 fee  ·  ${d.session.minutes} min`,
+      body: "Nothing moves until you approve with your passkey. The agent cannot raise its limits, change the basket or edit an approved order.",
     },
     {
       kicker: "07  Pay",
-      headline: "Confirmed by the network, not by the agent.",
+      headline: "Spent inside the cap, never past it.",
       data: `${rec.name}  ·  paid inside the approved session`,
-      body: "Payments run through Kite Passport. That integration is in progress, so every figure on this page comes from a fictional sample scenario.",
+      body: "Kite Passport enforces the cap and refunds what the order did not use. Checkout is the next step to go live, so every figure here comes from a fictional sample.",
     },
   ];
 }
@@ -76,15 +77,16 @@ export function buildChapters(d: LandingData): Chapter[] {
 export interface LedgerLine { label: string; value: string; from: number }
 
 export function buildLedger(d: LandingData): LedgerLine[] {
-  const eligible = d.suppliers.filter((s) => s.verdict === "eligible").length;
+  const eligible = d.options.filter((o) => o.verdict === "eligible").length;
+  const rec = d.options.find((o) => o.id === d.recommendedId)!;
   return [
     { label: "request", value: d.request.number, from: 1 },
-    { label: "quotes", value: String(d.suppliers.length), from: 2 },
-    { label: "eligible", value: `${eligible} of ${d.suppliers.length}`, from: 3 },
-    { label: "total", value: `${d.order.total.replace(/0{4}$/, "")} ${d.request.currency}`, from: 4 },
+    { label: "options", value: String(d.options.length), from: 2 },
+    { label: "eligible", value: `${eligible} of ${d.options.length}`, from: 3 },
+    { label: "total", value: `${two(rec.total)} + ship`, from: 4 },
     { label: "order", value: d.order.number, from: 5 },
     { label: "fingerprint", value: `${d.order.fingerprint.slice(0, 10)}…`, from: 5 },
-    { label: "approval", value: "human key", from: 6 },
-    { label: "status", value: "confirmed by network", from: 7 },
+    { label: "approval", value: "your passkey", from: 6 },
+    { label: "status", value: "inside the cap", from: 7 },
   ];
 }

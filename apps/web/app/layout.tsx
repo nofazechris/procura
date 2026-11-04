@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Procura", template: "%s · Procura" },
-  description: "Your procurement department, powered by autonomous AI.",
+  description: "An AI buyer for small businesses. It finds options, checks the evidence and spends only inside a limit you approve.",
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };

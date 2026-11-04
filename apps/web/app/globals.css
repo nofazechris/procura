@@ -716,9 +716,13 @@ body{overflow-x:hidden}
 .auth-card{width:100%;max-width:400px;margin:auto}
 .auth-card h1{font-size:28px;letter-spacing:-.03em;margin-bottom:8px}
 .auth-card .sub{color:var(--ink-2);margin-bottom:26px}
-.auth-aside{background:var(--panel);color:var(--panel-ink);padding:56px;display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative;overflow:hidden}
+.auth-aside{background:var(--panel);color:var(--panel-ink);padding:56px;display:flex;flex-direction:column;justify-content:flex-start;gap:14px;position:relative;overflow:hidden;min-height:100vh}
 .auth-aside::before{content:"";position:absolute;top:-20%;right:-20%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(183,243,107,.18),transparent 70%)}
-.auth-aside h2{color:#fff;font-size:30px;letter-spacing:-.03em;max-width:14em;position:relative}
+.auth-aside h2{color:#fff;font-size:30px;letter-spacing:-.03em;max-width:14em;position:relative;z-index:1;margin-top:clamp(8px,6vh,64px)}
+.auth-aside p{position:relative;z-index:1;font-size:14px;line-height:1.55;color:var(--panel-ink);max-width:30em;margin:0;opacity:.8}
+.auth-scene{position:absolute;inset:0;pointer-events:none}
+.auth-scene canvas{width:100%;height:100%;display:block}
+.auth-cap{position:absolute;left:0;right:0;bottom:16px;text-align:center;font:500 10.5px "JetBrains Mono Variable",ui-monospace,Menlo,monospace;letter-spacing:.04em;color:rgba(255,255,255,.34)}
 .auth-aside li{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--panel-ink);list-style:none;position:relative}
 .auth-aside li svg{color:var(--panel-accent);flex:none;margin-top:2px;width:17px;height:17px}
 .auth-aside ul{margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
@@ -745,3 +749,37 @@ body{overflow-x:hidden}
 .setup-modal .ob-sub{margin-bottom:22px}
 .skel-view .kpi{pointer-events:none}
 @media(max-width:560px){.setup-head{padding:16px 18px 0}.setup-body{padding:18px 18px 6px}.setup-foot{padding:12px 18px}}
+
+/* basket lines on a comparison card */
+.cmp-items{padding:12px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.cmp-item{display:grid;gap:3px;font-size:12.5px;min-width:0}
+.cmp-item .ci-top{display:flex;justify-content:space-between;gap:10px}
+.cmp-item .ci-sub{display:grid;gap:2px;color:var(--ink-3);font-size:11.5px;min-width:0}
+.cmp-item .ci-sub a{color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--line-2);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* onboarding: the 3D rack builds itself beside the form */
+.setup-modal.wz{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);max-width:1080px;height:min(740px,94vh);max-height:none;padding:0;overflow:hidden}
+.wz-visual{position:relative;background:var(--panel);overflow:hidden;min-width:0}
+.wz-visual::before{content:"";position:absolute;top:-25%;right:-25%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(183,243,107,.18),transparent 70%)}
+.wz-cap{position:absolute;left:0;right:0;bottom:0;padding:26px 26px 28px;background:linear-gradient(0deg,rgba(8,13,10,.96) 20%,rgba(8,13,10,0));z-index:1;color:#fff}
+.wz-step{font:600 11.5px "JetBrains Mono Variable",ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--panel-accent)}
+.wz-cap p{margin:8px 0 0;font-size:20px;line-height:1.3;letter-spacing:-.02em;font-weight:600;max-width:15em}
+.wz-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.wz-choices{display:grid;gap:10px}
+.wz-choice{border:1.5px solid var(--line-2);border-radius:var(--r-md);padding:15px 17px;cursor:pointer;display:grid;gap:3px;transition:.16s;background:var(--surface)}
+.wz-choice b{font-size:14.5px}.wz-choice span{font-size:13px;color:var(--ink-2);line-height:1.45}
+.wz-choice:hover{border-color:var(--ink-3)}
+.wz-choice.on{border-color:var(--forest-2);background:var(--green-soft,rgba(183,243,107,.12));box-shadow:0 0 0 3px rgba(140,200,80,.18)}
+.wz-explain{display:flex;gap:12px;align-items:flex-start;padding:15px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface-2);margin-top:4px}
+.wz-explain svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--forest-2)}
+.wz-explain p{font-size:13px;line-height:1.55;color:var(--ink-2);margin:0}
+@media(max-width:860px){.setup-modal.wz{grid-template-columns:minmax(0,1fr);max-width:640px}.wz-visual{display:none}}
+
+/* Home: the "what do you need" box and the limits meter */
+.dash-ask{padding:18px 20px;margin-bottom:20px}
+.dash-ask-l{display:block;font-size:13px;font-weight:650;margin-bottom:10px;color:var(--ink)}
+.dash-ask-r{display:flex;gap:10px}
+.dash-ask-r .input{flex:1;min-width:0}
+.dash-meter{height:8px;border-radius:8px;background:var(--surface-2);overflow:hidden;margin:2px 0 14px;border:1px solid var(--line)}
+.dash-meter i{display:block;height:100%;background:var(--forest-2);border-radius:8px;transition:width .4s}
+@media(max-width:560px){.dash-ask-r{flex-direction:column}}

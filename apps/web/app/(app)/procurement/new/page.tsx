@@ -1,24 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/icon";
 import { useToast } from "@/components/overlays";
 import { PageHead, Toggle } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
-import { errorMessage, useCreateRequest, useStartSourcing, type NewRequestInput } from "@/lib/queries";
+import { errorMessage, useAgentStatus, useCreateRequest, useInterpret, usePassport, useStartSourcing, type NewRequestInput, type SourceChoice } from "@/lib/queries";
 import { CreateProcurementRequestSchema } from "@procura/shared";
 
 interface Line { productName: string; quantity: string; unit: string; category: string }
 const blankLine = (): Line => ({ productName: "", quantity: "", unit: "", category: "" });
 
 const PRIORITIES = [
-  { v: "price", l: "Lowest price" }, { v: "reliability", l: "Supplier reliability" },
+  { v: "price", l: "Lowest price" }, { v: "reliability", l: "Seller reliability" },
   { v: "speed", l: "Delivery speed" }, { v: "quality", l: "Quality" },
 ] as const;
 
-const EXAMPLE = "I need 50 bags of premium basmati rice, 20 cartons of vegetable oil and 10 cartons of frozen chicken. Find reliable suppliers. My maximum budget is $2,000, including delivery.";
-const CHIPS = ["Restock our kitchen supplies", "Find the best supplier for office equipment", "Compare prices for packaging materials", "Find alternative suppliers for our current vendor"];
+const EXAMPLE = "I need 50 bags of premium basmati rice, 20 cartons of vegetable oil and 10 cartons of frozen chicken. Find reliable sellers. My maximum budget is $2,000, including delivery.";
+const CHIPS = ["A 65W USB-C charger under $25", "Printer labels, two rolls", "A standing desk mat under $60", "Gift for a coffee lover under $40"];
 
 export default function NewProcurementPage() {
   const { mode, business } = useApp();
@@ -26,9 +26,20 @@ export default function NewProcurementPage() {
   const { show } = useToast();
   const create = useCreateRequest();
   const sourcing = useStartSourcing();
+  const agent = useAgentStatus();
+  const interpret = useInterpret();
+  const agentReady = mode === "live" && agent.data?.configured === true;
+  const passport = usePassport();
+  // Amazon search runs through Kite Passport, so it is offered only where Passport is enabled.
+  const amazonReady = mode === "live" && passport.data?.enabled === true;
+  const [source, setSource] = useState<SourceChoice>("demo");
+  const chose = useRef(false);
+  useEffect(() => { if (amazonReady && !chose.current) { chose.current = true; setSource("amazon"); } }, [amazonReady]);
 
   const [busy, setBusy] = useState<null | "creating" | "sourcing">(null);
   const [prompt, setPrompt] = useState(mode === "demo" ? EXAMPLE : "");
+  // The Home page can hand over what you typed there.
+  useEffect(() => { const q = new URLSearchParams(window.location.search).get("q"); if (q) setPrompt(q.slice(0, 1500)); }, []);
   const [title, setTitle] = useState("");
   const [lines, setLines] = useState<Line[]>([blankLine()]);
   const [location, setLocation] = useState("");
@@ -38,15 +49,46 @@ export default function NewProcurementPage() {
   const [priority, setPriority] = useState<NewRequestInput["priority"]>("price");
   const [includeDelivery, setIncludeDelivery] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [review, setReview] = useState<{ missing: string[]; notes: string[]; model: string } | null>(null);
 
   const setLine = (i: number, patch: Partial<Line>) => setLines((ls) => ls.map((l, k) => (k === i ? { ...l, ...patch } : l)));
+
+  /** The agent reads the text and fills the form below. Nothing is created until a person submits it. */
+  async function readRequest(text: string) {
+    try {
+      const { draft, missing, notes, model } = await interpret.mutateAsync(text);
+      setTitle(draft.title);
+      setLines(draft.items.map((i) => ({ productName: i.productName, quantity: i.quantity, unit: i.unit, category: i.category })));
+      setLocation(draft.deliveryLocation);
+      setDeadline(draft.deliveryDeadline);
+      setBudget(draft.budgetAmount);
+      setCurrency(draft.currency);
+      setPriority(draft.priority);
+      setErrors({});
+      setReview({ missing, notes, model });
+    } catch (e) {
+      setReview(null);
+      show(errorMessage(e), "err");
+    }
+  }
+
+  // The assistant page hands over what the person typed. Read it once, then clear it.
+  const handedOver = useRef(false);
+  useEffect(() => {
+    if (handedOver.current || mode !== "live") return;
+    handedOver.current = true;
+    let text: string | null = null;
+    try { text = sessionStorage.getItem("procura_ask"); sessionStorage.removeItem("procura_ask"); } catch { /* storage unavailable */ }
+    if (text) { setPrompt(text); void readRequest(text); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   async function run(input: NewRequestInput) {
     try {
       setBusy("creating");
       const request = await create.mutateAsync(input);
       setBusy("sourcing");
-      await Promise.all([sourcing.mutateAsync(request.id), new Promise((r) => setTimeout(r, 1500))]);
+      await Promise.all([sourcing.mutateAsync({ id: request.id, source: amazonReady ? source : "demo" }), new Promise((r) => setTimeout(r, 1500))]);
       router.push(`/procurement/${request.id}/compare`);
     } catch (e) {
       setBusy(null);
@@ -94,11 +136,11 @@ export default function NewProcurementPage() {
   if (busy) {
     return (
       <div className="sourcing" role="status">
-        <div className="ap-orb live"><Icon name="spark" /></div>
-        <h2>{busy === "creating" ? "Saving your request" : "Sourcing suppliers"}</h2>
-        <p className="mut">{busy === "creating" ? "Recording the request and its line items." : "Finding suppliers, collecting quotes and checking their evidence."}</p>
+        <div className="ap-orb live"><Icon name="agent" /></div>
+        <h2>{busy === "creating" ? "Saving your request" : "Searching for options"}</h2>
+        <p className="mut">{busy === "creating" ? "Recording the request and its line items." : "Finding sellers, collecting prices and checking the evidence."}</p>
         <div className="src-steps">
-          {["Request saved", "Searching supplier sources", "Collecting and checking quotations"].map((s, i) => (
+          {["Request saved", "Searching sellers", "Collecting and checking prices"].map((s, i) => (
             <div key={s} className="src-step" style={{ animationDelay: `${i * 0.4}s` }}>{s}</div>
           ))}
         </div>
@@ -108,18 +150,39 @@ export default function NewProcurementPage() {
 
   return (
     <>
-      <PageHead title="New procurement" sub="Describe what you need, or build a structured request. Both create the same request and start the same workflow." />
+      <PageHead title="New request" sub="Describe what you need, or fill in the details yourself. Either way, Procura searches and shows you the options." />
+      {amazonReady ? (
+        <div className="card" style={{ padding: 16, marginBottom: 16, display: "grid", gap: 10 }}>
+          <div className="eyebrow">Where should I look?</div>
+          <nav className="filters" aria-label="Where to look for products" style={{ margin: 0 }}>
+            {([["amazon", "Amazon (live)"], ["demo", "Demo sellers"]] as const).map(([v, l]) => (
+              <button key={v} type="button" className={`filt ${source === v ? "on" : ""}`} aria-pressed={source === v} onClick={() => setSource(v)}>{l}</button>
+            ))}
+          </nav>
+          <p className="mut" style={{ fontSize: 12.5, margin: 0 }}>
+            {source === "amazon"
+              ? "Searches Amazon through Kite Passport. Searching is free and buys nothing. Prices are in USD, and shipping and tax are added at checkout."
+              : "Fictional sellers for rice, vegetable oil and frozen chicken, to try the flow."}
+          </p>
+          {source === "amazon" && currency !== "USD" ? <div className="callout warn"><Icon name="alert" /><div>Amazon prices are in USD and Procura does not guess exchange rates. Set the currency to USD to get quotes.</div></div> : null}
+        </div>
+      ) : null}
       <div className="two-col" style={{ alignItems: "start" }}>
         <div className="card" style={{ padding: 22 }} data-tour="ask-card">
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 6 }}>
-            <span className="k-ic" style={{ background: "var(--green)", color: "var(--forest)" }}><Icon name="spark" /></span>
+            <span className="k-ic" style={{ background: "var(--green)", color: "var(--forest)" }}><Icon name="agent" /></span>
             <h2 style={{ fontSize: 16 }}>Ask Procura</h2>
           </div>
           <p className="mut" style={{ fontSize: 13, marginBottom: 14 }}>The fastest way: tell the agent in plain language.</p>
-          {mode === "live" ? (
+          {mode === "live" && !agentReady ? (
             <div className="callout info" style={{ marginBottom: 14 }}>
               <Icon name="alert" />
-              <div>Plain-language requests need SERV Reasoning, which is not connected yet. Use the structured form for now.</div>
+              <div>{agent.isLoading ? "Checking the agent…" : "Plain-language requests need SERV Reasoning, which is not connected. Use the form instead."}</div>
+            </div>
+          ) : mode === "live" ? (
+            <div className="callout info" style={{ marginBottom: 14 }}>
+              <Icon name="shield" />
+              <div>Procura reads your request and fills in the form. You review it before anything starts, and the agent never sets your spending limits.</div>
             </div>
           ) : (
             <div className="callout info" style={{ marginBottom: 14 }}>
@@ -127,14 +190,30 @@ export default function NewProcurementPage() {
               <div>In this demo, any prompt starts the Northstar Kitchen scenario. Plain-language parsing arrives with SERV Reasoning.</div>
             </div>
           )}
-          <textarea className="input" style={{ minHeight: 120, background: "var(--surface-2)" }} aria-label="Describe what your business needs to purchase"
-            placeholder="Describe what your business needs to purchase…" value={prompt} disabled={mode === "live"} onChange={(e) => setPrompt(e.target.value)} />
+          <textarea className="input" style={{ minHeight: 120, background: "var(--surface-2)" }} aria-label="Describe what you need to buy"
+            placeholder="Describe what you need to buy…" value={prompt} disabled={mode === "live" && !agentReady} maxLength={1500} onChange={(e) => setPrompt(e.target.value)} />
           <div className="prompt-chips">
-            {CHIPS.map((c) => <button key={c} type="button" className="prompt-chip" disabled={mode === "live"} onClick={() => setPrompt(c)}>{c}</button>)}
+            {CHIPS.map((c) => <button key={c} type="button" className="prompt-chip" disabled={mode === "live" && !agentReady} onClick={() => setPrompt(c)}>{c}</button>)}
           </div>
-          <button className="btn btn-pri btn-lg" style={{ marginTop: 18, width: "100%" }} disabled={mode === "live" || !prompt.trim()} onClick={submitPrompt}>
-            <Icon name="bolt" /> Start sourcing
-          </button>
+          {mode === "live" ? (
+            <>
+              <button className="btn btn-pri btn-lg" style={{ marginTop: 18, width: "100%" }} disabled={!agentReady || !prompt.trim() || interpret.isPending} onClick={() => void readRequest(prompt)}>
+                <Icon name="agent" /> {interpret.isPending ? "Reading your request…" : "Read my request"}
+              </button>
+              {review ? (
+                <div className="callout ok" style={{ marginTop: 14, display: "grid", gap: 6 }} role="status">
+                  <div style={{ display: "flex", gap: 8 }}><Icon name="check" /><div><b>I filled in the form.</b> Check each line, then start sourcing.</div></div>
+                  {review.missing.length ? <div style={{ fontSize: 13 }}>Still needed: {review.missing.join(", ")}.</div> : null}
+                  {review.notes.map((n) => <div key={n} style={{ fontSize: 13 }}>{n}</div>)}
+                  <div className="mut3" style={{ fontSize: 11.5 }}>Read by {review.model} through SERV Reasoning.</div>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <button className="btn btn-pri btn-lg" style={{ marginTop: 18, width: "100%" }} disabled={!prompt.trim()} onClick={submitPrompt}>
+              <Icon name="bolt" /> Start sourcing
+            </button>
+          )}
         </div>
 
         <form className="card" style={{ padding: 22 }} onSubmit={submitStructured} noValidate>
@@ -199,7 +278,7 @@ export default function NewProcurementPage() {
           {mode === "live" ? (
             <div className="callout warn" style={{ marginTop: 14 }}>
               <Icon name="alert" />
-              <div>Supplier data comes from the demo provider, which covers rice, vegetable oil and frozen chicken. Other products will find no suppliers until live providers are connected.</div>
+              <div>Seller data comes from the demo provider, which covers rice, vegetable oil and frozen chicken. Other products will find no sellers until live providers are connected.</div>
             </div>
           ) : null}
           <button className="btn btn-pri btn-lg" type="submit" style={{ marginTop: 18, width: "100%" }}><Icon name="bolt" /> Start sourcing</button>

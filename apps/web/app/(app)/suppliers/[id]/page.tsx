@@ -11,6 +11,7 @@ import { errorMessage, useApprovePayout, useOrders, useSupplier } from "@/lib/qu
 import { EVIDENCE_CHECKS } from "@/lib/reasons";
 import { totalOf, spentOrders } from "@/lib/derive";
 import { SupplierStatePill, supplierState } from "@/components/supplier-state";
+import { VerifyPanel } from "@/components/verify-panel";
 
 function Stat({ v, l }: { v: string | number; l: string }) {
   return <div className="stat"><div className="sv num">{v}</div><div className="sl">{l}</div></div>;
@@ -35,6 +36,7 @@ export default function SupplierProfilePage() {
   const { show } = useToast();
   const approve = useApprovePayout();
   const canApprove = useCan("approvals:decide");
+  const canSpend = useCan("passport:manage");
 
   return (
     <Async query={query}>
@@ -47,17 +49,17 @@ export default function SupplierProfilePage() {
         return (
           <>
             <PageHead
-              eyebrow="Supplier profile"
+              eyebrow="Seller"
               title={<span style={{ display: "inline-flex", alignItems: "center", gap: 14 }}><SupplierLogo name={s.name} size={46} />{s.name}</span>}
               sub={[[s.city, s.countryCode].filter(Boolean).join(", "), s.categories.join(" · ")].filter(Boolean).join(" · ")}
               actions={<>
-                <Link href="/suppliers" className="btn btn-sec btn-sm"><Icon name="prev" /> Directory</Link>
-                <Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> New procurement</Link>
+                <Link href="/suppliers" className="btn btn-sec btn-sm"><Icon name="prev" /> All sellers</Link>
+                <Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> New request</Link>
               </>}
             />
             <div style={{ marginBottom: 20, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <SupplierStatePill state={state} />
-              {s.sourceType === "demo" ? <DemoTag>Demo supplier, fictional</DemoTag> : null}
+              {s.sourceType === "demo" ? <DemoTag>Demo seller, fictional</DemoTag> : null}
             </div>
 
             <div className="stat-strip">
@@ -70,7 +72,7 @@ export default function SupplierProfilePage() {
             <div className="grid-main">
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 <div className="card" style={{ padding: 20 }}>
-                  <div className="sec-head"><h2>Company information</h2></div>
+                  <div className="sec-head"><h2>About this seller</h2></div>
                   <InfoRow label="Legal name" value={s.legalName ?? s.name} tag={ev.identityVerified ? "Verified" : "Not verified"} />
                   <InfoRow label="Location" value={[s.city, s.countryCode].filter(Boolean).join(", ") || "Not provided"} tag="Supplier provided" />
                   <InfoRow label="Phone" value={s.phone ?? "Not provided"} {...(s.phone ? { tag: ev.contactVerified ? "Verified" as const : "Supplier provided" as const } : {})} />
@@ -126,7 +128,7 @@ export default function SupplierProfilePage() {
 
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Orders</h2></div>
-                  {mine.length === 0 ? <p className="mut3" style={{ fontSize: 13 }}>No orders with this supplier yet.</p> : (
+                  {mine.length === 0 ? <p className="mut3" style={{ fontSize: 13 }}>No orders with this seller yet.</p> : (
                     <div className="tbl-wrap" style={{ border: "none", boxShadow: "none" }}>
                       <table className="tbl"><thead><tr><th>PO</th><th>Request</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
                         <tbody>{mine.map((o) => (
@@ -140,6 +142,7 @@ export default function SupplierProfilePage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {s.sourceType === "demo" ? null : <VerifyPanel supplierId={id} canSpend={canSpend} />}
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Verification evidence</h2></div>
                   {EVIDENCE_CHECKS.map((chk) => {
@@ -165,7 +168,7 @@ export default function SupplierProfilePage() {
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Evidence sources</h2></div>
                   {d.evidence.length === 0 ? <p className="mut3" style={{ fontSize: 13 }}>No evidence collected yet.</p> : d.evidence.map((e) => (
-                    <div key={e.id} className="vtl-i on"><span className="nd" /><div className="vt">{e.evidenceType.replace(/_/g, " ")}</div><div className="vs">{e.sourceName} · {e.verificationStatus} · {shortDate(e.collectedAt)}</div></div>
+                    <div key={e.id} className="vtl-i on"><span className="nd" /><div className="vt">{e.evidenceType.replace(/_/g, " ")}</div><div className="vs">{e.sourceName} · {e.verificationStatus} · {shortDate(e.collectedAt)}</div>{typeof e.evidenceData?.summary === "string" ? <div className="vs" style={{ marginTop: 2 }}>{e.evidenceData.summary}</div> : null}</div>
                   ))}
                 </div>
               </div>

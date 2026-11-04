@@ -8,7 +8,7 @@ import { NAV } from "./nav";
 
 interface Item { group: string; title: string; sub?: string; icon: IconName; run: () => void }
 
-/** Cmd/Ctrl+K: jump to any page, start common actions, or find a supplier or request. */
+/** Cmd/Ctrl+K: jump to any page, start common actions, or find a seller or request. */
 export function CommandPalette({ open, onClose, actions }: {
   open: boolean;
   onClose: () => void;
@@ -33,7 +33,7 @@ export function CommandPalette({ open, onClose, actions }: {
         group: "Requests", title: r.title, sub: r.requestNumber, icon: "pkg" as IconName, run: () => router.push(`/procurement/${r.id}`),
       })),
       ...(suppliers.data ?? []).map((s) => ({
-        group: "Suppliers", title: s.name, sub: [s.city, s.sourceType === "demo" ? "Demo" : ""].filter(Boolean).join(" · "), icon: "users" as IconName,
+        group: "Sellers", title: s.name, sub: [s.city, s.sourceType === "demo" ? "Demo" : ""].filter(Boolean).join(" · "), icon: "users" as IconName,
         run: () => router.push(`/suppliers/${s.id}`),
       })),
     ];
@@ -61,7 +61,7 @@ export function CommandPalette({ open, onClose, actions }: {
         <div className="cmdk-in">
           <Icon name="search" />
           <input ref={input} value={q} onChange={(e) => { setQ(e.target.value); setSel(0); }} onKeyDown={onKey}
-            placeholder="Search actions, suppliers, pages…" autoComplete="off" aria-label="Search" />
+            placeholder="Search actions, sellers, pages…" autoComplete="off" aria-label="Search" />
           <span className="kbd">ESC</span>
         </div>
         <div className="cmdk-list" role="listbox">

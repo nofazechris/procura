@@ -21,6 +21,7 @@ export const PERMISSIONS = [
   "payments:execute",
   "policy:manage",
   "passport:manage",
+  "wallet:manage",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -30,11 +31,11 @@ const READ: Permission[] = [
 
 const ROLE_PERMISSIONS: Record<MemberRole, readonly Permission[]> = {
   owner: PERMISSIONS,
-  admin: PERMISSIONS.filter((p) => p !== "passport:manage"),
+  admin: PERMISSIONS.filter((p) => p !== "passport:manage" && p !== "wallet:manage"),
   procurement_manager: [
     ...READ, "procurement:create", "procurement:control", "suppliers:write", "orders:create",
   ],
-  finance_manager: [...READ, "approvals:decide", "payments:execute", "policy:manage", "passport:manage"],
+  finance_manager: [...READ, "approvals:decide", "payments:execute", "policy:manage", "passport:manage", "wallet:manage"],
   viewer: READ,
 };
 

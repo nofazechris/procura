@@ -49,6 +49,8 @@ export interface SupplierDTO {
 export interface EvidenceDTO {
   id: string; evidenceType: string; sourceName: string; verificationStatus: VerificationStatus; collectedAt: Iso;
   expiresAt: Iso | null;
+  /** What the check found, in the check's own words: { summary, ... }. */
+  evidenceData?: Record<string, unknown>;
 }
 
 export interface PayoutDestinationDTO {
@@ -124,4 +126,55 @@ export interface PolicyDTO {
 
 export interface SourcingSummaryDTO {
   suppliersFound: number; quotationsCreated: number; quotationsSkipped: number; requestStatus: RequestStatus;
+}
+
+export interface WalletDTO {
+  id: string; address: string; chainId: number; label: string | null; status: "active" | "revoked";
+  linkedAt: string; revokedAt: string | null;
+}
+
+export interface WalletBalancesDTO {
+  status: "ok" | "unavailable"; chainId: number;
+  native: { symbol: string; amount: string } | null;
+  token: { symbol: string; amount: string; address: string } | null;
+  tokenNotConfigured: boolean;
+}
+
+export interface PassportSessionDTO {
+  id: string; taskSummary: string; maxPerTx: string; maxTotal: string; asset: string;
+  status: "requested" | "awaiting_user_approval" | "active" | "exhausted" | "expired" | "revoked" | "failed";
+  createdAt: string; expiresAt: string | null; approvalUrl: string | null;
+}
+
+export interface PassportDTO {
+  enabled: boolean;
+  canManage: boolean;
+  agent: { type: string; id: string; registeredAt: string } | null;
+  sessions: PassportSessionDTO[];
+  live: {
+    loggedIn: boolean; backendEnv: string | null; backendReachable: boolean; ownerHint: string | null;
+    allowance: "none" | "active" | "unknown"; wallet: { address: string | null; usdcTotal: string | null };
+  } | null;
+  liveError: { code: string; message: string } | null;
+  /** Present only while Passport is not enabled for this business: the value to put in PASSPORT_BUSINESS_ID. */
+  businessId: string | null;
+}
+
+
+/* Supplier verification: paid checks bought through an approved Passport session. */
+export interface VerifyPlanDTO {
+  enabled: boolean;
+  checks: { id: "sanctions" | "registry" | "email"; label: string; proves: string; limit: string; price: string; ready: boolean; missing: string | null }[];
+  estimate: string;
+  currency: "USD";
+  sessions: { id: string; taskSummary: string; maxPerTx: string; maxTotal: string; expiresAt: string | null }[];
+}
+
+export interface VerifyRunDTO {
+  reports: {
+    check: "sanctions" | "registry" | "email"; label: string; state: "done" | "error" | "skipped";
+    outcome?: { status: VerificationStatus; summary: string };
+    charged?: string | null; error?: { kind: string; message: string };
+  }[];
+  stopped: boolean;
 }

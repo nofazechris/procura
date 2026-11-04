@@ -14,10 +14,26 @@ const ICONS = {
   logout: LogOut, building: Building2, invite: UserPlus, mail: Mail, inbox: Inbox,
 } satisfies Record<string, LucideIcon>;
 
-export type IconName = keyof typeof ICONS;
+export type IconName = keyof typeof ICONS | "agent";
+
+/**
+ * Procura's agent: a core with two orbits and a satellite. Used wherever the AI is meant, so it never
+ * reads as the generic "sparkles" mark.
+ */
+function AgentMark({ strokeWidth, className }: { strokeWidth: number; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...(className ? { className } : {})}>
+      <ellipse cx="12" cy="12" rx="9.5" ry="4" transform="rotate(-35 12 12)" />
+      <ellipse cx="12" cy="12" rx="9.5" ry="4" transform="rotate(35 12 12)" opacity=".45" />
+      <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+      <circle cx="19.8" cy="6.55" r="1.15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 /** Sizing comes from the surrounding CSS (e.g. `.btn svg`), as in the prototype. */
 export function Icon({ name, strokeWidth, className }: { name: IconName; strokeWidth?: number; className?: string }) {
+  if (name === "agent") return <AgentMark strokeWidth={strokeWidth ?? 2} {...(className ? { className } : {})} />;
   const Cmp = ICONS[name];
   return <Cmp aria-hidden="true" strokeWidth={strokeWidth ?? 2} {...(className ? { className } : {})} />;
 }

@@ -10,7 +10,7 @@ import {
 } from "./demo/store";
 import type {
   ActivityDTO, ApprovalDTO, BusinessDTO, ComparisonView, MemberDTO, OrderDetailDTO, OrderDTO, PaymentDTO, PolicyDTO,
-  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO,
+  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO, WalletBalancesDTO, WalletDTO, PassportDTO, PassportSessionDTO, VerifyPlanDTO, VerifyRunDTO,
 } from "./dto";
 
 /** Demo throws ServiceError; live throws ApiClientError. Present both the same way. */
@@ -109,10 +109,16 @@ export const useCreateRequest = () =>
     (i) => demoCreateRequest(i),
   );
 
+/** Where to look for products: the fictional demo suppliers, or Amazon through Kite Passport. */
+export type SourceChoice = "demo" | "amazon";
+
 export const useStartSourcing = () =>
-  useRefreshingMutation<string, SourcingSummaryDTO>(
-    (id) => api(`/procurement/${id}/sourcing`, { method: "POST", body: { provider: "demo" } }),
-    (id) => demoSourcing(id),
+  useRefreshingMutation<string | { id: string; source: SourceChoice }, SourcingSummaryDTO>(
+    (arg) => {
+      const { id, source } = typeof arg === "string" ? { id: arg, source: "demo" as SourceChoice } : arg;
+      return api(`/procurement/${id}/sourcing`, { method: "POST", body: { provider: source } });
+    },
+    (arg) => demoSourcing(typeof arg === "string" ? arg : arg.id),
   );
 
 export const useCreateOrder = () =>
@@ -212,3 +218,81 @@ export const useCancelRequest = () =>
       return { id, status: "cancelled" };
     },
   );
+
+/* Wallets exist only for real businesses: there is nothing to link in the in-browser demo. */
+export const useWallets = () => useModeQuery<WalletDTO[]>(["wallets"], () => api("/wallets"), async () => []);
+
+export const useWalletBalance = (id: string) =>
+  useModeQuery<WalletBalancesDTO>(["wallet-balance", id], () => api(`/wallets/${id}/balance`), async () => {
+    throw new ServiceError("NOT_AVAILABLE", "Balances are not available in demo mode.", 400);
+  });
+
+export const useRevokeWallet = () =>
+  useRefreshingMutation<string, { id: string }>((id) => api(`/wallets/${id}`, { method: "DELETE" }), async () => {
+    throw new ServiceError("NOT_AVAILABLE", "Wallets are not available in demo mode.", 400);
+  });
+
+/* The agent (SERV Reasoning). Live only: the in-browser demo has no model behind it. */
+export interface AgentStatusDTO { configured: boolean; model: string | null }
+export const useAgentStatus = () =>
+  useModeQuery<AgentStatusDTO>(["agent-status"], () => api("/agent/status"), async () => ({ configured: false, model: null }));
+
+export interface InterpretedDTO {
+  draft: {
+    title: string; items: { productName: string; quantity: string; unit: string; category: string }[];
+    budgetAmount: string; currency: string; deliveryLocation: string; deliveryDeadline: string;
+    priority: "price" | "reliability" | "speed" | "quality";
+  };
+  missing: string[];
+  notes: string[];
+  model: string;
+}
+export const useInterpret = () =>
+  useMutation<InterpretedDTO, unknown, string>({ mutationFn: (text) => api("/agent/interpret", { method: "POST", body: { text } }) });
+
+export interface ExplanationDTO {
+  preferredQuoteId: string | null; preferredSupplier: string | null; engineQuoteId: string | null; agreesWithEngine: boolean;
+  summary: string; tradeoffs: string[]; questionsForYou: string[]; model: string;
+}
+export const useExplain = (requestId: string) =>
+  useMutation<ExplanationDTO, unknown, void>({ mutationFn: () => api(`/procurement/${requestId}/explain`, { method: "POST" }) });
+
+/* Kite Passport: agent identity and spending sessions. Live only; the demo has nothing to connect to. */
+export const usePassport = (live = false) =>
+  useModeQuery<PassportDTO>(["passport", live], () => api(live ? "/passport?live=1" : "/passport"), async () => ({
+    enabled: false, canManage: false, agent: null, sessions: [], live: null, liveError: null, businessId: null,
+  }));
+
+export const useRegisterAgent = () =>
+  useRefreshingMutation<void, { id: string }>(() => api("/passport/agent", { method: "POST" }), async () => {
+    throw new ServiceError("NOT_AVAILABLE", "Passport is not available in demo mode.", 400);
+  });
+
+export interface RequestSessionInput { taskSummary: string; maxPerTx: string; maxTotal: string; ttlMinutes: number }
+export const useRequestSession = () =>
+  useRefreshingMutation<RequestSessionInput, PassportSessionDTO>((i) => api("/passport/sessions", { method: "POST", body: i }), async () => {
+    throw new ServiceError("NOT_AVAILABLE", "Passport is not available in demo mode.", 400);
+  });
+
+export const useRefreshSession = () =>
+  useRefreshingMutation<string, PassportSessionDTO>((id) => api(`/passport/sessions/${id}/refresh`, { method: "POST" }), async () => {
+    throw new ServiceError("NOT_AVAILABLE", "Passport is not available in demo mode.", 400);
+  });
+
+/* Suppliers added by hand, and paid verification checks. Live only: the demo has no real businesses to check. */
+export interface NewSupplierInput {
+  name: string; legalName?: string; website?: string; countryCode?: string; city?: string; email?: string; phone?: string; categories?: string[];
+}
+const NOT_IN_DEMO = async (): Promise<never> => { throw new ServiceError("NOT_AVAILABLE", "This needs a real business. The demo is read only.", 400); };
+
+export const useAddSupplier = () =>
+  useRefreshingMutation<NewSupplierInput, SupplierDTO>((i) => api("/suppliers", { method: "POST", body: i }), NOT_IN_DEMO);
+
+export const useVerifyPlan = (supplierId: string) =>
+  useModeQuery<VerifyPlanDTO>(["verify-plan", supplierId], () => api(`/suppliers/${supplierId}/verify`), async () => ({
+    enabled: false, checks: [], estimate: "0", currency: "USD" as const, sessions: [],
+  }));
+
+export interface VerifyInput { checks: string[]; sessionId: string; maxCost: string }
+export const useVerifySupplier = (supplierId: string) =>
+  useRefreshingMutation<VerifyInput, VerifyRunDTO>((i) => api(`/suppliers/${supplierId}/verify`, { method: "POST", body: i }), NOT_IN_DEMO);

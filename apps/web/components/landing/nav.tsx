@@ -7,8 +7,9 @@ export function LandingNav() {
       <Link href="/" className="lx-brand"><i><Icon name="leaf" /></i>Procura</Link>
       <div className="lx-links">
         <a href="#story">How it works</a>
-        <a href="#playground">Break it</a>
-        <a href="#authority">Authority</a>
+        <a href="#find">Try it</a>
+        <a href="#limits">Limits</a>
+        <a href="#lanes">Lanes</a>
       </div>
       <div className="lx-nav-r">
         <Link href="/login" className="link">Sign in</Link>

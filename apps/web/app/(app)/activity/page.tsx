@@ -17,7 +17,7 @@ export default function ActivityPage() {
 
   return (
     <>
-      <PageHead title="Activity" sub="A transparent, traceable record of procurement operations and agent actions." />
+      <PageHead title="Activity" sub="A plain record of what your buyer did, and what you approved." />
       <Async query={activity}>
         {(all) => all.length === 0 ? (
           <div className="card"><EmptyState icon="clock" title="No activity yet">Every instruction, decision and approval is recorded here as it happens.</EmptyState></div>

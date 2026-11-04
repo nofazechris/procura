@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/settings/business", label: "Business" },
-  { href: "/settings/team", label: "Team" },
-  { href: "/settings/agent-permissions", label: "Agent permissions" },
-  { href: "/settings/integrations", label: "Integrations" },
+  { href: "/settings/business", label: "Account" },
+  { href: "/settings/agent-permissions", label: "Limits" },
+  { href: "/settings/passport", label: "Passport" },
+  { href: "/settings/wallets", label: "Wallet" },
+  { href: "/settings/integrations", label: "Connections" },
 ];
 
 export function SettingsTabs() {

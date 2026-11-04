@@ -35,7 +35,8 @@ export const EVIDENCE_TYPES = [
 ] as const;
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
-export const SUPPLIER_SOURCE_TYPES = ["demo", "manual", "provider", "email"] as const;
+/** "marketplace": a retailer listing bought through checkout (e.g. Amazon via Kite Passport), not a supplier we pay directly. */
+export const SUPPLIER_SOURCE_TYPES = ["demo", "manual", "provider", "email", "marketplace"] as const;
 export type SupplierSourceType = (typeof SUPPLIER_SOURCE_TYPES)[number];
 
 export const AGENT_EVENT_TYPES = [

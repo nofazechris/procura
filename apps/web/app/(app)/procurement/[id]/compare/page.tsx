@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AgentExplain } from "@/components/agent-explain";
 import { Icon } from "@/components/icon";
 import { Modal, useToast } from "@/components/overlays";
 import { Async, DemoTag, EmptyState, PageHead, Pill, SupplierLogo } from "@/components/ui";
@@ -30,7 +31,8 @@ export default function ComparePage() {
   useEffect(() => { const t = setTimeout(() => setRevealed(true), 60); return () => clearTimeout(t); }, []);
 
   async function runSourcing() {
-    try { await sourcing.mutateAsync(id); show("Sourcing complete"); } catch (e) { show(errorMessage(e), "err"); }
+    const fromAmazon = comparison.data?.suppliers.some((s) => s.sourceType === "marketplace");
+    try { await sourcing.mutateAsync({ id, source: fromAmazon ? "amazon" : "demo" }); show("Sourcing complete"); } catch (e) { show(errorMessage(e), "err"); }
   }
 
   async function confirm() {
@@ -70,7 +72,7 @@ export default function ComparePage() {
               <div className="card">
                 <EmptyState icon="search" title="No quotations yet"
                   action={<button className="btn btn-pri" disabled={sourcing.isPending} onClick={() => void runSourcing()}><Icon name="bolt" /> {sourcing.isPending ? "Sourcing…" : "Start sourcing"}</button>}>
-                  Procura has not collected any quotes for this request. The demo supplier provider only covers rice, vegetable oil and frozen chicken.
+                  Procura has not collected any quotes for this request. Amazon search needs a clear product name and USD, and the demo suppliers only cover rice, vegetable oil and frozen chicken.
                 </EmptyState>
               </div>
             );
@@ -90,22 +92,26 @@ export default function ComparePage() {
                   <div className="big"><Icon name="check" strokeWidth={3} /></div>
                   <div style={{ flex: 1, minWidth: 220 }}>
                     <h2>{name(rec.supplierId)} is recommended {source(rec.supplierId) === "demo" ? <DemoTag /> : null}</h2>
-                    <p>It has the lowest total delivered price among the quotes that meet your requirements{view.evidence[rec.supplierId]?.historicalPerformanceAvailable ? ", and it has delivery history on record" : ""}. The ranking is computed from stored quotes and evidence, not guessed.</p>
+                    <p>It has the lowest {source(rec.supplierId) === "marketplace" ? "listed price" : "total delivered price"} among the quotes that meet your requirements{view.evidence[rec.supplierId]?.historicalPerformanceAvailable ? ", and it has delivery history on record" : ""}. The ranking is computed from stored quotes and evidence, not guessed.</p>
                     <div className="rec-stats">
-                      <div><div className="l">Total delivered</div><div className="v num">{moneyShort(rec.totalCost, cmp.currency)}</div></div>
+                      <div><div className="l">{source(rec.supplierId) === "marketplace" ? "Before shipping and tax" : "Total delivered"}</div><div className="v num">{moneyShort(rec.totalCost, cmp.currency)}</div></div>
                       <div><div className="l">Est. delivery</div><div className="v">{rec.deliveryDays ? `${rec.deliveryDays} days` : "Not stated"}</div></div>
                       {cmp.estimatedSavings ? <div><div className="l">Est. saving</div><div className="v num" style={{ color: "var(--ok)" }}>{moneyShort(cmp.estimatedSavings.amount, cmp.currency)}</div></div> : null}
                       {request.data ? <div><div className="l">Budget headroom</div><div className="v num">{moneyShort(minus(request.data.budgetAmount, rec.totalCost), cmp.currency)}</div></div> : null}
                     </div>
                     {cmp.estimatedSavings ? <p className="mut3" style={{ fontSize: 11.5, marginTop: 10 }}>{cmp.estimatedSavings.basis}</p> : null}
                   </div>
-                  {canSelect ? <button className="btn btn-pri" onClick={() => { setAck(false); setSelected(rec); }}>Select and prepare PO <Icon name="arr" /></button> : null}
+                  {canSelect ? (source(rec.supplierId) === "marketplace"
+                    ? <button className="btn btn-pri" disabled title="Checkout through Kite Passport is the next step and is not built yet">Checkout comes next</button>
+                    : <button className="btn btn-pri" onClick={() => { setAck(false); setSelected(rec); }}>Select and prepare PO <Icon name="arr" /></button>) : null}
                 </div>
               ) : (
                 <div className="callout warn" style={{ marginBottom: 18 }}>
                   <Icon name="alert" /><div>{cmp.notes.join(" ")}</div>
                 </div>
               )}
+
+              <AgentExplain requestId={id} hasEligible={cmp.rows.some((r) => r.verdict === "eligible")} />
 
               <div className="cmp-grid" id="cmpGrid">
                 {cmp.rows.map((row, idx) => {
@@ -119,9 +125,24 @@ export default function ComparePage() {
                         <SupplierLogo name={name(row.supplierId)} size={36} />
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontWeight: 700, fontSize: 14 }}>{name(row.supplierId)}</div>
-                          <div className="mut3" style={{ fontSize: 11.5 }}>{source(row.supplierId) === "demo" ? "Demo supplier" : "Supplier"}</div>
+                          <div className="mut3" style={{ fontSize: 11.5 }}>{source(row.supplierId) === "demo" ? "Demo supplier" : source(row.supplierId) === "marketplace" ? "Live Amazon listings" : "Supplier"}</div>
                         </div>
                       </div>
+                      {(view.lines?.[row.quoteId] ?? []).some((l) => l.listing) ? (
+                        <div className="cmp-items">
+                          {(view.lines?.[row.quoteId] ?? []).map((l) => (
+                            <div key={l.description} className="cmp-item">
+                              <div className="ci-top"><b>{l.description}</b><span className="num">{Number(l.quantity)} × {moneyShort(l.unitPrice, row.currency)}</span></div>
+                              {l.listing ? (
+                                <div className="ci-sub">
+                                  <a href={l.listing.link} target="_blank" rel="noopener noreferrer">{l.listing.title}</a>
+                                  <span>{l.listing.rating !== null ? `${l.listing.rating}★` : "no rating"}{l.listing.reviews !== null ? ` · ${l.listing.reviews.toLocaleString("en-US")} reviews` : ""}</span>
+                                </div>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="cmp-body">
                         <div className="cmp-line"><span className="mut">Est. delivery</span><span className="v">{row.deliveryDays ? `${row.deliveryDays} days` : "Not stated"}</span></div>
                         <div className="cmp-line"><span className="mut">Versus lowest</span><span className="v">{row.deltaVsLowest === null ? "-" : toUnits(row.deltaVsLowest) === 0n ? "Lowest" : `+${moneyShort(row.deltaVsLowest, row.currency)}`}</span></div>
@@ -137,18 +158,22 @@ export default function ComparePage() {
                       ) : null}
                       {ev ? (
                         <div className="ev-grid">
-                          {EVIDENCE_CHECKS.map((chk) => {
+                          {EVIDENCE_CHECKS.filter((chk) => source(row.supplierId) !== "marketplace" || chk.key === "identityVerified" || chk.key === "quotationReceived").map((chk) => {
                             const v = ev[chk.key] as boolean | null;
                             const cls = v === true ? "ev-yes" : v === false && chk.key !== "historicalPerformanceAvailable" && chk.key !== "quotationReceived" ? "ev-fail" : "ev-no";
                             return <div key={chk.key} className={`ev-i ${cls}`}><Icon name={v === true ? "check" : "x"} strokeWidth={3} /><span>{v === true ? chk.ok : v === false && chk.key !== "historicalPerformanceAvailable" && chk.key !== "quotationReceived" ? chk.failed : chk.unknown}</span></div>;
                           })}
                         </div>
                       ) : null}
+                      {source(row.supplierId) === "marketplace" ? (
+                        <div className="mut3" style={{ padding: "0 16px 12px", fontSize: 11.5 }}>Paid through Amazon&apos;s checkout, so there is no supplier address to verify. Shipping and tax are added at checkout.</div>
+                      ) : null}
                       <div className="cmp-foot">
                         <button className={`btn ${row.verdict === "eligible" ? "btn-pri" : "btn-sec"} btn-sm`} style={{ flex: 1 }}
-                          disabled={!canSelect || row.verdict === "ineligible"} title={row.verdict === "ineligible" ? "This quote does not meet the requirements" : undefined}
+                          disabled={!canSelect || row.verdict === "ineligible" || source(row.supplierId) === "marketplace"}
+                          title={source(row.supplierId) === "marketplace" ? "Checkout through Kite Passport is the next step and is not built yet" : row.verdict === "ineligible" ? "This quote does not meet the requirements" : undefined}
                           onClick={() => { setAck(false); setSelected(row); }}>
-                          {row.verdict === "review_required" ? "Review and select" : "Select"}
+                          {source(row.supplierId) === "marketplace" ? "Checkout comes next" : row.verdict === "review_required" ? "Review and select" : "Select"}
                         </button>
                         <Link href={`/suppliers/${row.supplierId}`} className="btn btn-ghost btn-sm">Profile</Link>
                       </div>

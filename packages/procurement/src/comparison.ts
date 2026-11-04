@@ -29,8 +29,15 @@ export interface ComparisonResult {
   notes: string[];
 }
 
+export interface ComparisonLine {
+  description: string; quantity: string; unitPrice: string;
+  listing?: { id: string; title: string; link: string; rating: number | null; reviews: number | null };
+}
+
 /** A request's comparison together with the supplier names and evidence it was based on. */
 export interface ComparisonView {
+  /** What each quote contains, by quote id. Absent in the in-browser demo. */
+  lines?: Record<string, ComparisonLine[]>;
   comparison: ComparisonResult;
   suppliers: { id: string; name: string; sourceType: string }[];
   evidence: Record<string, SupplierEvidenceSummary>;

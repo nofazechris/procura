@@ -37,9 +37,9 @@ export function describeActivity(a: ActivityDTO): ActivityView {
 
   switch (a.action) {
     case "business.created":
-      return { title: "Business created", sub: str(s["name"]) || "Onboarding completed", icon: "building", category: "Security", ok: true, href };
+      return { title: "Your buyer was set up", sub: "Limits saved", icon: "building", category: "Security", ok: true, href };
     case "business.updated":
-      return { title: "Business profile updated", sub: str(s["name"]), icon: "cog", category: "Security", ok: false, href };
+      return { title: "Account updated", sub: str(s["name"]), icon: "cog", category: "Security", ok: false, href };
     case "policy.updated":
       return { title: "Spending limits changed", sub: `Monthly ${amount(str(s["maxTotalSpend"]), 0)} · per purchase ${amount(str(s["maxTransactionAmount"]), 0)}`, icon: "sliders", category: "Security", ok: false, href };
     case "procurement.created":

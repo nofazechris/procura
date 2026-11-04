@@ -8,7 +8,7 @@ import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [f, setF] = useState({ name: "", email: "", password: "", company: "" });
+  const [f, setF] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -20,7 +20,6 @@ export default function SignupPage() {
     if (f.name.trim().length < 2) next["name"] = "Enter your full name.";
     if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) next["email"] = "Enter a valid email address.";
     if (f.password.length < 10) next["password"] = "Use at least 10 characters.";
-    if (f.company.trim().length < 2) next["company"] = "Enter your company name.";
     setErrors(next); setFormError(null);
     if (Object.keys(next).length) return;
 
@@ -31,7 +30,6 @@ export default function SignupPage() {
       setFormError(error.code === "USER_ALREADY_EXISTS" || /exist/i.test(error.message ?? "") ? "An account with that email already exists. Try signing in." : (error.message ?? "We could not create your account. Please try again."));
       return;
     }
-    try { sessionStorage.setItem("procura_signup_company", f.company.trim()); } catch { /* onboarding will just ask again */ }
     // If email verification is required there is no session yet.
     const session = await authClient.getSession();
     if (session.data) { router.push("/dashboard"); router.refresh(); }
@@ -58,12 +56,11 @@ export default function SignupPage() {
   return (
     <div className="auth-card">
       <h1>Create your account</h1>
-      <p className="sub">Set up your procurement workspace in a few minutes.</p>
+      <p className="sub">Set up your own AI buyer in a few minutes.</p>
       <form onSubmit={submit} noValidate>
         {field("name", "Full name", { autoComplete: "name", placeholder: "Chris Godwin" })}
-        {field("email", "Work email", { type: "email", autoComplete: "email", placeholder: "you@company.com" })}
+        {field("email", "Email", { type: "email", autoComplete: "email", placeholder: "you@example.com" })}
         {field("password", "Password", { type: "password", autoComplete: "new-password" })}
-        {field("company", "Company name", { autoComplete: "organization", placeholder: "Northstar Kitchen" })}
         {formError ? <div className="callout err" role="alert" style={{ marginBottom: 14 }}><span>{formError}</span></div> : null}
         <button className="btn btn-pri btn-lg" style={{ width: "100%" }} type="submit" disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
       </form>

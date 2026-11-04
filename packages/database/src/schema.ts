@@ -5,7 +5,7 @@ import {
 } from "drizzle-orm/pg-core";
 import {
   AGENT_TASK_STATUSES, EVIDENCE_TYPES, MEMBER_ROLES, PAYMENT_STATUSES, PO_STATUSES, REQUEST_STATUSES,
-  SESSION_STATUSES, SUPPLIER_SOURCE_TYPES, VERIFICATION_STATUSES,
+  SESSION_STATUSES, SUPPLIER_SOURCE_TYPES, VERIFICATION_STATUSES, WALLET_STATUSES,
 } from "@procura/shared";
 
 /* ------------------------------------------------------------------ */
@@ -406,6 +406,8 @@ export const spendingSessions = pgTable(
     purchaseOrderId: uuid("purchase_order_id").references(() => purchaseOrders.id, { onDelete: "set null" }),
     /** Reference returned by Kite Passport. We store references only, never keys or passkeys. */
     passportSessionReference: text("passport_session_reference"),
+    /** Passport's id for the approval request, used to poll whether the person approved it. */
+    passportRequestId: text("passport_request_id"),
     taskSummary: text("task_summary").notNull(),
     requestedAmount: money("requested_amount").notNull(),
     maxAmountPerTransaction: money("max_amount_per_transaction").notNull(),
@@ -523,6 +525,57 @@ export const agentEvents = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("agent_events_task_idx").on(t.taskId, t.createdAt)],
+);
+
+/**
+ * Procura's agent identity at Kite Passport. Passport issues the id when the agent is registered
+ * under the owner's account; we keep the reference only, never a token or key.
+ */
+export const passportAgents = pgTable(
+  "passport_agents",
+  {
+    id: id(),
+    businessId: businessRef(),
+    agentType: text("agent_type").notNull(),
+    /** Passport's agent id, e.g. agent_01a1... */
+    passportAgentId: text("passport_agent_id").notNull(),
+    /** Passport's id for the owner account the agent is registered under. */
+    passportOwnerId: text("passport_owner_id").notNull(),
+    registeredBy: text("registered_by").notNull().references(() => user.id),
+    registeredAt: timestamp("registered_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: createdAt(),
+  },
+  (t) => [unique("passport_agents_business_agent_uq").on(t.businessId, t.passportAgentId), index("passport_agents_business_idx").on(t.businessId)],
+);
+
+/**
+ * Wallets a business has proven it controls, by signing a challenge. Addresses only: Procura never
+ * stores keys, seed phrases or signatures that could be replayed. Revoked rows are kept for audit.
+ */
+export const businessWallets = pgTable(
+  "business_wallets",
+  {
+    id: id(),
+    businessId: businessRef(),
+    linkedBy: text("linked_by").notNull().references(() => user.id),
+    /** Lowercase 0x address. */
+    address: text("address").notNull(),
+    chainId: integer("chain_id").notNull(),
+    label: text("label"),
+    status: text("status", { enum: WALLET_STATUSES }).notNull().default("active"),
+    linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    revokedBy: text("revoked_by").references(() => user.id),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("business_wallets_active_uq").on(t.businessId, t.address, t.chainId).where(sql`${t.status} = 'active'`),
+    index("business_wallets_business_idx").on(t.businessId, t.status),
+    check("business_wallets_status_chk", oneOf(t.status, WALLET_STATUSES)),
+    check("business_wallets_address_chk", sql`${t.address} ~ '^0x[0-9a-f]{40}$'`),
+    check("business_wallets_revoked_chk", sql`(${t.status} = 'active') or (${t.revokedAt} is not null)`),
+  ],
 );
 
 /** Append-only (trigger). Not editable by application users. */

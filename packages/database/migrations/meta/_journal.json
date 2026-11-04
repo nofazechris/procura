@@ -29,6 +29,20 @@
       "when": 1793745136603,
       "tag": "0003_business_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793779399108,
+      "tag": "0004_business_wallets",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793787399108,
+      "tag": "0005_passport_agents",
+      "breakpoints": true
     }
   ]
 }

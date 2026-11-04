@@ -38,7 +38,7 @@ export default function ProcurementPage() {
 
   return (
     <>
-      <PageHead title="Procurement" sub="Manage purchasing requests from sourcing to fulfilment."
+      <PageHead title="Requests" sub="Everything you have asked Procura to find, from the first search to the order."
         actions={<Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Create request</Link>} />
       <Async query={requests}>
         {(all) => (
@@ -54,8 +54,8 @@ export default function ProcurementPage() {
               </select>
             </div>
             {all.length === 0 ? (
-              <div className="card"><EmptyState icon="pkg" title="No procurement requests yet" action={<Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Create your first request</Link>}>
-                Describe what your business needs and Procura will source and compare suppliers.
+              <div className="card"><EmptyState icon="pkg" title="No requests yet" action={<Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Create your first request</Link>}>
+                Describe what you need and Procura will find options and compare them.
               </EmptyState></div>
             ) : rows.length === 0 ? (
               <div className="card"><EmptyState icon="search" title="No matching requests">Try another filter or search term.</EmptyState></div>

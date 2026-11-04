@@ -26,6 +26,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.187.0",
+    "viem": "^2.57.16",
     "zod": "^4.1.0"
   },
   "devDependencies": {

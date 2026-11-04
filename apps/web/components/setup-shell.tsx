@@ -2,6 +2,7 @@
 
 import { Icon } from "./icon";
 import { NAV } from "./nav";
+import type { SceneData } from "./landing/rack-scene";
 import { SetupWizard } from "./setup-wizard";
 import { initials, greeting, firstName } from "@/lib/format";
 
@@ -9,13 +10,13 @@ import { initials, greeting, firstName } from "@/lib/format";
  * The dashboard frame shown behind the first-run wizard: the real navigation and layout, with
  * placeholder content. It makes no API calls, because there is no business to ask about yet.
  */
-export function SetupShell({ userName, userEmail }: { userName: string; userEmail: string }) {
+export function SetupShell({ userName, userEmail, scene }: { userName: string; userEmail: string; scene: SceneData }) {
   return (
     <>
       <div className="shell" aria-hidden="true">
         <aside className="side">
           <div className="side-top"><div className="wordmark"><span className="mark"><Icon name="leaf" /></span>Procura</div></div>
-          <div className="side-biz"><div className="av">?</div><div style={{ flex: 1 }}><div className="nm">Your business</div><div className="sb">Setting up</div></div></div>
+          <div className="side-biz"><div className="av">?</div><div style={{ flex: 1 }}><div className="nm">Your buyer</div><div className="sb">Setting up</div></div></div>
           <nav className="side-nav">
             {NAV.map((g) => (
               <div className="nav-group" key={g.group}>
@@ -29,9 +30,9 @@ export function SetupShell({ userName, userEmail }: { userName: string; userEmai
         <main className="main">
           <header className="topbar"><div className="crumb">Procura <span>›</span> <b>Overview</b></div></header>
           <div className="view skel-view">
-            <div className="phead"><div><h1>{greeting()}, {firstName(userName)}.</h1><p>Your workspace is almost ready.</p></div></div>
+            <div className="phead"><div><h1>{greeting()}, {firstName(userName)}.</h1><p>Your buyer is almost ready.</p></div></div>
             <div className="kpis">
-              {["Procurement spend", "Active procurement", "Potential savings", "Pending approvals"].map((l) => (
+              {["Spent this month", "Looking for", "You could save", "Waiting for you"].map((l) => (
                 <div key={l} className="kpi card"><div className="k-top"><span className="k-lbl">{l}</span></div><div className="skel" style={{ height: 30, width: 90 }} /></div>
               ))}
             </div>
@@ -39,7 +40,7 @@ export function SetupShell({ userName, userEmail }: { userName: string; userEmai
           </div>
         </main>
       </div>
-      <SetupWizard userName={userName} />
+      <SetupWizard userName={userName} scene={scene} />
     </>
   );
 }

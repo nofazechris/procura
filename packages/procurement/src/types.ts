@@ -73,10 +73,19 @@ export interface Eligibility {
   missingEvidence: string[];
 }
 
+/**
+ * How money reaches this supplier. A direct supplier is paid to a payout address a person approved, so
+ * its contact and payout address must be verified. A marketplace is paid through its checkout provider,
+ * which takes the payment itself, so those two checks do not apply to it.
+ */
+export type PaymentRoute = "supplier_payout" | "marketplace_checkout";
+
 export interface SupplierContext {
   supplierId: string;
   restricted: boolean;
   evidence: SupplierEvidenceSummary;
+  /** Defaults to a direct supplier payout, the stricter route. */
+  paymentRoute?: PaymentRoute;
 }
 
 export type Priority = "price" | "reliability" | "speed" | "quality";

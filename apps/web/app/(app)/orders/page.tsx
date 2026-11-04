@@ -26,17 +26,17 @@ export default function OrdersPage() {
 
   return (
     <>
-      <PageHead title="Purchase orders" sub="Review and manage purchases initiated through Procura." />
+      <PageHead title="Orders" sub="What you have bought, or are about to buy, through Procura." />
       <Async query={orders}>
         {(all) => all.length === 0 ? (
-          <div className="card"><EmptyState icon="doc" title="No purchase orders yet">Orders appear here after you select a supplier from a comparison.</EmptyState></div>
+          <div className="card"><EmptyState icon="doc" title="No orders yet">Orders appear here after you pick an option from a comparison.</EmptyState></div>
         ) : (
           <>
             <FilterChips options={Object.keys(GROUPS)} value={filter} onChange={setFilter} />
             {rows.length === 0 ? <div className="card"><EmptyState icon="search" title="No orders in this view" /></div> : (
               <div className="tbl-wrap" data-tour="orders-table">
                 <table className="tbl">
-                  <thead><tr><th>PO number</th><th>Supplier</th><th>Request</th><th>Total</th><th>Status</th><th>Created</th></tr></thead>
+                  <thead><tr><th>Order</th><th>Seller</th><th>Request</th><th>Total</th><th>Status</th><th>Created</th></tr></thead>
                   <tbody>
                     {rows.map((o) => (
                       <tr key={o.id} className="row-link" onClick={() => router.push(`/orders/${o.id}`)}>

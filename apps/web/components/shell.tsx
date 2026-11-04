@@ -11,6 +11,7 @@ import { leaveDemoMode } from "@/lib/mode";
 import { useActivity, useApprovals } from "@/lib/queries";
 import { toggleTheme } from "@/lib/theme";
 import { Icon } from "./icon";
+import { WalletChip } from "./wallet-chip";
 import { activeHref, NAV, titleFor } from "./nav";
 import { CommandPalette } from "./palette";
 
@@ -61,8 +62,8 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [mode, router]);
 
   const paletteActions = useMemo(() => [
-    { title: "New procurement request", icon: "plus" as const, run: () => router.push("/procurement/new") },
-    { title: "Talk to Procura", icon: "msg" as const, run: () => router.push("/assistant") },
+    { title: "New request", icon: "plus" as const, run: () => router.push("/procurement/new") },
+    { title: "Ask Procura", icon: "agent" as const, run: () => router.push("/assistant") },
     { title: "Toggle light / dark", icon: "moon" as const, run: () => toggleTheme() },
     { title: "Sign out", sub: "Back to the landing page", icon: "logout" as const, run: () => void signOut() },
   ], [router, signOut]);
@@ -80,10 +81,10 @@ export function Shell({ children }: { children: ReactNode }) {
               style={{ width: 28, height: 28, border: "none", background: "transparent", color: "var(--side-muted)" }}><Icon name="moon" /></button>
           </div>
           <div className="side-biz">
-            <div className="av">{initials(business.name)}</div>
+            <div className="av"><Icon name="agent" /></div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="nm">{business.name}</div>
-              <div className="sb">{business.defaultCurrency} · {business.role.replace("_", " ")}</div>
+              <div className="nm">Your buyer</div>
+              <div className="sb">{mode === "demo" ? "Demo" : `Budgets in ${business.defaultCurrency}`}</div>
             </div>
           </div>
           <nav className="side-nav">
@@ -104,7 +105,7 @@ export function Shell({ children }: { children: ReactNode }) {
               onClick={() => setPopup((p) => (p === "user" ? null : "user"))}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setPopup((p) => (p === "user" ? null : "user")); }}>
               <div className="av">{initials(user.name)}</div>
-              <div style={{ flex: 1, minWidth: 0 }}><div className="nm">{user.name}</div><div className="sb">{business.role.replace("_", " ")}</div></div>
+              <div style={{ flex: 1, minWidth: 0 }}><div className="nm">{user.name}</div><div className="sb" style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div></div>
               <Icon name="dots" />
             </div>
           </div>
@@ -114,7 +115,7 @@ export function Shell({ children }: { children: ReactNode }) {
           {mode === "demo" ? (
             <div className="demo-banner">
               <span className="tag">Demo</span>
-              <span>Sample data for a fictional business. Nothing here is real, and no money moves.</span>
+              <span>Sample data for a fictional shopper. Nothing here is real, and no money moves.</span>
               <button className="x" style={{ marginLeft: "auto" }} onClick={exitDemo}>Exit demo</button>
             </div>
           ) : null}
@@ -129,8 +130,9 @@ export function Shell({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 9, alignItems: "center" }}>
+              <WalletChip />
               <NotificationsButton open={popup === "notif"} onToggle={() => setPopup((p) => (p === "notif" ? null : "notif"))} pendingApprovals={pending} />
-              <Link href="/procurement/new" className="btn btn-pri btn-sm top-new" aria-label="New procurement"><Icon name="plus" strokeWidth={2.2} /><span className="lbl">New procurement</span></Link>
+              <Link href="/procurement/new" className="btn btn-pri btn-sm top-new" aria-label="New request"><Icon name="plus" strokeWidth={2.2} /><span className="lbl">New request</span></Link>
             </div>
           </header>
           <div className="view" id="view">{children}</div>
@@ -140,7 +142,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className={`menu ${popup === "user" ? "on" : ""}`} data-popup>
         <div className="menu-i" onClick={() => toggleTheme()}><Icon name="moon" /> Toggle light / dark</div>
         <div className="menu-i" onClick={() => { setPopup(null); setPaletteOpen(true); }}><Icon name="search" /> Command menu</div>
-        <div className="menu-i" onClick={() => router.push("/settings/business")}><Icon name="cog" /> Business settings</div>
+        <div className="menu-i" onClick={() => router.push("/settings/business")}><Icon name="cog" /> Account settings</div>
         <div className="menu-i" onClick={() => void signOut()}><Icon name="logout" /> Sign out</div>
       </div>
 
@@ -164,7 +166,7 @@ function NotificationsButton({ open, onToggle, pendingApprovals }: { open: boole
 
   const items = useMemo(() => {
     const pend = (approvals.data ?? []).filter((a) => a.status === "pending").map((a) => ({
-      key: `appr-${a.id}`, icon: "shield" as const, title: "Approval required", sub: `${a.orderNumber} · ${a.supplierName}`,
+      key: `appr-${a.id}`, icon: "shield" as const, title: "Waiting for your OK", sub: `${a.orderNumber} · ${a.supplierName}`,
       at: a.createdAt, href: "/approvals", ok: false,
     }));
     const act = (activity.data ?? []).slice(0, 6).map((a) => {

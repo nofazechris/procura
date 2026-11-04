@@ -72,12 +72,12 @@ export default function ApprovalsPage() {
                     </span>
                   </div>
                   {a.reason ? (
-                    <div className="reason" style={{ marginTop: 8 }}><div className="rl"><Icon name="spark" /> Why this is requested</div>{a.reason}</div>
+                    <div className="reason" style={{ marginTop: 8 }}><div className="rl"><Icon name="agent" /> Why this is requested</div>{a.reason}</div>
                   ) : null}
                   <div className="recipient-box">
                     <span className="k-ic" style={{ background: "var(--surface)", color: "var(--forest-2)" }}><Icon name="wallet" /></span>
                     <div style={{ flex: 1, minWidth: 140 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600 }}>Payment recipient: {a.supplierName}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600 }}>Pays: {a.supplierName}</div>
                       <div className="addr" title={a.destination?.address}>{a.destination ? `${shortAddress(a.destination.address)} · ${a.destination.network} · ${a.destination.asset}` : "No payment address"}</div>
                     </div>
                     <DestinationPill d={a.destination} />

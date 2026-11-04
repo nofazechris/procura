@@ -29,9 +29,9 @@ export default function LoginPage() {
   return (
     <div className="auth-card">
       <h1>Welcome back</h1>
-      <p className="sub">Sign in to your procurement workspace.</p>
+      <p className="sub">Sign in to your buyer.</p>
       <form onSubmit={submit} noValidate>
-        <div className="fld"><label htmlFor="email">Work email</label><input id="email" className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" /></div>
+        <div className="fld"><label htmlFor="email">Email</label><input id="email" className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></div>
         <div className="fld">
           <label htmlFor="password" style={{ display: "flex", justifyContent: "space-between" }}>Password<Link href="/forgot-password" className="linkbtn" style={{ fontSize: 12 }}>Forgot password?</Link></label>
           <input id="password" className="input" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />

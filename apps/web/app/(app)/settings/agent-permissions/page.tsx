@@ -12,9 +12,9 @@ import { errorMessage, usePolicy, useUpdatePolicy } from "@/lib/queries";
 import { compare, decimalString } from "@procura/shared";
 
 const LEVELS = [
-  { n: 1, name: "Research", text: "Discover suppliers, compare quotations and prepare recommendations. No payments." },
-  { n: 2, name: "Prepare", text: "Prepare purchase orders and payment instructions. No financial execution without authorisation." },
-  { n: 3, name: "Approved execution", text: "Execute payments within a user-approved spending session and your configured limits." },
+  { n: 1, name: "Research", text: "Search, compare options and prepare a recommendation. No payments." },
+  { n: 2, name: "Prepare", text: "Prepare orders and payment details. Nothing is paid without your OK." },
+  { n: 3, name: "Approved execution", text: "Pay inside a spending session you approved, and inside your limits." },
 ];
 
 export default function AgentPermissionsPage() {
@@ -34,10 +34,10 @@ export default function AgentPermissionsPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     const next: Record<string, string> = {};
-    if (!decimalString.safeParse(f.total).success) next["total"] = "Enter an amount such as 20000.";
-    if (!decimalString.safeParse(f.tx).success) next["tx"] = "Enter an amount such as 2500.";
+    if (!decimalString.safeParse(f.total).success) next["total"] = "Enter an amount such as 500.";
+    if (!decimalString.safeParse(f.tx).success) next["tx"] = "Enter an amount such as 150.";
     if (f.above && !decimalString.safeParse(f.above).success) next["above"] = "Enter an amount, or leave empty to require approval for every order.";
-    if (!next["total"] && !next["tx"] && d && compare({ amount: f.tx, currency: d.currency }, { amount: f.total, currency: d.currency }) > 0) next["tx"] = "The per-purchase limit cannot exceed the monthly budget.";
+    if (!next["total"] && !next["tx"] && d && compare({ amount: f.tx, currency: d.currency }, { amount: f.total, currency: d.currency }) > 0) next["tx"] = "The largest purchase cannot exceed the monthly limit.";
     setErr(next);
     if (Object.keys(next).length) return;
     try {
@@ -48,7 +48,7 @@ export default function AgentPermissionsPage() {
 
   return (
     <>
-      <PageHead title="Agent permissions" sub="Define what Procura can do on behalf of your business. Your agent can never increase its own authority." />
+      <PageHead title="Limits" sub="Decide what Procura may do for you and how much it may spend. Your buyer can never raise its own limits." />
       <SettingsTabs />
       <div className="lvl-grid">
         {LEVELS.map((l) => {
@@ -76,7 +76,7 @@ export default function AgentPermissionsPage() {
               <div className="fld"><label htmlFor="pa">Require approval above</label><input id="pa" className="input num" inputMode="decimal" value={f.above} disabled={!can} placeholder="Every order" onChange={(e) => setF({ ...f, above: e.target.value })} aria-invalid={!!err["above"]} />{err["above"] ? <div className="ferr">{err["above"]}</div> : <div className="hint">Empty means every order needs approval.</div>}</div>
               <div className="cfg-row"><div><div className="lab">Always require approval</div><div className="sub">Ignore the threshold and ask every time</div></div><Toggle on={f.required} onChange={(v) => can && setF({ ...f, required: v })} label="Always require approval" /></div>
               {can ? <button className="btn btn-pri" type="submit" style={{ marginTop: 14 }} disabled={update.isPending}>{update.isPending ? "Saving…" : "Save limits"}</button>
-                : <p className="mut3" style={{ fontSize: 12.5, marginTop: 14 }}>Only owners and finance managers can change spending limits.</p>}
+                : <p className="mut3" style={{ fontSize: 12.5, marginTop: 14 }}>Only you can change your limits.</p>}
             </form>
           )}
         </Async>

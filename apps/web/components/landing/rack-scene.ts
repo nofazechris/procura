@@ -8,23 +8,41 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
  * forwards and backwards. All geometry is procedural; there are no model or texture files.
  */
 
-export interface SceneSupplier {
+export interface SceneLine { label: string; quantity: string; price: string; rating: number | null }
+
+export interface SceneOption {
   name: string;
   total: string;
   days: number | null;
   verdict: "eligible" | "review_required" | "ineligible";
-  evidence: { identity: boolean | null; contact: boolean | null; payment: boolean | null };
+  kind: "marketplace" | "direct";
+  /** One short line under the total, such as "shipping and tax added at checkout". */
+  note: string;
+  lines: SceneLine[];
+  evidence: { identity: boolean | null; quote: boolean | null; payment: boolean | null };
 }
 
 export interface SceneData {
   request: { number: string; lines: string[]; budget: string };
-  /** In rank order: the recommended supplier first. */
-  suppliers: SceneSupplier[];
+  /** In rank order: the recommended option first. */
+  options: SceneOption[];
+  /** Prices of the listings the search turns up, shown as a grid before they become baskets. */
+  tiles: string[];
   order: { number: string; total: string; fingerprint: string };
+}
+
+export interface RackOptions {
+  reducedMotion: boolean;
+  /** A slow, wide, looping shot with no scroll: used behind the sign-in and sign-up forms. */
+  overview?: boolean;
+  /** How far the scene is shifted sideways to leave room for text, as a fraction of the width. */
+  offsetFactor?: number;
 }
 
 export interface RackScene {
   setProgress(p: number): void;
+  /** Sets progress with no easing, for restarting a loop. */
+  jump(p: number): void;
   setPointer(nx: number, ny: number): void;
   resize(w: number, h: number, mobile: boolean): void;
   render(timeMs: number): void;
@@ -33,7 +51,7 @@ export interface RackScene {
 
 const LIME = 0xb7f36b;
 const AMBER = 0xe0a94b;
-const MODULES = ["ORCHESTRATOR", "SOURCING", "EVIDENCE", "COMPARE", "PURCHASE ORDER", "PAYMENT"];
+const MODULES = ["REQUEST", "FIND", "PROVE", "COMPARE", "ORDER", "PAY"];
 
 const W = 2.2, D = 1.7, H = 0.8, STEP = 2.24;
 const mx = (i: number) => (i - 2.5) * STEP;
@@ -99,18 +117,41 @@ const labelTex = (text: string) => canvasTex(512, 96, (c, w, h) => {
   c.fillText(text, w / 2, h / 2 + 2);
 });
 
-const cardTex = (s: SceneSupplier) => canvasTex(560, 380, (c, w, h) => {
+const CARD_H = 440;
+const cardTex = (o: SceneOption) => canvasTex(560, CARD_H, (c, w, h) => {
   c.fillStyle = "#0e1510"; roundRect(c, 4, 4, w - 8, h - 8, 26); c.fill();
   c.strokeStyle = "#2a3a2f"; c.lineWidth = 3; c.stroke();
-  c.fillStyle = "#9fb0a3"; c.font = `500 22px ${MONO}`; c.textAlign = "left"; c.fillText("QUOTE", 36, 56);
-  c.fillStyle = "#e9f0e6"; c.font = `600 34px ${SANS}`; c.fillText(s.name, 36, 108);
-  c.fillStyle = "#9fb0a3"; c.font = `500 20px ${MONO}`; c.fillText("TOTAL DELIVERED", 36, 170);
-  c.fillStyle = "#ffffff"; c.font = `700 72px ${SANS}`; c.fillText(`$${Number(s.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}`, 36, 246);
-  c.fillStyle = "#9fb0a3"; c.font = `500 22px ${MONO}`;
-  c.fillText(s.days ? `${s.days} days` : "delivery not stated", 36, 292);
-  c.fillStyle = "#5d6b60"; c.font = `500 15px ${MONO}`;
-  c.textAlign = "center";
-  c.fillText("ID", 93, 366); c.fillText("CONTACT", 280, 366); c.fillText("PAYMENT", 467, 366);
+  c.textAlign = "left"; c.textBaseline = "alphabetic";
+  c.fillStyle = "#9fb0a3"; c.font = `500 19px ${MONO}`; c.fillText(o.kind === "marketplace" ? "AMAZON BASKET" : "LOCAL SUPPLIER", 36, 52);
+  c.fillStyle = "#e9f0e6"; c.font = `600 32px ${SANS}`; c.fillText(o.name.replace(/^Amazon:\s*/, ""), 36, 98);
+  o.lines.slice(0, 3).forEach((l, i) => {
+    const y = 144 + i * 31;
+    c.font = `500 19px ${MONO}`; c.fillStyle = "#cfd9d1"; c.textAlign = "left";
+    c.fillText(`${l.label}${Number(l.quantity) > 1 ? ` x${Number(l.quantity)}` : ""}`, 36, y);
+    c.textAlign = "right"; c.fillStyle = "#9fb0a3";
+    c.fillText(`${l.rating !== null ? `${l.rating}*  ` : ""}$${l.price}`, w - 36, y);
+  });
+  c.strokeStyle = "#233027"; c.lineWidth = 2; c.beginPath(); c.moveTo(36, 240); c.lineTo(w - 36, 240); c.stroke();
+  c.textAlign = "left"; c.fillStyle = "#9fb0a3"; c.font = `500 16px ${MONO}`; c.fillText("TOTAL", 36, 268);
+  c.fillStyle = "#ffffff"; c.font = `700 62px ${SANS}`; c.fillText(`$${Number(o.total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 36, 324);
+  c.fillStyle = "#9fb0a3"; c.font = `500 16px ${MONO}`; c.fillText(o.note, 36, 350);
+  c.fillStyle = "#5d6b60"; c.font = `500 14px ${MONO}`; c.textAlign = "center";
+  c.fillText("IDENTITY", 93, 430); c.fillText("QUOTE", 280, 430); c.fillText("PAYMENT", 467, 430);
+});
+
+const tileTex = (price: string) => canvasTex(160, 120, (c, w, h) => {
+  c.fillStyle = "#0e1510"; roundRect(c, 3, 3, w - 6, h - 6, 14); c.fill();
+  c.strokeStyle = "rgba(183,243,107,0.55)"; c.lineWidth = 2; c.stroke();
+  c.fillStyle = "#26332a"; roundRect(c, 14, 14, 54, 36, 6); c.fill();
+  c.fillRect(78, 20, 64, 6); c.fillRect(78, 34, 40, 6);
+  c.fillStyle = "#b7f36b"; c.font = `700 30px ${MONO}`; c.textAlign = "left"; c.textBaseline = "alphabetic";
+  c.fillText(`$${price}`, 16, 96);
+});
+
+const labelPlateTex = (text: string) => canvasTex(320, 72, (c, w, h) => {
+  c.fillStyle = "rgba(10,15,11,0.9)"; roundRect(c, 3, 3, w - 6, h - 6, 16); c.fill();
+  c.strokeStyle = "rgba(183,243,107,0.8)"; c.lineWidth = 2; c.stroke();
+  c.fillStyle = "#b7f36b"; c.font = `600 26px ${MONO}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(text, w / 2, h / 2 + 2);
 });
 
 const chipTex = (kind: "pending" | "ok" | "unknown") => canvasTex(128, 128, (c, w, h) => {
@@ -161,7 +202,7 @@ const shadowTex = () => canvasTex(128, 128, (c, w, h) => {
 
 /* ---------- the scene ---------- */
 
-export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts: { reducedMotion: boolean }): RackScene {
+export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts: RackOptions): RackScene {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -220,11 +261,11 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
   const reqCard = new THREE.Mesh(own(new THREE.PlaneGeometry(1.9, 1.9 * (340 / 560))), reqMat); scene.add(reqCard);
 
   /* supplier cards */
-  const cardGeo = own(new THREE.PlaneGeometry(1.5, 1.5 * (380 / 560)));
-  const glowGeo = own(new THREE.PlaneGeometry(1.62, 1.62 * (380 / 560) + 0.12));
-  const chipGeo = own(new THREE.PlaneGeometry(0.2, 0.2));
+  const cardGeo = own(new THREE.PlaneGeometry(1.5, 1.5 * (CARD_H / 560)));
+  const glowGeo = own(new THREE.PlaneGeometry(1.62, 1.62 * (CARD_H / 560) + 0.12));
+  const chipGeo = own(new THREE.PlaneGeometry(0.17, 0.17));
   const chipTexs = { pending: own(chipTex("pending")), ok: own(chipTex("ok")), unknown: own(chipTex("unknown")) };
-  const cards = data.suppliers.map((s, k) => {
+  const cards = data.options.map((s, k) => {
     const g = new THREE.Group();
     const faceMat = own(new THREE.MeshBasicMaterial({ map: own(cardTex(s)), transparent: true, toneMapped: false }));
     const face = new THREE.Mesh(cardGeo, faceMat);
@@ -233,15 +274,30 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     // Explicit order: transparent sorting is by object origin, which puts lower chips behind the face.
     glow.renderOrder = 10; face.renderOrder = 11;
     g.add(glow, face);
-    const states = [s.evidence.identity, s.evidence.contact, s.evidence.payment];
+    const states = [s.evidence.identity, s.evidence.quote, s.evidence.payment];
     const chips = states.map((st, j) => {
       const m = own(new THREE.MeshBasicMaterial({ map: chipTexs.pending, transparent: true, toneMapped: false, depthWrite: false }));
-      const c = new THREE.Mesh(chipGeo, m); c.renderOrder = 12; c.position.set(-0.5 + j * 0.5, -0.3, 0.01); g.add(c);
+      const c = new THREE.Mesh(chipGeo, m); c.renderOrder = 12; c.position.set(-0.5 + j * 0.5, -0.44, 0.01); g.add(c);
       return { mesh: c, mat: m, final: st === true ? chipTexs.ok : chipTexs.unknown, order: j };
     });
     scene.add(g);
     return { g, faceMat, glowMat, chips, k, verdict: s.verdict };
   });
+
+  /* the search: a grid of listings that appears over FIND, then fans out into the baskets */
+  const tileGeo = own(new THREE.PlaneGeometry(0.4, 0.3));
+  const tileCache = new Map<string, THREE.CanvasTexture>();
+  const TILE_COLS = 4, TILE_ROWS = 3;
+  const tiles = Array.from({ length: TILE_COLS * TILE_ROWS }, (_, i) => {
+    const price = data.tiles.length ? data.tiles[i % data.tiles.length]! : "0.00";
+    let tex = tileCache.get(price);
+    if (!tex) { tex = own(tileTex(price)); tileCache.set(price, tex); }
+    const mat = own(new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, toneMapped: false, depthWrite: false }));
+    const m = new THREE.Mesh(tileGeo, mat); m.renderOrder = 9; m.visible = false; scene.add(m);
+    return { m, mat, i, col: i % TILE_COLS, row: Math.floor(i / TILE_COLS) };
+  });
+  const scanMat = own(new THREE.MeshBasicMaterial({ color: LIME, transparent: true, opacity: 0, toneMapped: false, depthWrite: false, blending: THREE.AdditiveBlending }));
+  const scan = new THREE.Mesh(own(new THREE.PlaneGeometry(0.05, 1.5)), scanMat); scan.renderOrder = 8; scene.add(scan);
 
   /* purchase order plate and press */
   const poMat = own(new THREE.MeshBasicMaterial({ map: own(poTex(data.order)), transparent: true, opacity: 0, toneMapped: false }));
@@ -274,6 +330,8 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
   keyStem.position.y = -0.4; const keyTooth = new THREE.Mesh(own(new THREE.BoxGeometry(0.22, 0.07, 0.07)), keyStem.material as THREE.Material);
   keyTooth.position.set(0.11, -0.6, 0);
   keyG.add(keyRing, keyStem, keyTooth); scene.add(keyG);
+  const keyLabelMat = own(new THREE.MeshBasicMaterial({ map: own(labelPlateTex("YOUR PASSKEY")), transparent: true, opacity: 0, toneMapped: false, depthWrite: false }));
+  const keyLabel = new THREE.Mesh(own(new THREE.PlaneGeometry(1.1, 0.248)), keyLabelMat); keyLabel.renderOrder = 20; keyLabel.visible = false; scene.add(keyLabel);
 
   /* session rings around payment */
   const rings = [1.55, 1.9, 2.25].map((r, i) => {
@@ -299,8 +357,8 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     camera.aspect = w / h;
     // Push the scene off-centre so the chapter text has the other side to itself.
     if (mobile) camera.setViewOffset(w, h, 0, h * 0.2, w, h);
-    else camera.setViewOffset(w, h, -w * (w > 1100 ? 0.2 : 0.14), 0, w, h);
-    camera.fov = mobile ? 58 : 37;
+    else camera.setViewOffset(w, h, -w * (opts.offsetFactor ?? (w > 1100 ? 0.2 : 0.14)), 0, w, h);
+    camera.fov = opts.overview ? 40 : mobile ? 58 : 37;
     camera.updateProjectionMatrix();
   }
 
@@ -340,7 +398,7 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     const spread = mobile ? 1.1 : 1.62, cardK = mobile ? 0.72 : 1;
     cards.forEach((c) => {
       const off = (c.k - 1) * spread;
-      const arrive = ss(p, 0.24, 0.31);
+      const arrive = ss(p, 0.285, 0.335);
       const t3 = ss(p, 0.37, 0.43), t4 = ss(p, 0.51, 0.57), lift = ss(p, 0.57, 0.62);
       let x = mx(1) + off;
       x = lerp(x, mx(2) + off, t3); x = lerp(x, mx(3) + off, t4);
@@ -375,6 +433,25 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
       });
     });
 
+    /* search grid: pops in with a scanning beam, then each listing flies into a basket */
+    const merge = ss(p, 0.285, 0.335);
+    const spreadT = mobile ? 1.1 : 1.62;
+    tiles.forEach((tl) => {
+      const appear = ss(p, 0.215 + tl.i * 0.0035, 0.245 + tl.i * 0.0035);
+      const gx = mx(1) - 0.2 + (tl.col - (TILE_COLS - 1) / 2) * 0.45, gy = 2.4 - tl.row * 0.37;
+      const k = tl.i % Math.max(1, cards.length);
+      const cx = mx(1) + (k - 1) * spreadT, cy = 1.55 + 0.05;
+      const x = lerp(gx, cx, merge), y = lerp(gy + Math.sin(t * 1.3 + tl.i) * 0.025, cy, merge);
+      tl.m.position.set(x, y, lerp(0.25, 0.12, merge));
+      tl.m.scale.setScalar(Math.max(0.001, appear * (1 - merge * 0.82)));
+      tl.mat.opacity = appear * (1 - merge);
+      tl.m.visible = tl.mat.opacity > 0.01;
+    });
+    const sweep = seg(p, 0.215, 0.285);
+    scan.position.set(lerp(mx(1) - 1.1, mx(1) + 0.7, sm(sweep)), 2.0, 0.3);
+    scanMat.opacity = sweep > 0 && sweep < 1 ? 0.55 * Math.sin(sweep * Math.PI) : 0;
+    scan.visible = scanMat.opacity > 0.01;
+
     /* purchase order plate, press and stamp */
     const plateIn = ss(p, 0.705, 0.735);
     poMat.opacity = plateIn;
@@ -389,6 +466,9 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     keyG.position.y = lerp(H / 2 + 2.9, H / 2 + 1.45, keyIn);
     keyG.rotation.z = turn * (Math.PI / 2); keyG.rotation.y = Math.sin(t * 0.8) * 0.2;
     keyG.visible = keyIn > 0.01 && open < 0.98;
+    keyLabel.position.set(GATE_X, keyG.position.y + 0.78, keyG.position.z + 0.05);
+    keyLabelMat.opacity = keyIn * (1 - ss(p, 0.885, 0.915));
+    keyLabel.visible = keyLabelMat.opacity > 0.01;
     bar.position.y = H / 2 + 0.9 + open * 1.7; barEdge.position.y = H / 2 + 1.77 + open * 1.7;
     barMat.opacity = 0.28 * (1 - open * 0.9); amberMat.opacity = 1 - open * 0.6;
     gate.visible = ss(p, 0.76, 0.8) > 0.01;
@@ -406,6 +486,13 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     halo.scale.setScalar(1.05 + Math.sin(t * 2.4) * 0.08);
 
     /* camera, with a little pointer parallax */
+    if (opts.overview) {
+      // Looking down the length of the rack from one end, so it recedes into a narrow panel.
+      const sway = Math.sin(t * 0.12) * 0.9;
+      camera.position.set(-9.3 + sway, 3.0 + Math.sin(t * 0.09) * 0.25, 5.7);
+      camera.lookAt(0.9, 0.7, 0);
+      return;
+    }
     cameraAt(p);
     const drift = opts.reducedMotion ? 0 : Math.sin(t * 0.25) * 0.15 * (1 - seg(p, 0.1, 0.2));
     camera.position.set(camPos.x + px * 0.35 + drift, camPos.y + py * 0.18, camPos.z);
@@ -414,6 +501,7 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
 
   return {
     setProgress(p) { target = clamp(p); },
+    jump(p) { target = shown = clamp(p); },
     setPointer(nx, ny) { px = nx; py = ny; },
     resize(nw, nh, isMobile) {
       w = Math.max(1, nw); h = Math.max(1, nh); mobile = isMobile;

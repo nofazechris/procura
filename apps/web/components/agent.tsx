@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useApp } from "@/lib/app-context";
 import type { RequestDTO } from "@/lib/dto";
+import { useAgentStatus, usePassport } from "@/lib/queries";
 import { stageProgress, STAGES } from "@/lib/stages";
 import { Icon } from "./icon";
 
 /** Five headline steps for the dashboard card, mapped from the 11 stages. */
 const SUMMARY = [
   { label: "Analysed requirements", upTo: 2 },
-  { label: "Discovered suppliers", upTo: 3 },
+  { label: "Found options", upTo: 3 },
   { label: "Collected quotations", upTo: 4 },
   { label: "Compared delivered prices", upTo: 6 },
   { label: "Generated recommendation", upTo: 7 },
@@ -18,18 +19,20 @@ const SUMMARY = [
 
 /**
  * The agent card on the dashboard. It describes the most recent active request from its real
- * status. SERV Reasoning is not connected yet, so sourcing is run by the demo provider and the
- * card says so rather than implying an AI is working.
+ * status, and says plainly what is connected: SERV Reasoning for reading requests, and Amazon
+ * search through Kite Passport. Where neither is, it says so rather than implying an AI is working.
  */
 export function AgentPanel({ request }: { request: RequestDTO | undefined }) {
   const { mode } = useApp();
+  const serv = useAgentStatus();
+  const passport = usePassport();
   const progress = request ? stageProgress(request.status) : null;
   const live = progress?.kind === "now";
 
   return (
     <div className="agent-panel" data-tour="agent-panel">
       <div className="ap-head">
-        <div className={`ap-orb ${live ? "live" : ""}`}><Icon name="spark" /></div>
+        <div className={`ap-orb ${live ? "live" : ""}`}><Icon name="agent" /></div>
         <div>
           <h3>Procura agent</h3>
           <div className="st">{!request ? "● Idle" : live ? "● Working now" : progress?.kind === "attn" ? "● Waiting on you" : "● Ready"}</div>
@@ -50,19 +53,20 @@ export function AgentPanel({ request }: { request: RequestDTO | undefined }) {
             })}
           </div>
           <Link href={`/procurement/${request.id}`} className="btn btn-sm" style={{ background: "rgba(255,255,255,.1)", color: "#fff", marginTop: 16, width: "100%" }}>
-            Open workspace <Icon name="arr" />
+            Open request <Icon name="arr" />
           </Link>
         </>
       ) : (
-        <div className="ap-task">No active request. Start a procurement and Procura will source and compare suppliers for you.
+        <div className="ap-task">No active request. Describe what you need and Procura will find options and compare them for you.
           <Link href="/procurement/new" className="btn btn-sm" style={{ background: "var(--panel-accent)", color: "var(--panel)", marginTop: 16, width: "100%" }}>
-            <Icon name="plus" /> New procurement
+            <Icon name="plus" /> New request
           </Link>
         </div>
       )}
       {mode === "live" ? (
         <div className="ap-task" style={{ fontSize: 11.5, color: "var(--panel-ink-2)", marginTop: 14 }}>
-          Sourcing currently uses the demo supplier provider. SERV Reasoning is not connected yet.
+          {serv.data?.configured ? "SERV Reasoning reads your requests and explains comparisons." : "SERV Reasoning is not connected, so requests are filled in by hand."}{" "}
+          {passport.data?.enabled ? "Amazon search runs through Kite Passport. Checkout comes next." : "Sourcing uses the demo supplier set."}
         </div>
       ) : null}
     </div>

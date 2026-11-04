@@ -4,3 +4,4 @@ export * from "./state-machines";
 export * from "./schemas";
 export * from "./permissions";
 export * from "./errors";
+export * from "./wallet";

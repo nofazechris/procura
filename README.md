@@ -1,13 +1,16 @@
 # Procura
 
-Autonomous procurement: describe what your business needs, and an agent sources suppliers,
-compares quotes and pays within spending authority you control.
+A safe AI buyer for small businesses. Describe what you need to buy; an agent finds options
+(live Amazon search through Kite Passport, plus supplier checks), compares them on evidence and
+price, and explains its pick. When it is time to pay, the agent can only spend what you approve:
+Kite Passport gives it a verifiable identity and a capped spending session that you activate
+with your passkey. The agent never holds your card or your keys.
 
 - **App:** Next.js 16 (App Router), React 19, TypeScript, TanStack Query, Lucide
 - **Data:** Neon Postgres with Row Level Security (Drizzle ORM)
 - **Auth:** Better Auth (self-hosted)
-- **Reasoning:** SERV Reasoning (not connected yet)
-- **Payments:** Kite Passport (not connected yet)
+- **Reasoning:** SERV Reasoning (connected when `SERV_API_KEY` is set; see below)
+- **Identity and spending limits:** Kite Passport (agent identity and capped sessions work; checkout is next)
 
 See [docs/architecture.md](docs/architecture.md) for what is built and what is not.
 
@@ -36,19 +39,56 @@ pnpm dev           # terminal 2: the app on http://localhost:3000
 `.env` is already set for local development (gitignored). For a real deployment use
 `.env.example` and [docs/neon-setup.md](docs/neon-setup.md).
 
-### Landing page and first run
+### Landing page, sign-in and first run
 
-The landing page is a scroll-driven 3D story (three.js, procedural geometry, no model files):
-six agent modules joined edge to edge, with a request packet travelling through them. Every
-number on it comes from the real engine at build time, and the "Break it yourself" and
-"Authority rings" sections run the real comparison and payment-gate code in the visitor's
-browser. There is no demo dashboard: "See it run" asks the visitor to create an account.
+The landing page tells the product's story on a fictional sample scenario, computed by the real
+engine: a shop buying a label printer, a charger and label rolls. A scroll-driven 3D rack (three.js,
+procedural geometry, no model files) plays the whole purchase: request, find, prove, compare,
+order, your passkey, and a capped payment. Below it, four interactive 3D sections run the *real*
+rules in your browser: the basket rule that picks listings, the eligibility engine, the comparison
+engine with a budget plane, and the payment gate with attacks. There is no demo dashboard: "See it
+run" asks the visitor to create an account.
 
-Signing up lands on the dashboard with a setup wizard modal (business, requirements,
-preferences, financials). It cannot be dismissed until the business exists; afterwards the
-dashboard shows a "Get set up" checklist. Everything that needs SERV or Kite is shown as "not
-connected", never faked. A demo-mode cookie (`procura_mode=demo`) still exists for development
-but nothing in the UI links to it.
+The same rack plays on a slow loop behind the sign-in and sign-up forms. After sign-up, a
+two-pane setup wizard opens over the dashboard where the rack builds itself step by step as you
+answer (business, what you buy, how it chooses, limits, wallet, ready). It cannot be dismissed
+until the business exists, and the wallet step is optional. Afterwards the dashboard shows a "Get
+set up" checklist.
+
+### The agent (SERV Reasoning)
+
+With `SERV_API_KEY` set, the agent does two jobs, through `POST /v1/chat/completions` with strict
+JSON-schema output (`apps/web/lib/server/serv.ts`):
+
+- **Reads a plain-language request** ("50 bags of rice, budget $2,000, by Friday") and fills in the
+  request form. A person reviews it before anything is created. Every value is re-validated on the
+  server; anything unclear is dropped and reported, never guessed.
+- **Explains a comparison** in plain English. It is given only what the deterministic engine
+  computed and may cite only an eligible quote. The engine's ranking stays the authority.
+
+The model never sets a spending limit, approves, or pays. Calls are rate limited per user and
+recorded in the audit log (model and token usage, not the text). Defaults: base URL
+`https://inference-api.openserv.ai`, model `gpt-5.4-mini` (override with `SERV_BASE_URL` / `SERV_MODEL`).
+
+### Kite Passport (agent identity and spending limits)
+
+Settings, Passport. Kite Passport has **no public HTTP API**; the `kpass` CLI is the only way in, so
+Procura drives it as a child process (`apps/web/lib/server/passport.ts`: argument arrays, no shell,
+the login token is never read or returned).
+
+- **Verifiable identity:** Procura's agent (`procura-agent`) is registered under the owner's Passport
+  account, and the id Passport issues is recorded and shown.
+- **Spending limits you control:** a person requests a session with a per-payment limit, a total and a
+  duration. Procura first refuses anything wider than the business's own spending policy
+  (`evaluateSessionRequest`), then asks Passport, which enforces the caps. The session becomes
+  active only when Passport reports the person approved it with their passkey; nothing a client
+  sends can do that.
+- **Not wired yet:** executing payments. The Passport backend here is **production** and the
+  wallet is empty, so approving a session sets a limit and moves no money.
+
+Setup: `KPASS_BIN`, `PASSPORT_HOME` (the folder holding its gitignored `.kite-passport` login) and
+`PASSPORT_BUSINESS_ID`. One login serves one business, so only that business can use it; real
+multi-tenant use needs a per-business Passport worker or an HTTP API from Kite.
 
 ## Commands
 

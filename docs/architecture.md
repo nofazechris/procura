@@ -45,8 +45,8 @@ cross tenants. Tested in `tests/integration/database.test.ts`.
 | 1 Foundation | Done: monorepo, Next.js, Better Auth, env, migrations |
 | 2 Business and procurement data | Done: business onboarding, requests, suppliers, quotations, purchase orders, approvals. |
 | 3 Core UI | Done: the prototype is ported to Next.js routes (all PRD s17.1 routes) with loading, empty, error and retry states. Verified in a browser in live and demo mode, light and dark, at desktop and phone width. |
-| 4 SERV | Not started. Confirm base URL, model and parameters from the official docs first. The deterministic layer it will sit on top of exists (see below). |
-| 5 Supplier provider | Done for the demo provider (`packages/procurement`). Live providers need credentials and docs. |
+| 4 SERV | Done for two workflows: reading a plain-language request into a draft the person reviews, and explaining a comparison. Strict JSON-schema output, server-side re-validation, the model can only cite engine-approved quotes, per-user rate limit, audit entries. Supplier evaluation by the model (Workflow C) is not built; the engine does it deterministically. |
+| 5 Supplier provider | Demo provider, plus a live Amazon provider through Kite Passport (`apps/web/lib/server/shop-provider.ts`): free search, three comparable baskets, each line linked to the real listing. A marketplace is paid through checkout, so the engine skips supplier contact and payout-address checks for it (an explicit, tested rule). Checkout itself is not built. |
 
 ## Procurement core (`packages/procurement`)
 
@@ -59,7 +59,7 @@ Pure, deterministic and model-free. SERV will only ever choose among what this l
 - **Services** (`services/`): sourcing is idempotent; ordering refuses ineligible quotes; approval needs a human-approved payout address and records the order fingerprint.
 
 A payout address is only ever proposed by a provider. A person approves it (`approvals:decide`).
-| 6 Kite Passport | Not started. Requires an integration spike against the official CLI. |
+| 6 Kite Passport | Partly done. Agent identity registration and spending-session requests with policy-checked limits and passkey approval are built on the `kpass` CLI (Kite has no HTTP API). Executing payments is not: the Passport backend is production and the wallet is empty. Multi-tenant use needs a per-business worker. |
 | 7 Worker | Not started. |
 | 8 Security and tests | Partly: database, policy, money and state-machine tests exist. |
 | 9 Deployment | Not started. |
@@ -68,7 +68,7 @@ A payout address is only ever proposed by a provider. A person approves it (`app
 
 - **Live and demo share one data interface** (`apps/web/lib/queries.ts`). Components never know which mode they are in. Live calls `/api`; demo reads an in-browser store (`lib/demo/store.ts`) with the same shapes.
 - **Demo runs the real engine.** The store imports `@procura/procurement/core` (a browser-safe entry point with no database code), so the demo's comparison, eligibility and purchase orders come from the same functions the server uses. Only persistence and the Kite payment are simulated.
-- **Honest about what is not connected.** Live mode shows SERV Reasoning and Kite Passport as "not connected": the assistant will not interpret free text, and nothing can be paid. A control that would need them is disabled and says why.
+- **Honest about what is not connected.** Live mode shows Kite Passport as "not connected" (nothing can be paid) and SERV Reasoning as connected only when a key is set; without one the assistant will not interpret free text. A control that would need them is disabled and says why.
 - **No invented numbers.** Dashboard and intelligence figures are derived from real orders and requests. Savings are labelled estimated and use a stated baseline.
 - **Sessions:** `app/(app)/layout.tsx` resolves the session and business on the server for every protected screen. Role checks in the UI only hide controls; the API enforces them.
 - **Local development without Neon:** `scripts/dev-db.mjs` serves PGlite over a socket and the app drops to the `procura_app` role per transaction, so Row Level Security is enforced locally too.
@@ -77,6 +77,23 @@ A payout address is only ever proposed by a provider. A person approves it (`app
 
 - Email provider (verification, invitations, reset links print to the server console in development).
 - Team invitations, editing onboarding preferences, billing.
-- SERV Reasoning and Kite Passport (Phases 4, 6).
+- Executing payments through Kite Passport (identity, session request and approval are built), a per-business Passport worker for real multi-tenant use, and wallet escrow (Phase 6).
 - Background worker and realtime events (Phase 7): sourcing currently runs inline in the request.
 - No automated browser tests yet; the screens were verified manually.
+
+## Supplier verification (paid checks)
+
+A supplier added by hand starts as "supplier provided". It becomes verified only through evidence, bought one lookup at a time from an approved Kite Passport session:
+
+| Check | Service | Listed price | Evidence it can produce |
+| --- | --- | --- | --- |
+| Sanctions screening | tbs-digital `/screen/entity` | $0.001 | A possible match fails the identity check. A clear result is "unverified": it rules out a listed name, nothing more. |
+| Company registry | GLEIF resolve (oblique.markets) | $0.01 | Verified only when the registry names the same business and it is active. Not found is "unverified", not "failed". |
+| Email deliverability | toolcall.click `/t/email/validate` | $0.004 | Verified only when the address can receive mail and is not a throwaway domain. It does not prove ownership. |
+
+Rules, all unit tested in `tests/unit/verification.test.ts`:
+
+- The pure logic (plans, exact-decimal prices, URL guard, answer parsing) lives in `packages/procurement/src/verification.ts`. An answer that cannot be read is "unknown", never "verified", and a service's own match score is never trusted without the name matching.
+- `POST /api/suppliers/:id/verify` needs `passport:manage`, a named active session, and the total the person saw (`maxCost`). A higher price is refused with `PRICE_CHANGED`. Each paid call carries an idempotency key that is stable for the same payment on the same day, so a retry cannot be charged twice.
+- Money or session problems (empty wallet, limit, inactive session, pending payment) stop the remaining checks. Evidence is replaced per check, expires after 30 days, and every spend is written to the audit log.
+- The response parsers were written against the services' documented field names. They have not yet read a real paid reply, because the Passport wallet is empty. The first funded run should be checked by hand.

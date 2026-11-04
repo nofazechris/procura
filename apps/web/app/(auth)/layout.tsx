@@ -2,7 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
+import { AuthScene } from "@/components/auth-scene";
 import { Icon } from "@/components/icon";
+import { sceneDataOf } from "@/components/landing/scene-data";
+import { buildLandingData } from "@/lib/landing/data";
 import { getAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function AuthLayout({ children }: { children: ReactNode }) {
   const session = await getAuth().api.getSession({ headers: await headers() });
   if (session) redirect("/dashboard");
+  // The same sample run the landing page tells, computed by the real engine.
+  const scene = sceneDataOf(await buildLandingData());
   return (
     <div className="auth">
       <div className="auth-main">
@@ -18,13 +23,9 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
         {children}
       </div>
       <aside className="auth-aside" aria-hidden="true">
-        <h2>Your procurement department, powered by autonomous AI.</h2>
-        <ul>
-          <li><Icon name="check" strokeWidth={3} />Finds suppliers, compares delivered prices and explains why.</li>
-          <li><Icon name="check" strokeWidth={3} />Evidence first: unknown is never shown as verified.</li>
-          <li><Icon name="check" strokeWidth={3} />Nothing is paid without your approval, within limits you set.</li>
-          <li><Icon name="check" strokeWidth={3} />Every action recorded in an audit trail you can read.</li>
-        </ul>
+        <AuthScene scene={scene} />
+        <h2>An AI buyer that cannot overspend.</h2>
+        <p>It finds the options, checks the evidence and explains its pick. It can spend only inside a session you approve with your passkey.</p>
       </aside>
     </div>
   );
