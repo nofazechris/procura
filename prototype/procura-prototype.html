@@ -1,0 +1,1500 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Procura Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* ============================================================
+   PROCURA — autonomous procurement OS
+   Direction: light-first, cohesive white canvas · green signal accent · one deliberate dark "agent" surface
+   Full dark mode is a mirror; sidebar is theme-aware so the app reads as one product.
+   ============================================================ */
+:root{
+  /* --- light (default) --- */
+  --canvas:#F6F8F3; --surface:#FFFFFF; --surface-2:#F1F3EC; --surface-3:#E8ECE1;
+  --ink:#18221C; --ink-2:#5B665D; --ink-3:#8B958B;
+  --line:#E7EAE1; --line-2:#D7DDCF;
+  --green:#B7F36B; --green-ink:#17210E; --forest:#183B2A; --forest-2:#244C35;
+  --link:#2A5A3B; --accent-soft:#EAF6D4;
+  --ok:#248257; --ok-bg:#E3F2EA; --warn:#B4790F; --warn-bg:#F7EFD7; --err:#C94C45; --err-bg:#FaE8E6; --info:#3C72AE; --info-bg:#E6EFF8;
+  /* theme-aware sidebar */
+  --side-bg:#FFFFFF; --side-border:#E7EAE1; --side-ink:#5B665D; --side-ink-strong:#18221C; --side-muted:#98A199;
+  --side-hover:#F1F3EC; --side-active-bg:#E8F6D2; --side-active-ink:#1F4A30; --side-active-bar:#6FBF3F;
+  --side-logo-bg:#183B2A; --side-logo-ink:#B7F36B;
+  /* deliberate dark panel (agent surface) in BOTH themes */
+  --panel:#0F1711; --panel-2:#18241B; --panel-line:#273227; --panel-ink:#E3EEDE; --panel-ink-2:#8E998F; --panel-accent:#B7F36B;
+  --shadow:0 1px 2px rgba(24,34,28,.04),0 1px 3px rgba(24,34,28,.05);
+  --shadow-md:0 2px 6px rgba(24,34,28,.06),0 8px 24px -10px rgba(24,34,28,.12);
+  --shadow-lg:0 12px 42px -10px rgba(24,34,28,.24),0 2px 8px rgba(24,34,28,.08);
+  --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --r-sm:9px; --r:13px; --r-lg:18px; --r-xl:24px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --canvas:#0C120E; --surface:#131C16; --surface-2:#19231C; --surface-3:#212E24;
+  --ink:#F1F5EF; --ink-2:#A2AEA3; --ink-3:#6F7A70;
+  --line:#222E26; --line-2:#2D3A31;
+  --green:#B7F36B; --green-ink:#17210E; --forest:#1D3E2C; --forest-2:#2C6240;
+  --link:#A9E86A; --accent-soft:#1C3320;
+  --ok:#4CC387; --ok-bg:#122A1F; --warn:#DCA648; --warn-bg:#2C2411; --err:#EC7F78; --err-bg:#2D1917; --info:#6FA6DC; --info-bg:#142536;
+  --side-bg:#0A100C; --side-border:#1C271F; --side-ink:#AEB9AF; --side-ink-strong:#FFFFFF; --side-muted:#69736A;
+  --side-hover:#141D17; --side-active-bg:rgba(183,243,107,.13); --side-active-ink:#C2F088; --side-active-bar:#B7F36B;
+  --side-logo-bg:#B7F36B; --side-logo-ink:#15270F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.3);
+  --shadow-md:0 2px 10px rgba(0,0,0,.4);
+  --shadow-lg:0 18px 54px -10px rgba(0,0,0,.6),0 2px 10px rgba(0,0,0,.45);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0C120E; --surface:#131C16; --surface-2:#19231C; --surface-3:#212E24;
+  --ink:#F1F5EF; --ink-2:#A2AEA3; --ink-3:#6F7A70;
+  --line:#222E26; --line-2:#2D3A31;
+  --green:#B7F36B; --green-ink:#17210E; --forest:#1D3E2C; --forest-2:#2C6240;
+  --link:#A9E86A; --accent-soft:#1C3320;
+  --ok:#4CC387; --ok-bg:#122A1F; --warn:#DCA648; --warn-bg:#2C2411; --err:#EC7F78; --err-bg:#2D1917; --info:#6FA6DC; --info-bg:#142536;
+  --side-bg:#0A100C; --side-border:#1C271F; --side-ink:#AEB9AF; --side-ink-strong:#FFFFFF; --side-muted:#69736A;
+  --side-hover:#141D17; --side-active-bg:rgba(183,243,107,.13); --side-active-ink:#C2F088; --side-active-bar:#B7F36B;
+  --side-logo-bg:#B7F36B; --side-logo-ink:#15270F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 1px 4px rgba(0,0,0,.3);
+  --shadow-md:0 2px 10px rgba(0,0,0,.4);
+  --shadow-lg:0 18px 54px -10px rgba(0,0,0,.6),0 2px 10px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--sans);background:var(--canvas);color:var(--ink);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.021em;text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+::selection{background:var(--green);color:var(--green-ink)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--forest-2);outline-offset:2px;border-radius:4px}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:20px;border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:var(--ink-3)}
+
+/* ---------- atoms ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--r-sm);
+  padding:9px 15px;font-size:13.5px;font-weight:600;transition:.16s ease;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-pri{background:var(--green);color:var(--green-ink)}
+.btn-pri:hover{filter:brightness(1.04);box-shadow:0 5px 16px -5px rgba(140,200,80,.7)}
+.btn-sec{background:var(--surface);color:var(--ink);border-color:var(--line-2)}
+.btn-sec:hover{background:var(--surface-2);border-color:var(--ink-3)}
+.btn-ghost{background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--surface-2);color:var(--ink)}
+.btn-forest{background:var(--forest);color:#EAF7D8}
+.btn-forest:hover{background:var(--forest-2)}
+.btn-sm{padding:6px 11px;font-size:12.5px}
+.btn-lg{padding:13px 22px;font-size:15px}
+.btn svg{width:16px;height:16px}
+.btn-lg svg{width:18px;height:18px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--line-2);color:var(--ink-2);background:var(--surface)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;line-height:1.4}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ok{color:var(--ok);background:var(--ok-bg)} .p-warn{color:var(--warn);background:var(--warn-bg)}
+.p-err{color:var(--err);background:var(--err-bg)} .p-info{color:var(--info);background:var(--info-bg)}
+.p-mute{color:var(--ink-2);background:var(--surface-2)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.mut{color:var(--ink-2)} .mut3{color:var(--ink-3)}
+.demo-tag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--warn);background:var(--warn-bg);padding:2px 7px;border-radius:5px}
+.hidden{display:none!important}
+
+/* ============================================================ LANDING */
+#landing{display:block}
+.lp-wrap{max-width:1180px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left));padding-right:max(24px,env(safe-area-inset-right))}
+.lp-nav{position:sticky;top:env(safe-area-inset-top,0);z-index:40;backdrop-filter:blur(14px);
+  background:color-mix(in srgb,var(--canvas) 82%,transparent);border-bottom:1px solid var(--line)}
+.lp-nav-in{display:flex;align-items:center;gap:30px;height:66px}
+.lp-nav a.lk{font-size:13.5px;font-weight:500;color:var(--ink-2);text-decoration:none;transition:.15s;cursor:pointer}
+.lp-nav a.lk:hover{color:var(--ink)}
+.wordmark{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.03em}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--forest);display:grid;place-items:center;flex:none}
+.mark svg{width:17px;height:17px;color:var(--green)}
+.lp-hero{padding:74px 0 46px;display:grid;grid-template-columns:1.02fr 1fr;gap:52px;align-items:center}
+.lp-badge{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--forest-2);
+  background:var(--surface);border:1px solid var(--line-2);padding:6px 13px;border-radius:999px;margin-bottom:22px}
+.lp-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 30%,transparent)}
+.lp-h1{font-size:clamp(40px,5.4vw,64px);line-height:1.02;letter-spacing:-.035em;font-weight:800}
+.lp-h1 .u{color:var(--forest-2)}
+.lp-sub{font-size:18px;color:var(--ink-2);margin-top:22px;max-width:30em;line-height:1.55}
+.lp-cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+.lp-trust{display:flex;gap:26px;margin-top:36px;flex-wrap:wrap}
+.lp-trust div{font-size:12.5px;color:var(--ink-3)}
+.lp-trust b{display:block;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+@media(max-width:860px){.lp-hero{grid-template-columns:1fr;gap:36px;padding-top:44px}}
+
+.hero-app{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+.ha-top{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ha-top .d{width:9px;height:9px;border-radius:50%;background:var(--line-2)}
+.ha-title{font-size:12px;font-weight:600;color:var(--ink-2);margin-left:6px}
+.ha-body{padding:18px}
+.ha-task{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.ha-task h4{font-size:15px}
+.q-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);
+  margin-bottom:9px;opacity:0;transform:translateY(8px);transition:.5s cubic-bezier(.2,.7,.3,1)}
+.q-row.in{opacity:1;transform:none}
+.q-row.rec{border-color:var(--green);background:var(--accent-soft);box-shadow:0 0 0 1px var(--green)}
+.q-logo{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff}
+.q-meta{flex:1;min-width:0}
+.q-meta .nm{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.q-meta .sb{font-size:11.5px;color:var(--ink-3)}
+.q-price{text-align:right;font-weight:700;font-size:14px}
+.q-price .sub{font-size:11px;color:var(--ink-3);font-weight:500}
+.ha-foot{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.budget-bar{height:7px;border-radius:5px;background:var(--surface-3);overflow:hidden;margin-top:7px}
+.budget-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--forest-2),var(--green));border-radius:5px;transition:width 1s ease}
+
+.lp-section{padding:76px 0;border-top:1px solid var(--line)}
+.lp-kick{text-align:center;max-width:620px;margin:0 auto 46px}
+.lp-kick h2{font-size:clamp(26px,3.4vw,38px);letter-spacing:-.03em}
+.lp-kick p{color:var(--ink-2);margin-top:14px;font-size:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:860px){.grid-3,.grid-4{grid-template-columns:1fr}}
+.feat{padding:26px;border-radius:var(--r-lg)}
+.feat .ic{width:42px;height:42px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;margin-bottom:16px;color:var(--forest-2)}
+.feat .ic svg{width:21px;height:21px}
+.feat h3{font-size:16.5px;margin-bottom:8px}
+.feat p{color:var(--ink-2);font-size:14px}
+.step{padding:24px;border-radius:var(--r-lg)}
+.step .n{font-size:13px;font-weight:800;color:var(--green-ink);background:var(--green);width:28px;height:28px;border-radius:9px;display:grid;place-items:center;margin-bottom:16px}
+.step h3{font-size:16px;margin-bottom:7px}
+.step p{color:var(--ink-2);font-size:13.5px}
+.lp-control{background:var(--panel);border-radius:var(--r-xl);padding:54px;color:var(--panel-ink);display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+@media(max-width:860px){.lp-control{grid-template-columns:1fr;padding:34px}}
+.lp-control h2{color:#fff;font-size:clamp(26px,3vw,34px)}
+.lp-control p{color:var(--panel-ink-2);margin-top:14px;font-size:15.5px;line-height:1.6}
+.ctrl-list{display:flex;flex-direction:column;gap:14px}
+.ctrl-item{display:flex;gap:13px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--panel-line);padding:16px;border-radius:var(--r)}
+.ctrl-item .ic{width:34px;height:34px;border-radius:9px;background:rgba(183,243,107,.14);color:var(--panel-accent);display:grid;place-items:center;flex:none}
+.ctrl-item .ic svg{width:18px;height:18px}
+.ctrl-item h4{color:#fff;font-size:14px}
+.ctrl-item p{color:var(--panel-ink-2);font-size:12.5px;margin-top:3px}
+.lp-final{text-align:center;padding:86px 0}
+.lp-final h2{font-size:clamp(30px,4.2vw,50px);letter-spacing:-.035em;max-width:14em;margin:0 auto}
+.lp-foot{border-top:1px solid var(--line);padding:40px 0;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--ink-3);font-size:13px}
+
+/* ============================================================ APP SHELL */
+#app{display:none;height:100%}
+.shell{display:grid;grid-template-columns:250px 1fr;height:100%}
+.side{background:var(--side-bg);display:flex;flex-direction:column;border-right:1px solid var(--side-border);padding-top:env(safe-area-inset-top,0);min-height:0}
+.side-top{padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between}
+.side-top .wordmark{color:var(--side-ink-strong);font-size:16px}
+.side-top .mark{background:var(--side-logo-bg)}.side-top .mark svg{color:var(--side-logo-ink)}
+.side-biz{margin:4px 14px 10px;padding:10px 12px;background:var(--side-hover);border:1px solid var(--side-border);border-radius:var(--r-sm);display:flex;align-items:center;gap:10px;cursor:pointer;transition:.13s}
+.side-biz:hover{border-color:var(--line-2)}
+.side-biz .av{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--forest-2),var(--green));display:grid;place-items:center;font-weight:800;color:var(--green-ink);font-size:13px;flex:none}
+.side-biz .nm{font-size:13px;font-weight:600;color:var(--side-ink-strong);line-height:1.2}
+.side-biz .sb{font-size:11px;color:var(--side-muted)}
+.side-nav{flex:1;overflow-y:auto;padding:6px 12px 12px}
+.nav-group{margin-top:14px}
+.nav-group .lbl{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--side-muted);padding:6px 10px}
+.nav-i{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--r-sm);color:var(--side-ink);font-size:13.5px;font-weight:500;cursor:pointer;transition:.13s;position:relative;user-select:none}
+.nav-i svg{width:17px;height:17px;flex:none;opacity:.8}
+.nav-i:hover{background:var(--side-hover);color:var(--side-ink-strong)}
+.nav-i.on{background:var(--side-active-bg);color:var(--side-active-ink);font-weight:600}
+.nav-i.on svg{opacity:1}
+.nav-i.on::before{content:"";position:absolute;left:-12px;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--side-active-bar)}
+.nav-i .badge{margin-left:auto;font-size:10.5px;font-weight:700;background:var(--green);color:var(--green-ink);min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:grid;place-items:center}
+.side-foot{padding:12px;border-top:1px solid var(--side-border)}
+.side-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer}
+.side-user:hover{background:var(--side-hover)}
+.side-user .av{width:30px;height:30px;border-radius:50%;background:var(--forest-2);display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;flex:none}
+.side-user .nm{font-size:13px;font-weight:600;color:var(--side-ink-strong);line-height:1.15}
+.side-user .sb{font-size:11px;color:var(--side-muted)}
+
+.main{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.topbar{height:60px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--line);
+  background:color-mix(in srgb,var(--canvas) 85%,transparent);backdrop-filter:blur(8px);padding-top:env(safe-area-inset-top,0)}
+.crumb{font-size:13px;color:var(--ink-3);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.crumb b{color:var(--ink);font-weight:600}
+.search{flex:1;max-width:320px;position:relative}
+.search input{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-sm);padding:8px 12px 8px 34px;font-size:13px;color:var(--ink);font-family:inherit}
+.search input:focus{outline:none;border-color:var(--forest-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--forest-2) 15%,transparent)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--ink-3)}
+.icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;color:var(--ink-2);position:relative;transition:.14s}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.icon-btn svg{width:17px;height:17px}
+.icon-btn .ndot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--err);border:2px solid var(--surface)}
+.view{flex:1;overflow-y:auto;padding:28px 32px 70px;min-width:0;scroll-behavior:smooth}
+@media(max-width:720px){.view{padding:20px 16px 64px}}
+
+.phead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.phead h1{font-size:26px}
+.phead p{color:var(--ink-2);margin-top:5px;font-size:14px;max-width:60ch}
+.phead .acts{display:flex;gap:10px;flex-wrap:wrap}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.kpis{grid-template-columns:1fr}}
+.kpi{padding:18px}
+.kpi .k-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi .k-lbl{font-size:12.5px;color:var(--ink-2);font-weight:500}
+.kpi .k-ic{width:32px;height:32px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;color:var(--forest-2)}
+.kpi .k-ic svg{width:16px;height:16px}
+.kpi .k-val{font-size:28px;font-weight:800;letter-spacing:-.025em}
+.kpi .k-delta{font-size:12px;margin-top:6px;display:flex;align-items:center;gap:5px;color:var(--ink-3)}
+.k-up{color:var(--ok)}.k-down{color:var(--err)}
+
+.grid-main{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+@media(max-width:1080px){.grid-main{grid-template-columns:1fr}}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.sec-head h2{font-size:16px}
+.sec-head a{font-size:12.5px;color:var(--link);font-weight:600;text-decoration:none;cursor:pointer}
+
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr{transition:.12s;cursor:pointer}
+.tbl tbody tr:hover{background:var(--surface-2)}
+.tbl .r-id{font-weight:600;font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+
+.filters{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap}
+.filt{font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);cursor:pointer;transition:.13s;white-space:nowrap}
+.filt:hover{border-color:var(--ink-3)}
+.filt.on{background:var(--forest);color:#EAF7D8;border-color:var(--forest)}
+
+.feed{display:flex;flex-direction:column}
+.feed-i{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.feed-i:last-child{border-bottom:none}
+.feed-dot{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--surface-2);color:var(--forest-2)}
+.feed-dot svg{width:15px;height:15px}
+.feed-i .ft{font-size:13px}
+.feed-i .fs{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* agent panel (deliberate dark surface, both themes) */
+.agent-panel{background:linear-gradient(165deg,var(--panel),var(--panel-2));border:1px solid var(--panel-line);border-radius:var(--r-lg);padding:20px;color:var(--panel-ink);position:relative;overflow:hidden}
+.agent-panel::before{content:"";position:absolute;top:-40%;right:-20%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(183,243,107,.2),transparent 70%)}
+.ap-head{display:flex;align-items:center;gap:10px;position:relative}
+.ap-orb{width:36px;height:36px;border-radius:11px;background:var(--panel-accent);display:grid;place-items:center;flex:none;position:relative}
+.ap-orb svg{width:20px;height:20px;color:var(--panel)}
+.ap-orb.live::after{content:"";position:absolute;inset:-5px;border-radius:14px;border:2px solid var(--panel-accent);opacity:.6;animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.9);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+.ap-head h3{color:#fff;font-size:14px}
+.ap-head .st{font-size:11.5px;color:var(--panel-accent)}
+.ap-task{position:relative;margin-top:16px;font-size:13.5px;color:var(--panel-ink);line-height:1.5}
+.ap-task b{color:#fff}
+.ap-steps{position:relative;margin-top:16px;display:flex;flex-direction:column;gap:2px}
+.ap-step{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--panel-ink-2);padding:5px 0}
+.ap-step .tick{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--panel-line);flex:none;display:grid;place-items:center}
+.ap-step.done{color:var(--panel-ink)}
+.ap-step.done .tick{background:var(--panel-accent);border-color:var(--panel-accent)}
+.ap-step.done .tick svg{width:10px;height:10px;color:var(--panel)}
+.ap-step.now{color:#fff;font-weight:600}
+.ap-step.now .tick{border-color:var(--panel-accent);animation:spin 1s linear infinite;border-top-color:transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.chart-wrap{padding:20px}
+.chart-legend{display:flex;gap:16px;margin-bottom:8px;font-size:12px}
+.chart-legend span{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.lg-dot{width:9px;height:9px;border-radius:3px}
+.opp{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;transition:.14s;cursor:pointer;align-items:center}
+.opp:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
+.opp .oic{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center}
+.opp h4{font-size:13.5px}
+.opp p{font-size:12px;color:var(--ink-2);margin-top:3px}
+
+/* workspace */
+.ws{display:grid;grid-template-columns:270px 1fr 300px;gap:18px;align-items:start}
+@media(max-width:1200px){.ws{grid-template-columns:1fr}}
+.ws-col{display:flex;flex-direction:column;gap:16px}
+.ws-card{padding:18px}
+.ws-card h3{font-size:13px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.spec-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.spec-row:last-child{border-bottom:none}
+.spec-row .v{font-weight:600}
+.item-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px}
+.item-line .q{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.exec{padding:20px}
+.exec-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:10px}
+.exec-top h2{font-size:17px}
+.stage-prog{font-size:12px;color:var(--ink-2)}
+.timeline{position:relative;margin-top:20px}
+.tl-i{position:relative;padding:0 0 4px 36px;min-height:46px}
+.tl-i::before{content:"";position:absolute;left:12px;top:24px;bottom:-4px;width:2px;background:var(--line)}
+.tl-i:last-child::before{display:none}
+.tl-node{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:2px solid var(--line-2);display:grid;place-items:center;z-index:1;transition:.3s}
+.tl-node svg{width:11px;height:11px}
+.tl-i .tl-h{font-size:13.5px;font-weight:600;padding-top:1px;color:var(--ink-3);transition:.3s}
+.tl-i .tl-d{font-size:12px;color:var(--ink-3);margin-top:3px;max-width:52ch;opacity:0;max-height:0;overflow:hidden;transition:.4s}
+.tl-i.done .tl-node{background:var(--ok);border-color:var(--ok)}
+.tl-i.done .tl-node svg{color:#fff}
+.tl-i.done .tl-h{color:var(--ink)}
+.tl-i.done::before{background:var(--ok)}
+.tl-i.now .tl-node{border-color:var(--forest-2);background:var(--surface);animation:spin 1s linear infinite;border-top-color:transparent}
+.tl-i.now .tl-h{color:var(--ink);font-weight:700}
+.tl-i.now .tl-d{opacity:1;max-height:60px;margin-top:6px}
+.tl-i.attn .tl-node{background:var(--warn);border-color:var(--warn)}
+.tl-i.attn .tl-node svg{color:#fff}
+.tl-i.attn .tl-h{color:var(--ink)}
+.tl-i.attn .tl-d{opacity:1;max-height:60px;margin-top:6px}
+.reason{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:var(--r-sm);padding:14px 16px;margin-top:18px;font-size:13px;line-height:1.55}
+.reason .rl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.reason .rl svg{width:13px;height:13px}
+.logline{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;display:flex;gap:10px;padding:5px 0;color:var(--ink-2)}
+.logline .t{color:var(--ink-3);flex:none}
+.logline b{color:var(--ink);font-weight:600}
+.short-i{display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:9px}
+.short-i.rec{border-color:var(--green);background:var(--accent-soft)}
+.short-i .q-logo{width:30px;height:30px;font-size:12px}
+.short-i .nm{font-size:12.5px;font-weight:600}
+.short-i .pr{margin-left:auto;font-weight:700;font-size:13px;white-space:nowrap}
+.budget-ring{display:flex;align-items:center;gap:14px}
+
+/* compare */
+.cmp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:900px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-card{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface);opacity:0;transform:translateY(14px);transition:.55s cubic-bezier(.2,.7,.3,1)}
+.cmp-card.in{opacity:1;transform:none}
+.cmp-card.rec{border-color:var(--green);box-shadow:0 0 0 2px var(--green),var(--shadow-md)}
+.cmp-head{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:relative}
+.cmp-rec-tag{position:absolute;top:-1px;right:-1px;background:var(--green);color:var(--green-ink);font-size:10.5px;font-weight:700;padding:4px 11px;border-bottom-left-radius:10px;letter-spacing:.03em}
+.cmp-body{padding:16px}
+.cmp-line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+.cmp-line.tot{border-bottom:none;border-top:1.5px solid var(--line);margin-top:4px;padding-top:12px;font-weight:700;font-size:15px}
+.cmp-line .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:14px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+.ev-i{display:flex;align-items:center;gap:7px;font-size:11.5px}
+.ev-i svg{width:13px;height:13px;flex:none}
+.ev-yes{color:var(--ok)} .ev-no{color:var(--ink-3)}
+.cmp-foot{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:9px}
+.rec-banner{background:linear-gradient(120deg,var(--accent-soft),var(--surface));border:1px solid var(--green);border-radius:var(--r-lg);padding:22px;display:flex;gap:20px;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap}
+.rec-banner .big{width:52px;height:52px;border-radius:14px;background:var(--green);display:grid;place-items:center;flex:none}
+.rec-banner .big svg{width:26px;height:26px;color:var(--forest)}
+.rec-banner h2{font-size:18px}
+.rec-banner p{color:var(--ink-2);margin-top:6px;font-size:13.5px;max-width:60ch}
+.rec-stats{display:flex;gap:28px;margin-top:14px;flex-wrap:wrap}
+.rec-stats div .l{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.rec-stats div .v{font-size:19px;font-weight:800;margin-top:2px}
+
+/* approvals */
+.appr-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+@media(max-width:1000px){.appr-grid{grid-template-columns:1fr}}
+.appr-card{padding:20px;margin-bottom:14px;border-left:3px solid var(--warn)}
+.appr-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.appr-row:last-of-type{border-bottom:none}
+.appr-row .v{font-weight:600}
+.recipient-box{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px;margin:14px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.recipient-box .addr{font-family:ui-monospace,monospace;font-size:12px;color:var(--ink-2);word-break:break-all}
+.passport-card{padding:20px}
+.pp-stat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+.pp-stat .v{font-weight:600;font-variant-numeric:tabular-nums}
+.session-meter{margin:14px 0}
+.session-meter .bar{height:8px;border-radius:5px;background:var(--surface-3);overflow:hidden;margin-top:8px}
+.session-meter .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--forest-2),var(--green))}
+
+/* passkey modal */
+.overlay{position:fixed;inset:0;background:rgba(8,14,10,.55);backdrop-filter:blur(4px);z-index:150;display:grid;place-items:center;opacity:0;pointer-events:none;transition:.25s;padding:20px}
+.overlay.on{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);max-width:420px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(16px) scale(.98);transition:.3s cubic-bezier(.2,.8,.3,1);overflow:hidden}
+.overlay.on .modal{transform:none}
+.modal-body{padding:26px;text-align:center}
+.pk-ring{width:78px;height:78px;border-radius:50%;margin:4px auto 18px;display:grid;place-items:center;position:relative;background:var(--surface-2);border:1px solid var(--line)}
+.pk-ring svg{width:34px;height:34px;color:var(--forest-2);transition:.3s}
+.pk-ring.scanning{border-color:var(--forest-2)}
+.pk-ring.scanning::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:2.5px solid var(--forest-2);border-top-color:transparent;animation:spin .9s linear infinite}
+.pk-ring.ok{background:var(--ok-bg);border-color:var(--ok)}
+.pk-ring.ok svg{color:var(--ok)}
+.modal h3{font-size:18px;margin-bottom:8px}
+.modal p{color:var(--ink-2);font-size:13.5px;line-height:1.5}
+.modal-sum{background:var(--surface-2);border-radius:var(--r-sm);padding:14px;margin:18px 0;text-align:left;font-size:13px}
+.modal-sum .r{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+.modal-foot{padding:16px 26px;border-top:1px solid var(--line);display:flex;gap:10px;background:var(--surface-2)}
+.tx-hash{font-family:ui-monospace,monospace;font-size:11.5px;background:var(--surface-2);padding:8px 12px;border-radius:7px;color:var(--ink-2);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;word-break:break-all}
+.tx-hash svg{width:14px;height:14px;flex:none}
+
+/* permissions */
+.lvl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:900px){.lvl-grid{grid-template-columns:1fr}}
+.lvl{padding:20px;border-radius:var(--r-lg);border:1px solid var(--line);cursor:pointer;transition:.18s;position:relative}
+.lvl:hover{border-color:var(--line-2)}
+.lvl.on{border-color:var(--forest-2);box-shadow:0 0 0 2px var(--forest-2)}
+.lvl .ln{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.lvl h3{font-size:17px;margin:6px 0 10px}
+.lvl p{font-size:13px;color:var(--ink-2);line-height:1.5}
+.lvl .radio{position:absolute;top:18px;right:18px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center}
+.lvl.on .radio{border-color:var(--forest-2)}
+.lvl.on .radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--forest-2)}
+.toggle{width:40px;height:23px;border-radius:999px;background:var(--line-2);position:relative;transition:.2s;cursor:pointer;flex:none}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.toggle.on{background:var(--forest-2)}
+.toggle.on::after{left:19px}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.cfg-row:last-child{border-bottom:none}
+.cfg-row .lab{font-size:13.5px;font-weight:500}
+.cfg-row .sub{font-size:12px;color:var(--ink-3);margin-top:2px}
+.cfg-input{border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-sm);padding:7px 11px;font-size:13px;color:var(--ink);font-family:inherit;width:130px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* assistant */
+.chat{display:flex;flex-direction:column;height:100%;max-width:820px;margin:0 auto;width:100%}
+.chat-stream{flex:1;overflow-y:auto;padding:8px 4px 20px;display:flex;flex-direction:column;gap:18px}
+.msg{display:flex;gap:12px;max-width:100%}
+.msg .av{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;font-weight:700;font-size:12px}
+.msg.u{flex-direction:row-reverse}
+.msg.u .av{background:var(--forest-2);color:#fff}
+.msg.a .av{background:var(--green);color:var(--forest)}
+.msg .bubble{padding:12px 15px;border-radius:14px;font-size:14px;line-height:1.55;max-width:75%}
+.msg.u .bubble{background:var(--forest);color:#EAF7D8;border-bottom-right-radius:4px}
+.msg.a .bubble{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.chat-card{border:1px solid var(--line);border-radius:var(--r);margin-top:10px;overflow:hidden;background:var(--surface)}
+.chat-card .cc-h{padding:10px 13px;background:var(--surface-2);font-size:12px;font-weight:600;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+.chat-card .cc-h svg{width:14px;height:14px;color:var(--forest-2)}
+.composer{display:flex;gap:10px;padding:14px 4px;padding-bottom:max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--line);align-items:flex-end}
+.composer textarea{flex:1;resize:none;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);padding:12px 14px;font-size:14px;font-family:inherit;color:var(--ink);min-height:46px;max-height:120px}
+.composer textarea:focus{outline:none;border-color:var(--forest-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--forest-2) 14%,transparent)}
+.typing{display:inline-flex;gap:4px;padding:4px 0}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-3);animation:td 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.prompt-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.prompt-chip{font-size:12.5px;padding:7px 13px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;transition:.13s}
+.prompt-chip:hover{border-color:var(--forest-2);background:var(--surface-2)}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.two-col{grid-template-columns:1fr}}
+.bar-chart{display:flex;align-items:flex-end;gap:10px;height:160px;padding-top:10px}
+.bar-chart .bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+.bar-chart .bc .bar{width:100%;max-width:40px;border-radius:6px 6px 2px 2px;background:var(--surface-3);transition:height 1s cubic-bezier(.2,.7,.3,1)}
+.bar-chart .bc .bar.hi{background:linear-gradient(180deg,var(--green),var(--forest-2))}
+.bar-chart .bc .lb{font-size:11px;color:var(--ink-3)}
+.insight{display:flex;gap:12px;padding:14px;border-radius:var(--r);background:var(--surface-2);margin-bottom:10px}
+.insight .ic{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--surface)}
+.insight .ic svg{width:16px;height:16px}
+.insight p{font-size:13px}
+.insight p b{font-weight:700}
+
+/* toasts */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:160;display:flex;flex-direction:column;gap:10px;align-items:flex-end;padding-right:env(safe-area-inset-right,0)}
+.toast{background:var(--panel);color:#fff;padding:13px 16px;border-radius:var(--r);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:11px;font-size:13px;font-weight:500;transform:translateX(120%);transition:.4s cubic-bezier(.2,.8,.3,1);max-width:330px}
+.toast.on{transform:none}
+.toast .ti{width:26px;height:26px;border-radius:8px;background:var(--green);display:grid;place-items:center;flex:none}
+.toast .ti svg{width:15px;height:15px;color:var(--forest)}
+
+/* ===== COMMAND PALETTE / POPUPS / LOADING ===== */
+.cmdk-ov{position:fixed;inset:0;background:rgba(8,14,10,.5);backdrop-filter:blur(4px);z-index:170;display:flex;justify-content:center;align-items:flex-start;padding:13vh 20px 20px;opacity:0;pointer-events:none;transition:.2s}
+.cmdk-ov.on{opacity:1;pointer-events:auto}
+.cmdk{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);overflow:hidden;transform:translateY(-10px) scale(.99);transition:.22s cubic-bezier(.2,.8,.3,1)}
+.cmdk-ov.on .cmdk{transform:none}
+.cmdk-in{display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid var(--line)}
+.cmdk-in svg{width:18px;height:18px;color:var(--ink-3);flex:none}
+.cmdk-in input{flex:1;border:none;background:transparent;font-size:15px;color:var(--ink);font-family:inherit;outline:none;min-width:0}
+.cmdk-in kbd,.cmdk-foot kbd{font:inherit;font-size:10px;font-weight:600;color:var(--ink-3);border:1px solid var(--line-2);border-radius:5px;padding:2px 6px;background:var(--surface-2)}
+.cmdk-list{max-height:52vh;overflow-y:auto;padding:8px}
+.cmdk-grp{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:10px 12px 6px}
+.cmdk-i{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm);cursor:pointer}
+.cmdk-i>div:nth-child(2){font-size:13.5px;min-width:0}
+.cmdk-i .ci{width:28px;height:28px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2);flex:none}
+.cmdk-i .ci svg{width:15px;height:15px}
+.cmdk-i .sub{font-size:11.5px;color:var(--ink-3)}
+.cmdk-i.sel{background:var(--accent-soft)}
+.cmdk-i.sel .ci{background:var(--surface);color:var(--forest-2)}
+.cmdk-i .go-arr{margin-left:auto;opacity:0;color:var(--ink-3);display:flex}
+.cmdk-i .go-arr svg{width:15px;height:15px}
+.cmdk-i.sel .go-arr{opacity:1}
+.cmdk-empty{padding:34px;text-align:center;color:var(--ink-3);font-size:13px}
+.cmdk-foot{display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3)}
+.cmdk-foot span{display:flex;align-items:center;gap:5px}
+.notif{position:fixed;top:calc(60px + env(safe-area-inset-top,0));right:max(14px,env(safe-area-inset-right,0));width:min(344px,92vw);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);z-index:130;transform-origin:top right;transform:scale(.96) translateY(-6px);opacity:0;pointer-events:none;transition:.18s}
+.notif.on{transform:none;opacity:1;pointer-events:auto}
+.notif-h{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line)}
+.notif-h h3{font-size:14px}
+.notif-h a{font-size:12px;color:var(--link);font-weight:600;cursor:pointer}
+.notif-list{max-height:min(380px,60vh);overflow-y:auto}
+.notif-i{display:flex;gap:11px;align-items:center;padding:12px 16px 12px 22px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+.notif-i:last-child{border-bottom:none}
+.notif-i:hover{background:var(--surface-2)}
+.notif-i.unread{background:color-mix(in srgb,var(--accent-soft) 45%,var(--surface))}
+.notif-i .nd2{width:7px;height:7px;border-radius:50%;background:var(--green);position:absolute;left:8px;top:50%;transform:translateY(-50%)}
+.menu{position:fixed;left:14px;bottom:62px;width:218px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-lg);z-index:130;padding:6px;opacity:0;pointer-events:none;transform:translateY(8px);transition:.16s}
+.menu.on{opacity:1;pointer-events:auto;transform:none}
+.menu-i{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r-sm);font-size:13px;cursor:pointer}
+.menu-i:hover{background:var(--surface-2)}
+.menu-i svg{width:15px;height:15px;color:var(--ink-3);flex:none}
+.empty{text-align:center;padding:52px 20px;color:var(--ink-3)}
+.empty .empty-ic{width:52px;height:52px;border-radius:14px;background:var(--surface-2);display:grid;place-items:center;margin:0 auto 14px;color:var(--ink-3)}
+.empty .empty-ic svg{width:24px;height:24px}
+.empty h3{font-size:15px;color:var(--ink);margin-bottom:5px}
+.empty p{font-size:13px}
+.sourcing{max-width:440px;margin:7vh auto;text-align:center}
+.sourcing .ap-orb{margin:0 auto 22px;width:56px;height:56px;border-radius:16px}
+.sourcing .ap-orb svg{width:28px;height:28px}
+.sourcing h2{font-size:20px;margin-bottom:8px}
+.src-steps{margin-top:26px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.src-step{padding:12px 15px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:13px;background:var(--surface);display:flex;align-items:center;gap:11px;opacity:0;animation:srcIn .5s forwards}
+.src-step::before{content:"";width:14px;height:14px;border-radius:50%;border:2px solid var(--forest-2);border-top-color:transparent;animation:spin 1s linear infinite;flex:none}
+@keyframes srcIn{to{opacity:1}}
+
+/* ===== DETAIL SCREENS ===== */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:760px){.stat-strip{grid-template-columns:1fr 1fr}}
+.stat{padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.stat .sv{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat .sl{font-size:12px;color:var(--ink-2);margin-top:3px}
+.ev-row{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.ev-row:last-child{border-bottom:none}
+.ev-ic{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center}
+.ev-ic svg{width:15px;height:15px}
+.ev-ic.yes{background:var(--ok-bg);color:var(--ok)} .ev-ic.no{background:var(--surface-2);color:var(--ink-3)}
+.ev-row .et{font-size:13px;font-weight:600}
+.ev-row .es{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.vtl{position:relative}
+.vtl-i{position:relative;padding:0 0 15px 24px}
+.vtl-i::before{content:"";position:absolute;left:5px;top:15px;bottom:0;width:2px;background:var(--line)}
+.vtl-i:last-child::before{display:none}.vtl-i:last-child{padding-bottom:0}
+.vtl-i .nd{position:absolute;left:0;top:3px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--line-2)}
+.vtl-i.on .nd{background:var(--forest-2);border-color:var(--forest-2)}
+.vtl-i .vt{font-size:12.5px;font-weight:600}
+.vtl-i .vs{font-size:11px;color:var(--ink-3);margin-top:1px}
+.po-doc{padding:0;overflow:hidden}
+.po-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface-2)}
+.po-parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px;border-bottom:1px solid var(--line)}
+@media(max-width:600px){.po-parties{grid-template-columns:1fr}}
+.po-party .pl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700;margin-bottom:6px}
+.po-party .pn{font-weight:700;font-size:14px}
+.po-party .pa{font-size:12.5px;color:var(--ink-2);margin-top:4px;line-height:1.6}
+.po-items{padding:2px 24px}
+.po-total-row{display:flex;justify-content:space-between;gap:12px;padding:6px 24px;font-size:13.5px}
+.po-total-row.grand{font-weight:800;font-size:16px;border-top:1.5px solid var(--line);margin:6px 0 0;padding-top:14px;padding-bottom:18px}
+.po-section{padding:18px 24px;border-top:1px solid var(--line)}
+.drawer-ov{position:fixed;inset:0;background:rgba(8,14,10,.5);backdrop-filter:blur(3px);z-index:145;opacity:0;pointer-events:none;transition:.25s}
+.drawer-ov.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,92vw);background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow-lg);z-index:146;transform:translateX(100%);transition:.34s cubic-bezier(.2,.8,.3,1);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
+.drawer.on{transform:none}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.drawer-body{flex:1;overflow-y:auto;padding:20px}
+.drawer-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:10px;padding-bottom:max(16px,env(safe-area-inset-bottom))}
+.drawer .pp-stat{gap:14px}
+.drawer .pp-stat>span:first-child{flex:none}
+.drawer .pp-stat .v{text-align:right;min-width:0;overflow-wrap:anywhere}
+
+/* ===== ONBOARDING ===== */
+#onboarding{display:none;height:100%;flex-direction:column}
+.ob-top{position:sticky;top:env(safe-area-inset-top,0);z-index:10;background:color-mix(in srgb,var(--canvas) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.ob-top-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:16px;height:62px;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.ob-top .wordmark{font-size:16px}
+.ob-steplabel{margin-left:auto;font-size:12.5px;color:var(--ink-3);font-weight:600;font-variant-numeric:tabular-nums}
+.ob-prog{height:3px;background:var(--line)}
+.ob-prog i{display:block;height:100%;background:linear-gradient(90deg,var(--forest-2),var(--green));transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.ob-body{flex:1;overflow-y:auto;padding:40px 20px 110px}
+.ob-wrap{max-width:620px;margin:0 auto}
+.ob-dots{display:flex;gap:8px;margin-bottom:26px}
+.ob-dot{height:5px;flex:1;border-radius:3px;background:var(--line-2);transition:.3s}
+.ob-dot.done{background:var(--forest-2)}.ob-dot.now{background:var(--green)}
+.ob-kick{font-size:clamp(23px,4vw,31px);letter-spacing:-.03em;margin-bottom:8px}
+.ob-sub{color:var(--ink-2);font-size:15px;margin-bottom:28px;line-height:1.5}
+.ob-step{animation:obIn .45s cubic-bezier(.2,.8,.3,1)}
+@keyframes obIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.ob-field{margin-bottom:20px}
+.ob-field>label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.ob-field .hint{font-weight:400;color:var(--ink-3);font-size:12px}
+.ob-input{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-sm);padding:11px 13px;font-size:14px;color:var(--ink);font-family:inherit}
+.ob-input:focus{outline:none;border-color:var(--forest-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--forest-2) 14%,transparent)}
+.ob-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.ob-grid2{grid-template-columns:1fr}}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg-i{flex:1;min-width:84px;text-align:center;padding:11px 10px;border:1px solid var(--line-2);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;transition:.14s;background:var(--surface);color:var(--ink-2)}
+.seg-i:hover{border-color:var(--ink-3)}
+.seg-i.on{border-color:var(--forest-2);background:var(--accent-soft);color:var(--side-active-ink);box-shadow:0 0 0 1px var(--forest-2)}
+.ob-chips{display:flex;gap:9px;flex-wrap:wrap}
+.ob-chip{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid var(--line-2);border-radius:999px;font-size:13.5px;font-weight:500;cursor:pointer;transition:.14s;background:var(--surface);color:var(--ink)}
+.ob-chip:hover{border-color:var(--ink-3)}
+.ob-chip.on{border-color:var(--forest-2);background:var(--accent-soft);color:var(--side-active-ink)}
+.ob-chip .ck{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line-2);display:grid;place-items:center;transition:.14s}
+.ob-chip.on .ck{background:var(--forest-2);border-color:var(--forest-2)}
+.ob-chip .ck svg{width:11px;height:11px;color:#fff;opacity:0}
+.ob-chip.on .ck svg{opacity:1}
+.ob-foot{position:fixed;bottom:0;left:0;right:0;z-index:10;background:color-mix(in srgb,var(--canvas) 92%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:14px 0;padding-bottom:max(14px,env(safe-area-inset-bottom))}
+.ob-foot-in{max-width:620px;margin:0 auto;display:flex;gap:12px;align-items:center;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.ob-agent-hero{text-align:center;padding:10px 0 20px}
+.ob-orb-xl{width:92px;height:92px;border-radius:26px;background:linear-gradient(145deg,var(--forest-2),var(--green));display:grid;place-items:center;margin:0 auto 22px;position:relative;box-shadow:0 14px 40px -10px color-mix(in srgb,var(--green) 70%,transparent)}
+.ob-orb-xl svg{width:44px;height:44px;color:#0E1C0C}
+.ob-orb-xl::after{content:"";position:absolute;inset:-8px;border-radius:32px;border:2px solid var(--green);opacity:.5;animation:pulse 2s ease-out infinite}
+.ob-summary{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 18px;margin-top:8px}
+.ob-sum-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ob-sum-row:last-child{border-bottom:none}
+.ob-sum-row .v{font-weight:600;text-align:right}
+
+/* ===== DEMO MODE ===== */
+.demo-banner{display:none;align-items:center;gap:12px;padding:9px 16px;background:var(--panel);color:#fff;font-size:12.5px;font-weight:500;padding-top:calc(9px + env(safe-area-inset-top,0))}
+body.demo .demo-banner{display:flex}
+.demo-banner .tag{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;background:var(--green);color:var(--green-ink);padding:3px 8px;border-radius:5px}
+.demo-banner .x{margin-left:auto;color:var(--panel-ink-2);background:transparent;border:1px solid var(--panel-line);border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600}
+.demo-banner .x:hover{color:#fff;border-color:var(--panel-ink-2)}
+.demo-spot{position:relative;z-index:2;border-radius:var(--r)!important;box-shadow:0 0 0 3px var(--green),0 0 0 9px color-mix(in srgb,var(--green) 28%,transparent),var(--shadow-lg)!important;scroll-margin:90px;animation:spotpulse 2s ease-in-out infinite}
+@keyframes spotpulse{0%,100%{box-shadow:0 0 0 3px var(--green),0 0 0 7px color-mix(in srgb,var(--green) 26%,transparent)}50%{box-shadow:0 0 0 3px var(--green),0 0 0 12px color-mix(in srgb,var(--green) 12%,transparent)}}
+.demo-bar{position:fixed;left:50%;transform:translateX(-50%) translateY(140%);bottom:calc(20px + env(safe-area-inset-bottom,0));z-index:140;width:min(680px,calc(100% - 28px));
+  background:var(--panel);color:#fff;border:1px solid var(--panel-line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:14px 16px;transition:.4s cubic-bezier(.2,.8,.3,1)}
+body.demo .demo-bar{transform:translateX(-50%)}
+.demo-bar .db-prog{height:3px;border-radius:3px;background:var(--panel-line);overflow:hidden;margin-bottom:11px}
+.demo-bar .db-prog i{display:block;height:100%;background:var(--green);transition:width .45s ease}
+.demo-bar .db-main{display:flex;align-items:center;gap:14px}
+.db-num{font-size:11px;font-weight:700;color:var(--panel-accent);letter-spacing:.04em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.db-cap{flex:1;font-size:13px;color:var(--panel-ink);line-height:1.45;min-width:0}
+.db-cap b{color:#fff}
+.db-ctrls{display:flex;gap:7px;flex:none}
+.db-btn{width:34px;height:34px;border-radius:9px;background:var(--panel-2);border:1px solid var(--panel-line);color:#fff;display:grid;place-items:center;transition:.14s}
+.db-btn:hover{background:var(--panel-line)}
+.db-btn svg{width:16px;height:16px}
+.db-btn.pri{background:var(--green);border-color:var(--green);color:var(--green-ink)}
+.db-btn:disabled{opacity:.35;cursor:default}
+@media(max-width:620px){.demo-bar .db-main{flex-wrap:wrap}.db-cap{order:3;flex-basis:100%}}
+
+.mobile-side{display:none}
+@media(max-width:720px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:95;transform:translateX(-100%);transition:.28s;box-shadow:var(--shadow-lg)}
+  .side.open{transform:none}
+  .mobile-side{display:grid}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;opacity:0;pointer-events:none;transition:.2s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .topbar{padding:0 14px;gap:10px}
+  .search{display:none}
+  .topbar .top-new .lbl{display:none}
+  .topbar .top-new{width:34px;height:34px;padding:0}
+  .kpi .k-val{font-size:23px}
+  .phead h1{font-size:22px}
+}
+@media(max-width:860px){.lp-links{display:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.view{scroll-behavior:auto}}
+</style>
+
+<!-- ============================ LANDING ============================ -->
+<div id="landing">
+  <nav class="lp-nav"><div class="lp-wrap lp-nav-in">
+    <div class="wordmark"><span class="mark">%LEAF%</span>Procura</div>
+    <div class="lp-links" style="display:flex;gap:26px">
+      <a class="lk" onclick="startDemo()">Product</a><a class="lk" onclick="startDemo()">Solutions</a>
+      <a class="lk" onclick="startDemo()">How it works</a><a class="lk" onclick="enterApp('permissions')">Security</a><a class="lk" onclick="enterApp('settings')">Pricing</a>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-ghost" onclick="enterApp('dashboard')">Sign in</button>
+      <button class="btn btn-pri" onclick="startOnboarding()">Get started %ARR%</button>
+    </div>
+  </div></nav>
+
+  <div class="lp-wrap">
+    <section class="lp-hero">
+      <div>
+        <div class="lp-badge"><span class="dot"></span>Powered by SERV Reasoning and Kite Passport</div>
+        <h1 class="lp-h1">Procurement,<br>on <span class="u">autopilot.</span></h1>
+        <p class="lp-sub">The AI procurement platform that finds suppliers, compares prices and executes purchases, within the financial limits you control.</p>
+        <div class="lp-cta">
+          <button class="btn btn-pri btn-lg" onclick="startOnboarding()">Start procuring %ARR%</button>
+          <button class="btn btn-sec btn-lg" onclick="startDemo()">%PLAY% Watch the walkthrough</button>
+        </div>
+        <div class="lp-trust">
+          <div><b>38%</b>avg. time saved per request</div>
+          <div><b>$1.2M</b>purchasing routed through agents</div>
+          <div><b>11</b>stage traceable execution</div>
+        </div>
+      </div>
+      <div class="hero-app">
+        <div class="ha-top"><span class="d"></span><span class="d"></span><span class="d"></span><span class="ha-title">Northstar Kitchen, procurement workspace</span></div>
+        <div class="ha-body">
+          <div class="ha-task"><div><h4>Kitchen inventory restock</h4><span class="mut" style="font-size:12px">Rice, vegetable oil, frozen chicken</span></div>
+            <span class="pill p-info"><span class="dot"></span>Comparing</span></div>
+          <div id="heroRows"></div>
+          <div class="ha-foot">
+            <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:12px"><span class="mut">Budget used</span><span style="font-weight:700" class="num">$1,630 / $2,000</span></div>
+              <div class="budget-bar"><i id="heroBudgetBar" style="width:0%"></i></div></div>
+            <button class="btn btn-pri btn-sm" onclick="startDemo()">See it run %ARR%</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="lp-wrap">
+    <section class="lp-section">
+      <div class="lp-kick"><h2>Your business should not spend hours buying what it needs.</h2>
+        <p>Procurement is scattered across spreadsheets, chat, email and phone calls. Procura brings it into one autonomous workflow.</p></div>
+      <div class="grid-3">
+        <div class="feat card"><div class="ic">%SEARCH%</div><h3>Fragmented supplier discovery</h3><p>Finding reliable vendors means hours of searching, calling and chasing quotes across disconnected channels.</p></div>
+        <div class="feat card"><div class="ic">%SCALE%</div><h3>Manual purchasing decisions</h3><p>Comparing delivered prices, spotting inflated quotes and judging reliability is slow and error prone.</p></div>
+        <div class="feat card"><div class="ic">%CARD%</div><h3>Disconnected payment operations</h3><p>Approvals, payments and records live in separate systems, so nothing is traceable end to end.</p></div>
+      </div>
+    </section>
+
+    <section class="lp-section">
+      <div class="lp-kick"><h2>How Procura works</h2><p>From a plain language request to an executed, fully traceable purchase.</p></div>
+      <div class="grid-4">
+        <div class="step card"><div class="n">1</div><h3>Tell Procura what you need</h3><p>Describe it in natural language or build a structured request.</p></div>
+        <div class="step card"><div class="n">2</div><h3>Let it source and compare</h3><p>Agents discover suppliers, collect quotes and check the evidence.</p></div>
+        <div class="step card"><div class="n">3</div><h3>Review the recommendation</h3><p>See the best eligible offer, the reasoning and the supporting evidence.</p></div>
+        <div class="step card"><div class="n">4</div><h3>Authorise and execute</h3><p>Approve a spending session with a passkey, the agent pays within your limits.</p></div>
+      </div>
+      <div style="text-align:center;margin-top:36px"><button class="btn btn-pri btn-lg" onclick="startDemo()">%PLAY% Watch the full walkthrough</button></div>
+    </section>
+
+    <section class="lp-section">
+      <div class="lp-kick"><h2>An operating system for buying</h2><p>Five capabilities, one autonomous procurement department.</p></div>
+      <div class="grid-3">
+        <div class="feat card"><div class="ic">%SEARCH%</div><h3>Intelligent sourcing</h3><p>Match requirements to suppliers and surface competitive purchasing options automatically.</p></div>
+        <div class="feat card"><div class="ic">%SHIELD%</div><h3>Supplier intelligence</h3><p>Evidence based profiles that separate verified data from AI assessments.</p></div>
+        <div class="feat card"><div class="ic">%BOLT%</div><h3>Automated purchasing</h3><p>Prepare purchase orders and payment instructions without manual assembly.</p></div>
+        <div class="feat card"><div class="ic">%LOCK%</div><h3>Controlled payments</h3><p>Programmable budgets and passkey approved spending sessions on Kite Passport.</p></div>
+        <div class="feat card"><div class="ic">%CHART%</div><h3>Procurement analytics</h3><p>Understand spend, savings, supplier performance and price movements.</p></div>
+        <div class="feat card"><div class="ic">%CLOCK%</div><h3>Full audit trail</h3><p>Every instruction, decision and payment recorded as a traceable event.</p></div>
+      </div>
+    </section>
+
+    <section class="lp-section">
+      <div class="lp-control">
+        <div>
+          <h2>Give your agent responsibility, not unlimited authority.</h2>
+          <p>Procura can act, but never beyond the financial authority you approve. Every payment is bounded by programmable budgets, per transaction limits and time boxed spending sessions, all enforced by Kite Passport.</p>
+          <button class="btn btn-pri btn-lg" style="margin-top:22px" onclick="enterApp('permissions')">Explore agent permissions %ARR%</button>
+        </div>
+        <div class="ctrl-list">
+          <div class="ctrl-item"><div class="ic">%WALLET%</div><div><h4>Programmable budgets</h4><p>Set monthly and per purchase ceilings the agent can never exceed.</p></div></div>
+          <div class="ctrl-item"><div class="ic">%CLOCK%</div><div><h4>Time boxed sessions</h4><p>Authority expires automatically when the spending session ends.</p></div></div>
+          <div class="ctrl-item"><div class="ic">%KEY%</div><div><h4>Passkey approval</h4><p>Real device level authentication before any payment executes.</p></div></div>
+          <div class="ctrl-item"><div class="ic">%SHIELD%</div><div><h4>Revoke anytime</h4><p>Withdraw agent permissions instantly, with a full audit record.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-final">
+      <h2>Make procurement your least complicated operation.</h2>
+      <div style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-pri btn-lg" onclick="startOnboarding()">Get started with Procura %ARR%</button>
+        <button class="btn btn-sec btn-lg" onclick="startDemo()">%PLAY% Watch the demo</button></div>
+    </section>
+
+    <footer class="lp-foot">
+      <div class="wordmark" style="font-size:16px"><span class="mark">%LEAF%</span>Procura</div>
+      <div>Product · Company · Documentation · Security · Privacy · Terms</div>
+      <div>© 2026 Procura · Your procurement department, powered by autonomous AI.</div>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================ ONBOARDING ============================ -->
+<div id="onboarding"></div>
+
+<!-- ============================ APP ============================ -->
+<div id="app">
+  <div class="scrim" id="scrim" onclick="toggleSide(false)"></div>
+  <div class="shell">
+    <aside class="side" id="side">
+      <div class="side-top">
+        <div class="wordmark"><span class="mark">%LEAF%</span>Procura</div>
+        <button class="icon-btn" style="width:28px;height:28px;border:none;background:transparent;color:var(--side-muted)" onclick="toggleTheme()" title="Toggle light / dark">%MOON%</button>
+      </div>
+      <div class="side-biz"><div class="av">NK</div><div style="flex:1"><div class="nm">Northstar Kitchen</div><div class="sb">Restaurant group · USD</div></div>%CHEV%</div>
+      <nav class="side-nav" id="sidenav"></nav>
+      <div class="side-foot">
+        <div class="side-user" onclick="toggleUserMenu(event)"><div class="av">CG</div><div style="flex:1"><div class="nm">Chris Godwin</div><div class="sb">Owner</div></div>%DOTS%</div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="demo-banner"><span class="tag">Demo</span><span>Guided walkthrough · Northstar Kitchen restock scenario</span><button class="x" onclick="exitDemo()">Exit demo</button></div>
+      <header class="topbar">
+        <button class="icon-btn mobile-side" onclick="toggleSide(true)">%MENU%</button>
+        <div class="crumb" id="crumb">Procura <span>›</span> <b>Overview</b></div>
+        <div class="search" onclick="openPalette()"><div style="position:relative">%SEARCH_SM% <input placeholder="Search or jump to…" readonly style="cursor:pointer"></div></div>
+        <div style="margin-left:auto;display:flex;gap:9px;align-items:center">
+          <button class="icon-btn" id="bellBtn" onclick="toggleNotif(event)">%BELL%<span class="ndot"></span></button>
+          <button class="btn btn-pri btn-sm top-new" onclick="go('newreq')">%PLUS%<span class="lbl">New procurement</span></button>
+        </div>
+      </header>
+      <div class="view" id="view"></div>
+    </main>
+  </div>
+</div>
+
+<div class="overlay" id="pkOverlay"><div class="modal" id="pkModal"></div></div>
+<div class="drawer-ov" id="drawerOv" onclick="closeDrawer()"></div><div class="drawer" id="drawer"></div>
+<div class="cmdk-ov" id="cmdkOv" onclick="if(event.target===this)closePalette()"><div class="cmdk" id="cmdk"></div></div>
+<div class="notif" id="notif"></div>
+<div class="menu" id="userMenu"></div>
+<div class="demo-bar" id="demoBar"></div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const I={
+ leaf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>',
+ arr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+ scale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-2 1.5-4 1.5-6 0Z"/><path d="m2 16 3-8 3 8c-2 1.5-4 1.5-6 0Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>',
+ card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+ shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>',
+ bolt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+ chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 3-4 3 2 5-7"/></svg>',
+ clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ wallet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 7H6a2 2 0 0 0 0 4h15v6"/><circle cx="16.5" cy="13.5" r="1"/></svg>',
+ key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8 3 3M16 7l2 2"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+ chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--side-muted)"><path d="m6 9 6 6 6-6"/></svg>',
+ dots:'<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--side-muted)"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+ menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+ bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+ finger:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11a1.8 1.8 0 0 1 1.8 1.8c0 2.4-.3 4.3-1 6"/><path d="M8.5 13.2a3.5 3.5 0 0 1 7 0c0 2.3-.4 4.4-1 6.3"/><path d="M5.5 11a6.5 6.5 0 0 1 11.3-4.3"/><path d="M19 10.5c.3 1 .4 2 .4 3 0 1.8-.3 3.6-.8 5"/><path d="M7 20c.6-1.8 1-3.9 1-6a4 4 0 0 1 .3-1.6"/></svg>',
+ pkg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>',
+ users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>',
+ doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>',
+ msg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.8 7.2L3 20l1.3-4.2A8.4 8.4 0 1 1 21 11.5Z"/></svg>',
+ grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>',
+ cog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>',
+ sliders:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>',
+ plug:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 8V2M15 8V2M18 8H6v4a6 6 0 0 0 12 0Z"/></svg>',
+ trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>',
+ ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+ pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+ play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l11-7Z"/></svg>',
+ prev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+ next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+ x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+ spark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>',
+ send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>',
+ alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>'
+};
+function ic(n){return I[n]||''}
+function hydrate(){
+ const map={LEAF:'leaf',ARR:'arr',SEARCH:'search',SCALE:'scale',CARD:'card',SHIELD:'shield',BOLT:'bolt',LOCK:'lock',CHART:'chart',CLOCK:'clock',WALLET:'wallet',KEY:'key',MOON:'moon',CHEV:'chev',DOTS:'dots',MENU:'menu',BELL:'bell',PLUS:'plus',SEARCH_SM:'search',PLAY:'play'};
+ document.querySelectorAll('#landing,#app').forEach(root=>{root.innerHTML=root.innerHTML.replace(/%([A-Z_]+)%/g,(m,k)=>map[k]?ic(map[k]):m);});
+}
+
+let curView='dashboard', agentTimer=null;
+function toggleTheme(){const r=document.documentElement,cur=r.getAttribute('data-theme'),sysDark=matchMedia('(prefers-color-scheme:dark)').matches,isDark=cur==='dark'||(!cur&&sysDark);r.setAttribute('data-theme',isDark?'light':'dark');}
+function toggleSide(open){document.getElementById('side').classList.toggle('open',open);document.getElementById('scrim').classList.toggle('on',open);}
+
+const NAV=[
+ {g:'Main',items:[{k:'dashboard',t:'Overview',i:'grid'},{k:'procurement',t:'Procurement',i:'pkg'},{k:'suppliers',t:'Suppliers',i:'users'},{k:'orders',t:'Purchase Orders',i:'doc'},{k:'payments',t:'Payments',i:'card'},{k:'intelligence',t:'Intelligence',i:'trend'},{k:'activity',t:'Activity',i:'clock'}]},
+ {g:'Workspace',items:[{k:'assistant',t:'AI Assistant',i:'msg'},{k:'approvals',t:'Approvals',i:'shield',badge:2}]},
+ {g:'Settings',items:[{k:'permissions',t:'Agent Permissions',i:'sliders'},{k:'settings',t:'Business Settings',i:'cog'},{k:'integrations',t:'Integrations',i:'plug'}]},
+];
+function buildNav(){document.getElementById('sidenav').innerHTML=NAV.map(gr=>`<div class="nav-group"><div class="lbl">${gr.g}</div>`+gr.items.map(it=>`<div class="nav-i" data-k="${it.k}" onclick="go('${it.k}')">${ic(it.i)}<span>${it.t}</span>${it.badge?`<span class="badge num">${it.badge}</span>`:''}</div>`).join('')+`</div>`).join('');}
+const TITLES={dashboard:'Overview',procurement:'Procurement',newreq:'New procurement',workspace:'Procurement workspace',compare:'Supplier comparison',suppliers:'Suppliers',orders:'Purchase Orders',payments:'Payments',intelligence:'Intelligence',activity:'Activity',assistant:'AI Assistant',approvals:'Approvals',permissions:'Agent Permissions',settings:'Business Settings',integrations:'Integrations',supplierProfile:'Supplier profile',orderDetail:'Purchase order'};
+
+function enterApp(v){document.getElementById('landing').style.display='none';document.getElementById('app').style.display='block';go(v||'dashboard');}
+function go(k){
+ if(agentTimer){clearInterval(agentTimer);agentTimer=null;}
+ curView=k;
+ const navMap={compare:'procurement',workspace:'procurement',newreq:'procurement',supplierProfile:'suppliers',orderDetail:'orders'};setActiveNav(navMap[k]||k);
+ document.getElementById('crumb').innerHTML=`Procura <span>›</span> <b>${TITLES[k]||'Overview'}</b>`;
+ const v=document.getElementById('view');v.scrollTop=0;
+ v.innerHTML=(VIEWS[k]||VIEWS.dashboard)();
+ if(AFTER[k])AFTER[k]();
+ toggleSide(false);closePopups();
+}
+const $=s=>document.querySelector(s);
+function toast(msg){const w=document.getElementById('toasts'),t=document.createElement('div');t.className='toast';t.innerHTML=`<span class="ti">${ic('check')}</span>${msg}`;w.appendChild(t);requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),400)},3400);}
+function logoColor(s){return {A:'#3C72AE',B:'#248257',C:'#B4790F',D:'#7B61A8',E:'#C94C45'}[s]||'#5B665D'}
+
+const SUPPLIERS=[
+ {id:'SUP-001',l:'A',n:'Harvest Bulk Foods',loc:'Lagos, NG',sub:1650,del:80,tot:1730,eta:'4-5 days',ev:{id:1,contact:1,quote:1,pay:1,hist:0,deliv:1},risk:'review',cats:'Dry goods · Frozen'},
+ {id:'SUP-002',l:'B',n:'Greenfield Supply Co.',loc:'Lagos, NG',sub:1580,del:50,tot:1630,eta:'3-4 days',ev:{id:1,contact:1,quote:1,pay:1,hist:1,deliv:1},risk:'ok',cats:'Dry goods · Oils · Frozen'},
+ {id:'SUP-003',l:'C',n:'Prime Provisions Ltd',loc:'Ibadan, NG',sub:1700,del:25,tot:1725,eta:'2-3 days',ev:{id:1,contact:0,quote:1,pay:0,hist:0,deliv:0},risk:'warn',cats:'Dry goods'},
+];
+const VIEWS={}, AFTER={};
+
+/* DASHBOARD */
+VIEWS.dashboard=()=>`
+ <div class="phead">
+   <div><div class="eyebrow" style="margin-bottom:8px">Tuesday · 3 Nov</div><h1>Good morning, Chris.</h1><p>Here is what is happening across your procurement operations.</p></div>
+   <div class="acts"><button class="btn btn-sec" onclick="go('assistant')">${ic('msg')} Talk to Procura</button><button class="btn btn-pri" onclick="go('newreq')">${ic('plus')} New procurement</button></div>
+ </div>
+ <div class="kpis" id="kpiRow">
+   ${kpi('Procurement spend','$14,820','grid','up','+6.2% vs last month')}
+   ${kpi('Active procurement','3','pkg',null,'2 sourcing, 1 awaiting approval')}
+   ${kpi('Potential savings','$1,240','trend','up','identified this month')}
+   ${kpi('Pending approvals','2','shield','warn','needs your authorisation')}
+ </div>
+ <div class="grid-main">
+   <div style="display:flex;flex-direction:column;gap:20px">
+     <div class="card" style="padding:20px" id="activeProc">
+       <div class="sec-head"><h2>Active procurement</h2><a onclick="go('procurement')">View all</a></div>
+       <div class="tbl-wrap" style="border:none;box-shadow:none;overflow-x:auto"><table class="tbl"><thead><tr><th>Request</th><th>Status</th><th>Suppliers</th><th>Est. total</th><th>Budget</th></tr></thead><tbody>
+         <tr onclick="go('workspace')"><td><b>Kitchen inventory restock</b><div class="mut3" style="font-size:11.5px">PR-0142</div></td><td><span class="pill p-info"><span class="dot"></span>Sourcing</span></td><td class="num">8</td><td class="num">$1,630</td><td class="num mut">$2,000</td></tr>
+         <tr onclick="go('approvals')"><td><b>Packaging supplies</b><div class="mut3" style="font-size:11.5px">PR-0141</div></td><td><span class="pill p-warn"><span class="dot"></span>Awaiting approval</span></td><td class="num">5</td><td class="num">$880</td><td class="num mut">$1,000</td></tr>
+         <tr onclick="go('orders')"><td><b>Office equipment</b><div class="mut3" style="font-size:11.5px">PR-0138</div></td><td><span class="pill p-ok"><span class="dot"></span>Completed</span></td><td class="num">6</td><td class="num">$2,410</td><td class="num mut">$2,500</td></tr>
+       </tbody></table></div>
+     </div>
+     <div class="card chart-wrap"><div class="sec-head"><h2>Spending overview</h2><span class="chip">Last 6 months</span></div>
+       <div class="chart-legend"><span><span class="lg-dot" style="background:var(--forest-2)"></span>Actual spend</span><span><span class="lg-dot" style="background:var(--line-2)"></span>Approved budget</span></div>
+       ${spendChart()}</div>
+     <div class="card" style="padding:20px"><div class="sec-head"><h2>Recommended opportunities</h2></div>
+       <div class="opp" onclick="go('compare')"><div class="oic" style="background:var(--ok-bg);color:var(--ok)">${ic('trend')}</div><div style="flex:1"><h4>Greenfield offers a lower price on vegetable oil</h4><p>Switching this line could save about $120 a month across your regular orders.</p></div><span class="pill p-ok">Save $120</span></div>
+       <div class="opp" onclick="go('intelligence')"><div class="oic" style="background:var(--warn-bg);color:var(--warn)">${ic('alert')}</div><div style="flex:1"><h4>Packaging prices rose 8.4% this month</h4><p>Three suppliers raised quotes. Consider locking a rate or sourcing alternatives.</p></div><span class="pill p-warn">Price up</span></div>
+     </div>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:20px">
+     ${agentPanelHTML()}
+     <div class="card" style="padding:20px"><div class="sec-head"><h2>Procurement activity</h2><a onclick="go('activity')">All</a></div>
+       <div class="feed">
+         ${feedItem('check','Payment confirmed','Greenfield Supply, $1,630, 2m ago','ok')}
+         ${feedItem('shield','Spending session approved','$2,000, passkey, 14m ago','ok')}
+         ${feedItem('spark','Recommendation generated','Supplier B selected, 16m ago')}
+         ${feedItem('scale','Supplier comparison completed','7 quotes compared, 18m ago')}
+         ${feedItem('search','8 suppliers discovered','Kitchen restock, 21m ago')}
+       </div>
+     </div>
+   </div>
+ </div>`;
+function kpi(l,v,icn,dir,sub){const cls=dir==='up'?'k-up':dir==='down'?'k-down':'',arrow=dir==='up'?'↑':dir==='down'?'↓':'';return `<div class="kpi card"><div class="k-top"><span class="k-lbl">${l}</span><span class="k-ic">${ic(icn)}</span></div><div class="k-val num">${v}</div><div class="k-delta"><span class="${cls}">${arrow} ${sub}</span></div></div>`;}
+function feedItem(icn,t,s,tone){return `<div class="feed-i"><div class="feed-dot" ${tone==='ok'?'style="background:var(--ok-bg);color:var(--ok)"':''}>${ic(icn)}</div><div><div class="ft">${t}</div><div class="fs">${s}</div></div></div>`;}
+function spendChart(){const data=[9.2,11.5,10.1,13.4,12.8,14.8],budget=16,max=18;return `<svg viewBox="0 0 520 170" style="width:100%;height:auto" preserveAspectRatio="none" aria-label="Spending chart">
+   ${[0,4.5,9,13.5,18].map(y=>`<line x1="40" x2="510" y1="${150-y/max*130}" y2="${150-y/max*130}" stroke="var(--line)" stroke-width="1"/>`).join('')}
+   ${[0,9,18].map(y=>`<text x="34" y="${154-y/max*130}" text-anchor="end" font-size="10" fill="var(--ink-3)">$${y}k</text>`).join('')}
+   <line x1="40" x2="510" y1="${150-budget/max*130}" y2="${150-budget/max*130}" stroke="var(--line-2)" stroke-width="2" stroke-dasharray="5 4"/>
+   ${(()=>{const pts=data.map((d,i)=>`${40+i*(470/5)},${150-d/max*130}`);return `<path d="M40,150 L${pts.join(' L')} L510,150 Z" fill="var(--forest-2)" opacity="0.08"/><polyline points="${pts.join(' ')}" fill="none" stroke="var(--forest-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`+data.map((d,i)=>`<circle cx="${40+i*(470/5)}" cy="${150-d/max*130}" r="${i===5?4.5:3}" fill="${i===5?'var(--green)':'var(--forest-2)'}" stroke="var(--surface)" stroke-width="2"/>`).join('');})()}
+   ${['Jun','Jul','Aug','Sep','Oct','Nov'].map((m,i)=>`<text x="${40+i*(470/5)}" y="166" text-anchor="middle" font-size="10" fill="var(--ink-3)">${m}</text>`).join('')}</svg>`;}
+function agentPanelHTML(){return `<div class="agent-panel" id="agentPanel"><div class="ap-head"><div class="ap-orb live">${ic('spark')}</div><div><h3>Procura agent</h3><div class="st">● Working now</div></div></div>
+   <div class="ap-task">Comparing 8 supplier offers for your <b>Kitchen inventory restock</b> request.</div>
+   <div class="ap-steps">
+     <div class="ap-step done"><span class="tick">${ic('check')}</span>Analysed requirements</div>
+     <div class="ap-step done"><span class="tick">${ic('check')}</span>Discovered 8 suppliers</div>
+     <div class="ap-step done"><span class="tick">${ic('check')}</span>Retrieved 7 quotations</div>
+     <div class="ap-step now"><span class="tick"></span>Comparing delivered prices</div>
+     <div class="ap-step"><span class="tick"></span>Generate recommendation</div>
+   </div>
+   <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;margin-top:16px;width:100%" onclick="go('workspace')">Open workspace ${ic('arr')}</button></div>`;}
+
+/* PROCUREMENT LIST */
+VIEWS.procurement=()=>{const rows=[['PR-0142','Kitchen inventory restock','Chris G.','$2,000','info','Sourcing','3 Nov'],['PR-0141','Packaging supplies','Ada N.','$1,000','warn','Awaiting approval','3 Nov'],['PR-0140','Cleaning and sanitation','Chris G.','$600','mute','Draft','2 Nov'],['PR-0139','Beverage restock','Ada N.','$1,400','info','Comparing','1 Nov'],['PR-0138','Office equipment','Chris G.','$2,500','ok','Completed','28 Oct'],['PR-0137','Uniform order','Tunde A.','$750','ok','Completed','24 Oct'],['PR-0136','Table linens','Ada N.','$420','err','Cancelled','20 Oct']];
+ return `<div class="phead"><div><h1>Procurement</h1><p>Manage purchasing requests from sourcing to fulfilment.</p></div><div class="acts"><button class="btn btn-pri" onclick="go('newreq')">${ic('plus')} Create request</button></div></div>
+ <div class="filters">${['All','Draft','Sourcing','Comparing','Awaiting approval','Completed','Cancelled'].map((f,i)=>`<button class="filt ${i===0?'on':''}" onclick="filterProc(this,'${f}')">${f}</button>`).join('')}</div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Request ID</th><th>Description</th><th>Requested by</th><th>Budget</th><th>Status</th><th>Created</th></tr></thead><tbody id="procBody">
+   ${rows.map(r=>`<tr onclick="go('${r[0]==='PR-0142'?'workspace':r[5]==='Completed'?'orders':r[5]==='Awaiting approval'?'approvals':'compare'}')"><td class="r-id">${r[0]}</td><td><b>${r[1]}</b></td><td class="mut">${r[2]}</td><td class="num">${r[3]}</td><td><span class="pill p-${r[4]}"><span class="dot"></span>${r[5]}</span></td><td class="mut num">${r[6]}</td></tr>`).join('')}
+ </tbody></table></div>`;};
+function filtClick(el){el.parentNode.querySelectorAll('.filt').forEach(f=>f.classList.remove('on'));el.classList.add('on');}
+
+/* NEW REQUEST */
+VIEWS.newreq=()=>`
+ <div class="phead"><div><h1>New procurement</h1><p>Describe what you need, or build a structured request. Both start the same agent workflow.</p></div></div>
+ <div class="two-col" style="align-items:start">
+   <div class="card" style="padding:22px" id="askCard">
+     <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span class="k-ic" style="background:var(--green);color:var(--forest)">${ic('spark')}</span><h2 style="font-size:16px">Ask Procura</h2></div>
+     <p class="mut" style="font-size:13px;margin-bottom:14px">The fastest way, tell the agent in plain language.</p>
+     <textarea id="reqText" style="width:100%;min-height:120px;border:1px solid var(--line-2);background:var(--surface-2);border-radius:var(--r);padding:14px;font-family:inherit;font-size:14px;color:var(--ink);resize:vertical" placeholder="Describe what your business needs to purchase">I need 50 bags of premium basmati rice, 20 cartons of vegetable oil and 10 cartons of frozen chicken. Find reliable suppliers. My maximum budget is $2,000, including delivery.</textarea>
+     <div class="prompt-chips">${['Restock our kitchen supplies','Find the best supplier for office equipment','Compare prices for packaging','Find alternatives to our current vendor'].map(p=>`<span class="prompt-chip" onclick="document.getElementById('reqText').value='${p}'">${p}</span>`).join('')}</div>
+     <button class="btn btn-pri btn-lg" style="margin-top:18px;width:100%" onclick="startSourcing()">${ic('bolt')} Start sourcing</button>
+   </div>
+   <div class="card" style="padding:22px">
+     <h2 style="font-size:16px;margin-bottom:4px">Create manually</h2><p class="mut" style="font-size:13px;margin-bottom:16px">Precise control over line items and requirements.</p>
+     ${field('Product or service','Premium basmati rice')}
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${field('Quantity','50','num')}${field('Unit','Bags')}</div>
+     ${field('Delivery location','Victoria Island, Lagos')}
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${field('Budget','$2,000','num')}${field('Deadline','7 days')}</div>
+     <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)"><div class="eyebrow" style="margin-bottom:12px">Purchasing controls</div>
+       ${ctrlToggle('Prioritise supplier reliability',true)}${ctrlToggle('Include delivery and additional costs',true)}${ctrlToggle('Include new suppliers',false)}</div>
+     <button class="btn btn-sec btn-lg" style="margin-top:18px;width:100%" onclick="startSourcing()">Start sourcing</button>
+   </div>
+ </div>`;
+function field(l,v,t){return `<div style="margin-bottom:12px"><label class="mut" style="font-size:12px;font-weight:600;display:block;margin-bottom:5px">${l}</label><input value="${v}" class="${t==='num'?'num':''}" style="width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r-sm);padding:9px 12px;font-size:13.5px;color:var(--ink);font-family:inherit"></div>`;}
+function ctrlToggle(l,on){return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0"><span style="font-size:13.5px">${l}</span><div class="toggle ${on?'on':''}" onclick="this.classList.toggle('on')"></div></div>`;}
+
+/* WORKSPACE */
+const STAGES=[
+ ['Request received','Parsed 3 line items and a $2,000 delivered cost budget.'],
+ ['Requirements analysed','Extracted quantities, quality specs and a 7 day delivery window.'],
+ ['Supplier discovery','Searching vendor networks for matching dry goods and frozen suppliers.'],
+ ['Quotations collected','Retrieved 7 comparable quotations from 8 discovered suppliers.'],
+ ['Supplier evaluation','Checking available verification evidence for each supplier.'],
+ ['Price comparison','Comparing full delivered cost against your quality requirements.'],
+ ['Recommendation generated','Supplier B offers the lowest eligible delivered price.'],
+ ['Purchase order prepared','Drafted PO-2041 with validated quantities and totals.'],
+ ['Approval required','Spending session needs your passkey authorisation.'],
+ ['Payment execution','Awaiting approved session before executing on Kite.'],
+ ['Fulfilment tracking','Monitoring delivery evidence after payment.'],
+];
+VIEWS.workspace=()=>`
+ <div class="phead"><div><div class="eyebrow" style="margin-bottom:6px">PR-0142 · Kitchen inventory restock</div><h1>Procurement workspace</h1><p>Agent command centre, sourcing, reasoning and execution for this request.</p></div>
+   <div class="acts"><button class="btn btn-sec btn-sm" id="pauseBtn" onclick="toggleAgent()">${ic('pause')} Pause agent</button><button class="btn btn-sec btn-sm" onclick="go('compare')">${ic('scale')} View comparison</button></div></div>
+ <div class="ws">
+   <div class="ws-col">
+     <div class="card ws-card"><h3>Requirements <span class="demo-tag">Demo</span></h3>
+       ${[['Rice (premium basmati)','50 bags'],['Vegetable oil','20 cartons'],['Frozen chicken','10 cartons']].map(x=>`<div class="item-line"><span>${x[0]}</span><span class="q">${x[1]}</span></div>`).join('')}</div>
+     <div class="card ws-card"><h3>Constraints</h3>${specRow('Budget (delivered)','$2,000')}${specRow('Delivery window','7 days')}${specRow('Location','Lagos, NG')}${specRow('Priority','Reliability')}${specRow('Currency','USD')}</div>
+   </div>
+   <div class="ws-col">
+     <div class="card exec" id="execCard">
+       <div class="exec-top"><h2>Agent execution</h2><span class="stage-prog num" id="stageProg">Stage 6 / 11</span></div>
+       <div class="timeline" id="timeline">${STAGES.map((s,i)=>`<div class="tl-i" data-i="${i}"><div class="tl-node">${ic('check')}</div><div class="tl-h">${s[0]}</div><div class="tl-d">${s[1]}</div></div>`).join('')}</div>
+       <div class="reason"><div class="rl">${ic('spark')} Decision summary</div><span>Supplier B is currently recommended because it offers the best total delivered price ($1,630) while meeting your quality and delivery requirements. Supplier C is cheaper on delivery but is missing verified contact and payment evidence.</span></div>
+       <div style="margin-top:18px"><div class="eyebrow" style="margin-bottom:8px">Activity log</div><div id="logBox"></div></div>
+     </div>
+   </div>
+   <div class="ws-col">
+     <div class="card ws-card"><h3>Supplier shortlist</h3>${SUPPLIERS.map(s=>`<div class="short-i ${s.risk==='ok'?'rec':''}" style="cursor:pointer" onclick="openSupplier('${s.id}')"><div class="q-logo" style="background:${logoColor(s.l)}">${s.l}</div><div style="min-width:0"><div class="nm">${s.n}</div><div class="mut3" style="font-size:11px">${s.eta}</div></div><span class="pr num">$${s.tot}</span></div>`).join('')}<button class="btn btn-sec btn-sm" style="width:100%;margin-top:6px" onclick="go('compare')">Compare all</button></div>
+     <div class="card ws-card"><h3>Budget status</h3><div class="budget-ring">${budgetRing(1630,2000)}<div><div class="num" style="font-size:20px;font-weight:800">$1,630</div><div class="mut3" style="font-size:12px">of $2,000, $370 left</div></div></div></div>
+     <div class="card ws-card" style="border-left:3px solid var(--warn)" id="wsAttn"><h3>${ic('alert')} Needs attention</h3><p class="mut" style="font-size:13px">A spending session is required before payment can execute.</p><button class="btn btn-pri btn-sm" style="width:100%;margin-top:12px" onclick="go('approvals')">Review approval ${ic('arr')}</button></div>
+   </div>
+ </div>`;
+function specRow(l,v){return `<div class="spec-row"><span class="mut">${l}</span><span class="v num">${v}</span></div>`;}
+function budgetRing(v,m){const p=v/m,C=2*Math.PI*26;return `<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="var(--surface-3)" stroke-width="7"/><circle cx="32" cy="32" r="26" fill="none" stroke="var(--forest-2)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 32 32)"/><text x="32" y="36" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink)">${Math.round(p*100)}%</text></svg>`;}
+let agentStage=6, agentPlaying=true;
+AFTER.workspace=()=>{
+ agentStage=6;agentPlaying=true;renderStages();
+ const box=document.getElementById('logBox');
+ box.innerHTML=[['09:42','Analysed purchasing requirements'],['09:43','Discovered <b>8</b> potential suppliers'],['09:44','Retrieved <b>7</b> comparable quotations'],['09:45','Excluded <b>2</b> suppliers, missing required info'],['09:46','Completed supplier comparison']].map(l=>`<div class="logline"><span class="t num">${l[0]}</span><span>${l[1]}</span></div>`).join('');
+ agentTimer=setInterval(()=>{if(!agentPlaying)return;if(agentStage<STAGES.length-1){agentStage++;renderStages();
+   const times=['09:47','09:48','09:49','09:50','09:51'],msgs=['Recommended <b>Greenfield Supply (B)</b>','Prepared purchase order <b>PO-2041</b>','Spending authorisation requested','Awaiting passkey approval','Monitoring fulfilment'],idx=agentStage-6;
+   if(msgs[idx])box.insertAdjacentHTML('beforeend',`<div class="logline"><span class="t num">${times[idx]||'09:52'}</span><span>${msgs[idx]}</span></div>`);
+   if(agentStage===8){agentPlaying=false;updatePause();if(!demoMode)toast('Approval required, spending session');}}},2600);
+};
+function renderStages(){document.querySelectorAll('#timeline .tl-i').forEach(el=>{const i=+el.dataset.i;el.className='tl-i';if(i<agentStage)el.classList.add('done');else if(i===agentStage)el.classList.add(agentStage===8?'attn':'now');});const sp=document.getElementById('stageProg');if(sp)sp.textContent=`Stage ${agentStage+1} / 11`;}
+function toggleAgent(){agentPlaying=!agentPlaying;updatePause();}
+function updatePause(){const b=document.getElementById('pauseBtn');if(b)b.innerHTML=(agentPlaying?ic('pause')+' Pause agent':ic('play')+' Resume agent');}
+
+/* COMPARE */
+VIEWS.compare=()=>`
+ <div class="phead"><div><div class="eyebrow" style="margin-bottom:6px">PR-0142 · Kitchen inventory restock</div><h1>Supplier comparison</h1><p>Compare available suppliers and choose the best purchasing option.</p></div>
+   <div class="acts"><button class="btn btn-sec btn-sm" onclick="go('workspace')">${ic('prev')} Back to workspace</button></div></div>
+ <div class="rec-banner" id="recBanner"><div class="big">${ic('check')}</div>
+   <div style="flex:1;min-width:220px"><h2>Greenfield Supply Co. is recommended <span class="demo-tag">Demo data</span></h2>
+     <p>It offers the lowest total delivered price among the suppliers that meet your quality and delivery requirements, and it is the only shortlisted supplier with historical delivery evidence on record.</p>
+     <div class="rec-stats"><div><div class="l">Total delivered</div><div class="v num">$1,630</div></div><div><div class="l">Est. delivery</div><div class="v">3-4 days</div></div><div><div class="l">Saves vs highest</div><div class="v num" style="color:var(--ok)">$100</div></div><div><div class="l">Budget headroom</div><div class="v num">$370</div></div></div></div>
+   <button class="btn btn-pri" onclick="go('approvals')">Select and prepare PO ${ic('arr')}</button></div>
+ <div class="cmp-grid" id="cmpGrid">${SUPPLIERS.map((s,i)=>cmpCard(s,i)).join('')}</div>`;
+function cmpCard(s,i){const ev=s.ev,evItem=(ok,lbl)=>`<div class="ev-i ${ok===1?'ev-yes':'ev-no'}">${ok===1?ic('check'):ic('x')}<span>${lbl}</span></div>`;
+ return `<div class="cmp-card ${s.risk==='ok'?'rec':''}" data-i="${i}">${s.risk==='ok'?'<span class="cmp-rec-tag">RECOMMENDED</span>':''}
+   <div class="cmp-head"><div class="q-logo" style="background:${logoColor(s.l)}">${s.l}</div><div style="min-width:0"><div style="font-weight:700;font-size:14px">${s.n}</div><div class="mut3" style="font-size:11.5px">${s.loc} · ${s.cats}</div></div></div>
+   <div class="cmp-body">
+     <div class="cmp-line"><span class="mut">Product subtotal</span><span class="v">$${s.sub}</span></div>
+     <div class="cmp-line"><span class="mut">Delivery</span><span class="v">$${s.del}</span></div>
+     <div class="cmp-line"><span class="mut">Est. delivery</span><span class="v">${s.eta}</span></div>
+     <div class="cmp-line"><span class="mut">Risk</span><span>${s.risk==='ok'?'<span class="pill p-ok">Low</span>':s.risk==='warn'?'<span class="pill p-err">Insufficient evidence</span>':'<span class="pill p-warn">Review required</span>'}</span></div>
+     <div class="cmp-line tot"><span>Total cost</span><span class="v">$${s.tot}</span></div></div>
+   <div class="ev-grid">${evItem(ev.id,'Identity verified')}${evItem(ev.contact,'Contact verified')}${evItem(ev.quote,'Quote received')}${evItem(ev.pay,'Payment matched')}${evItem(ev.hist,'Delivery history')}${evItem(ev.deliv,'Delivery evidence')}</div>
+   <div class="cmp-foot"><button class="btn ${s.risk==='ok'?'btn-pri':'btn-sec'} btn-sm" style="flex:1" onclick="${s.risk==='ok'?"go('approvals')":"toast('Supplier selected, preparing PO')"}">Select</button><button class="btn btn-ghost btn-sm" onclick="openSupplier('${s.id}')">Profile</button></div></div>`;}
+AFTER.compare=()=>{document.querySelectorAll('#cmpGrid .cmp-card').forEach((c,i)=>setTimeout(()=>c.classList.add('in'),120+i*160));};
+
+/* APPROVALS */
+VIEWS.approvals=()=>`
+ <div class="phead"><div><h1>Approvals</h1><p>Review the financial actions that require your authorisation.</p></div></div>
+ <div class="filters">${['Pending','Approved','Rejected','Expired'].map((f,i)=>`<button class="filt ${i===0?'on':''}" onclick="filtClick(this)">${f}</button>`).join('')}</div>
+ <div class="appr-grid">
+   <div>
+     <div class="card appr-card" id="apprCard">
+       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px"><div><div class="eyebrow" style="margin-bottom:4px">PR-0142 · PO-2041</div><h2 style="font-size:17px">Kitchen inventory restock</h2></div><span class="pill p-warn"><span class="dot"></span>Awaiting authorisation</span></div>
+       <div class="reason" style="margin-top:8px"><div class="rl">${ic('spark')} Why this is requested</div>Procura selected <b>Greenfield Supply Co.</b>, the lowest eligible delivered price that meets your requirements. Executing payment needs a spending session within your limits.</div>
+       <div class="recipient-box"><span class="k-ic" style="background:var(--surface);color:var(--forest-2)">${ic('wallet')}</span><div style="flex:1;min-width:140px"><div style="font-size:12px;font-weight:600">Payment recipient, Greenfield Supply Co.</div><div class="addr">0x7Af3…9e21 · Kite testnet · USDC.e</div></div><span class="pill p-ok">Verified destination</span></div>
+       <div class="appr-row"><span class="mut">Amount</span><span class="v num">$1,630.00 USDC.e</span></div>
+       <div class="appr-row"><span class="mut">Budget remaining (month)</span><span class="v num">$5,180</span></div>
+       <div class="appr-row"><span class="mut">Per transaction limit</span><span class="v num">$2,500</span></div>
+       <div class="appr-row"><span class="mut">Session expires</span><span class="v">in 30 minutes once approved</span></div>
+       <div style="display:flex;gap:10px;margin-top:18px" id="apprActions"><button class="btn btn-pri btn-lg" style="flex:1" onclick="openPasskey()">${ic('key')} Approve spending session</button><button class="btn btn-sec btn-lg" onclick="toast('Approval rejected')">Reject</button></div>
+       <p class="mut3" style="font-size:11.5px;text-align:center;margin-top:12px">Approval invokes the Kite Passport passkey workflow. This is a demo environment using a testnet destination.</p>
+     </div>
+     <div class="card appr-card" style="border-left-color:var(--line-2);opacity:.85"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="eyebrow" style="margin-bottom:4px">PR-0141 · PO-2039</div><h2 style="font-size:16px">Packaging supplies</h2></div><span class="num" style="font-weight:800;font-size:17px">$880.00</span></div><p class="mut" style="font-size:13px;margin-top:6px">Rightway Packaging, within limits, awaiting review.</p><button class="btn btn-sec btn-sm" style="margin-top:12px" onclick="toast('Opening approval')">Review details</button></div>
+   </div>
+   <div>${passportCard()}</div>
+ </div>`;
+function passportCard(){return `<div class="card passport-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span class="k-ic" style="background:var(--forest);color:var(--green)">${ic('shield')}</span><div><h3 style="font-size:14px">Kite Passport</h3><div class="pill p-ok" style="margin-top:3px"><span class="dot"></span>Connected</div></div></div>
+   ${ppStat('Agent identity','procura-agent-01')}${ppStat('Wallet','0x4C8e…B217')}${ppStat('Network','Kite testnet')}${ppStat('Available balance','$6,810 USDC.e')}
+   <div class="session-meter"><div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px"><span class="mut">Active session budget</span><span class="num" style="font-weight:700">$370 / $2,000</span></div><div class="bar"><i style="width:81.5%"></i></div><div class="mut3" style="font-size:11.5px;margin-top:6px">Expires in 22 min, per tx limit $2,500</div></div>
+   <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px"><button class="btn btn-forest btn-sm" onclick="go('permissions')">Manage spending session</button><button class="btn btn-ghost btn-sm" style="color:var(--err)" onclick="toast('Agent permissions revoked')">Revoke agent permissions</button></div></div>`;}
+function ppStat(l,v){return `<div class="pp-stat"><span class="mut">${l}</span><span class="v">${v}</span></div>`;}
+
+/* PASSKEY */
+function openPasskey(){const ov=document.getElementById('pkOverlay'),m=document.getElementById('pkModal');
+ m.innerHTML=`<div class="modal-body"><div class="pk-ring" id="pkRing">${ic('finger')}</div><h3>Authorise spending session</h3><p>Confirm with your passkey to let Procura execute this payment within your approved limits.</p>
+   <div class="modal-sum"><div class="r"><span class="mut">Recipient</span><b>Greenfield Supply Co.</b></div><div class="r"><span class="mut">Amount</span><b class="num">$1,630.00 USDC.e</b></div><div class="r"><span class="mut">Network</span><b>Kite testnet</b></div><div class="r"><span class="mut">Session cap</span><b class="num">$2,000, 30 min</b></div></div></div>
+   <div class="modal-foot"><button class="btn btn-sec" style="flex:1" onclick="closePasskey()">Cancel</button><button class="btn btn-pri" style="flex:1" id="pkConfirm" onclick="runPasskey()">${ic('key')} Confirm with passkey</button></div>`;
+ ov.classList.add('on');}
+function closePasskey(){document.getElementById('pkOverlay').classList.remove('on');}
+function runPasskey(){const ring=document.getElementById('pkRing'),btn=document.getElementById('pkConfirm');ring.classList.add('scanning');btn.style.opacity='.5';btn.style.pointerEvents='none';btn.innerHTML='Authenticating';
+ setTimeout(()=>{const m=document.getElementById('pkModal');m.innerHTML=`<div class="modal-body"><div class="pk-ring ok">${ic('check')}</div><h3>Payment executed</h3><p>Procura executed the approved transaction on the Kite testnet. The purchase order is now marked paid.</p><div class="tx-hash">${ic('ext')} 0x9f3c7a…e21b04, view on explorer</div></div><div class="modal-foot"><button class="btn btn-sec" style="flex:1" onclick="closePasskey()">Close</button><button class="btn btn-pri" style="flex:1" onclick="closePasskey();go('payments')">View payment ${ic('arr')}</button></div>`;
+   if(!demoMode)toast('Payment confirmed, $1,630 on Kite testnet');},2100);}
+
+/* SUPPLIERS */
+VIEWS.suppliers=()=>{const list=SUPPLIER_DIR;
+ return `<div class="phead"><div><h1>Suppliers</h1><p>Vendors discovered or added by your business. Evidence over confidence.</p></div><div class="acts"><button class="btn btn-pri" onclick="toast('Add supplier form')">${ic('plus')} Add supplier</button></div></div>
+ <div class="filters">${['All suppliers','Verified','Review required','Dry goods','Packaging','Beverages'].map((f,i)=>`<button class="filt ${i===0?'on':''}" onclick="filterSup(this,'${f}')">${f}</button>`).join('')}</div>
+ <div class="grid-3" id="supGrid">${list.map(s=>`<div class="card" style="padding:18px;cursor:pointer" onclick="openSupplier('${s.id}')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div class="q-logo" style="width:40px;height:40px;background:${logoColor(s.l)}">${s.l}</div><div style="min-width:0"><div style="font-weight:700;font-size:14.5px">${s.n}</div><div class="mut3" style="font-size:12px">${s.loc}</div></div></div>
+   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${s.cats.split(' · ').map(c=>`<span class="chip" style="padding:3px 9px;font-size:11px">${c}</span>`).join('')}</div>
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line)">${s.risk==='ok'?'<span class="pill p-ok"><span class="dot"></span>Verified</span>':s.risk==='warn'?'<span class="pill p-warn"><span class="dot"></span>Review required</span>':'<span class="pill p-info"><span class="dot"></span>Partial evidence</span>'}<span class="mut3" style="font-size:11.5px">${s.lastQuote||'Active supplier'}</span></div></div>`).join('')}</div>`;};
+
+/* ORDERS */
+VIEWS.orders=()=>{const rows=[['PO-2041','Greenfield Supply Co.','Kitchen inventory restock','$1,630','ok','Paid','3 Nov'],['PO-2039','Rightway Packaging','Packaging supplies','$880','warn','Pending approval','3 Nov'],['PO-2035','TechPoint Office','Office equipment','$2,410','ok','Fulfilled','28 Oct'],['PO-2031','Harvest Bulk Foods','Dry goods top up','$640','info','Processing','26 Oct'],['PO-2028','Uniforma Ltd','Uniform order','$750','ok','Fulfilled','24 Oct']];
+ return `<div class="phead"><div><h1>Purchase orders</h1><p>Review and manage purchases initiated through Procura.</p></div></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>PO number</th><th>Supplier</th><th>Request</th><th>Amount</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>
+   ${rows.map(r=>`<tr onclick="openOrder('${r[0]}')"><td class="r-id">${r[0]}</td><td><b>${r[1]}</b></td><td class="mut">${r[2]}</td><td class="num">${r[3]}</td><td><span class="pill p-${r[4]}"><span class="dot"></span>${r[5]}</span></td><td class="mut num">${r[6]}</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();toast('Exporting ${r[0]}.pdf')">${ic('doc')} PDF</button></td></tr>`).join('')}
+ </tbody></table></div>`;};
+
+/* PAYMENTS */
+VIEWS.payments=()=>`
+ <div class="phead"><div><h1>Payments</h1><p>Track payments made through your authorised procurement agents.</p></div></div>
+ <div class="kpis">${kpi('Total paid','$9,840','card','up','this month')}${kpi('Pending','$880','clock','warn','1 awaiting approval')}${kpi('Failed','$0','shield',null,'no failed transactions')}${kpi('Transactions','14','trend',null,'all on Kite testnet')}</div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Transaction</th><th>Supplier</th><th>PO</th><th>Amount</th><th>Network</th><th>Status</th><th>Date</th></tr></thead><tbody>
+   ${[['0x9f3c…b04','Greenfield Supply Co.','PO-2041','$1,630','Kite testnet','ok','Confirmed','3 Nov'],['0x2a71…c9f','TechPoint Office','PO-2035','$2,410','Kite testnet','ok','Confirmed','28 Oct'],['0x5d18…4ae','Harvest Bulk Foods','PO-2031','$640','Kite testnet','info','Pending','26 Oct'],['0x8e02…11c','Uniforma Ltd','PO-2028','$750','Kite testnet','ok','Confirmed','24 Oct']].map((r,i)=>`<tr id="${i===0?'payTop':''}" onclick="openPayment(${i})" style="cursor:pointer"><td class="r-id num">${r[0]}</td><td><b>${r[1]}</b></td><td class="mut">${r[2]}</td><td class="num">${r[3]}</td><td><span class="chip" style="font-size:11px;padding:3px 9px">${r[4]}</span></td><td><span class="pill p-${r[5]}"><span class="dot"></span>${r[6]}</span></td><td class="mut num">${r[7]}</td></tr>`).join('')}
+ </tbody></table></div>
+ <p class="mut3" style="font-size:12px;margin-top:14px;display:flex;align-items:center;gap:7px">${ic('shield')} Payment states reflect actual chain responses. A transaction is marked confirmed only after the network confirms it.</p>`;
+
+/* INTELLIGENCE */
+VIEWS.intelligence=()=>`
+ <div class="phead"><div><h1>Procurement intelligence</h1><p>Understand your purchasing performance and find opportunities to improve.</p></div></div>
+ <div class="kpis">${kpi('Total expenditure','$14,820','grid',null,'this month')}${kpi('Estimated savings','$1,240','trend','up','vs highest quotes')}${kpi('Avg quotes per request','6.4','scale',null,'across 12 requests')}${kpi('Avg cycle time','1.8 days','clock','down','request to purchase')}</div>
+ <div class="two-col">
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Spend by category</h2><span class="demo-tag">Demo</span></div>${barChart([['Food',62],['Packaging',22],['Equipment',10],['Other',6]])}</div>
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Spend by supplier</h2></div>${[['Greenfield Supply',41,'var(--forest-2)'],['TechPoint Office',24,'var(--green)'],['Harvest Bulk',19,'var(--info)'],['Others',16,'var(--line-2)']].map(s=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>${s[0]}</span><span class="num" style="font-weight:600">${s[1]}%</span></div><div class="budget-bar"><i style="width:${s[1]}%;background:${s[2]}"></i></div></div>`).join('')}</div>
+ </div>
+ <div class="card" style="padding:20px;margin-top:16px"><div class="sec-head"><h2>Insights</h2></div>
+   <div class="insight"><div class="ic" style="color:var(--warn)">${ic('trend')}</div><p><b>Packaging expenditure increased 8.4%</b> compared with the previous month, driven by three suppliers raising quotes.</p></div>
+   <div class="insight"><div class="ic" style="color:var(--ok)">${ic('check')}</div><p><b>Greenfield Supply offers a lower price</b> on two products you purchase regularly, an estimated $120 a month saving.</p></div>
+   <div class="insight"><div class="ic" style="color:var(--info)">${ic('users')}</div><p><b>Your purchases are concentrated among three suppliers.</b> Adding a backup vendor would reduce fulfilment risk.</p></div>
+   <p class="mut3" style="font-size:12px;margin-top:8px">Insights are derived from your procurement records. Estimated savings are distinct from realised savings.</p></div>`;
+function barChart(data){const max=Math.max(...data.map(d=>d[1]));return `<div class="bar-chart">${data.map((d,i)=>`<div class="bc"><div class="bar ${i===0?'hi':''}" data-h="${d[1]/max*100}" style="height:0%"></div><div class="lb">${d[0]}</div><div class="num" style="font-size:12px;font-weight:700">${d[1]}%</div></div>`).join('')}</div>`;}
+AFTER.intelligence=()=>{setTimeout(()=>document.querySelectorAll('#view .bar-chart .bar').forEach(b=>b.style.height=b.dataset.h+'%'),80);};
+
+/* ACTIVITY */
+VIEWS.activity=()=>{const ev=[['payment','check','Payment confirmed','Greenfield Supply Co., $1,630, tx 0x9f3c…b04','09:51','ok'],['approval','shield','Spending session approved','Chris Godwin, passkey, $2,000 cap','09:50','ok'],['payment','key','Payment initiated','PO-2041, Kite testnet','09:49'],['agent','spark','Recommendation generated','Supplier B (Greenfield) selected, reasoning recorded','09:47'],['agent','scale','Supplier comparison completed','7 quotations compared','09:46'],['supplier','x','2 suppliers excluded','Missing required contact or payment evidence','09:45'],['agent','search','8 suppliers discovered','Dry goods and frozen, Lagos region','09:44'],['procurement','pkg','Procurement request created','PR-0142, Kitchen inventory restock','09:42'],['agent','msg','User instruction received','Restock 50 bags rice, 20 oil, 10 chicken','09:42']];
+ return `<div class="phead"><div><h1>Activity</h1><p>A transparent, traceable record of procurement operations and agent actions.</p></div></div>
+ <div class="filters">${['All','Procurement','Supplier','Payment','Approval','Agent','Security'].map((f,i)=>`<button class="filt ${i===0?'on':''}" onclick="filtClick(this)">${f}</button>`).join('')}</div>
+ <div class="card" style="padding:8px 20px">${ev.map(e=>`<div class="feed-i"><div class="feed-dot" ${e[5]==='ok'?'style="background:var(--ok-bg);color:var(--ok)"':''}>${ic(e[1])}</div><div style="flex:1;min-width:0"><div class="ft" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b>${e[2]}</b><span class="chip" style="font-size:10px;padding:2px 7px;text-transform:capitalize">${e[0]}</span></div><div class="fs">${e[3]}</div></div><div class="mut3 num" style="font-size:12px;white-space:nowrap">${e[4]}</div></div>`).join('')}</div>`;};
+
+/* ASSISTANT */
+VIEWS.assistant=()=>`
+ <div style="height:100%;display:flex;flex-direction:column">
+ <div class="phead" style="margin-bottom:12px"><div><h1>AI Assistant</h1><p>Start procurement, compare quotes and check status, in plain language.</p></div></div>
+ <div class="chat"><div class="chat-stream" id="chatStream">
+     ${msgA(`Hi Chris, I am Procura. I can source products, evaluate suppliers, prepare purchase orders and execute approved payments. What does Northstar Kitchen need today?`)}
+     <div class="prompt-chips" style="padding-left:42px">${['Find a supplier for 100 packaging boxes','Summarise spending this month','Compare rice suppliers','Check PR-0142 status'].map(p=>`<span class="prompt-chip" onclick="sendMsg('${p}')">${p}</span>`).join('')}</div>
+   </div>
+   <div class="composer"><textarea id="chatInput" placeholder="Message Procura" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea><button class="btn btn-pri" style="height:46px;width:46px;padding:0" onclick="sendMsg()">${ic('send')}</button></div>
+ </div></div>`;
+function msgA(html){return `<div class="msg a"><div class="av">P</div><div class="bubble">${html}</div></div>`;}
+function msgU(html){return `<div class="msg u"><div class="av">CG</div><div class="bubble">${html}</div></div>`;}
+function sendMsg(preset){const input=document.getElementById('chatInput'),text=preset||input.value.trim();if(!text)return;input.value='';
+ const s=document.getElementById('chatStream'),chips=s.querySelector('.prompt-chips');if(chips)chips.remove();
+ s.insertAdjacentHTML('beforeend',msgU(text));
+ const typing=document.createElement('div');typing.className='msg a';typing.innerHTML=`<div class="av">P</div><div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div>`;s.appendChild(typing);s.scrollTop=s.scrollHeight;
+ setTimeout(()=>{typing.remove();let reply;
+   if(/packaging|box/i.test(text))reply=`I will search for suppliers that can deliver 100 cartons within your window, compare the full delivered cost and check each supplier's evidence before recommending one.<div class="chat-card"><div class="cc-h">${ic('spark')} Sourcing started, PR-0143</div><div style="padding:13px"><div style="font-size:13px" class="mut">3 suppliers found, 2 quotes received, comparing.</div><button class="btn btn-pri btn-sm" style="margin-top:10px;width:100%" onclick="go('workspace')">Open workspace ${ic('arr')}</button></div></div>`;
+   else if(/spend|summar/i.test(text))reply=`This month you have spent <b>$14,820</b> across 12 requests, with an estimated <b>$1,240</b> saved versus the highest quotes. Food is 62% of spend. Packaging rose 8.4%.<div class="chat-card"><div class="cc-h">${ic('trend')} Spending summary</div><div style="padding:13px"><button class="btn btn-sec btn-sm" style="width:100%" onclick="go('intelligence')">View full intelligence ${ic('arr')}</button></div></div>`;
+   else if(/compare|rice|supplier/i.test(text))reply=`For your rice line, <b>Greenfield Supply</b> is the best eligible option at $1,630 delivered, the only shortlisted supplier with delivery history on record.<div class="chat-card"><div class="cc-h">${ic('scale')} Comparison ready</div><div style="padding:13px"><button class="btn btn-pri btn-sm" style="width:100%" onclick="go('compare')">View comparison ${ic('arr')}</button></div></div>`;
+   else if(/status|PR-/i.test(text))reply=`<b>PR-0142, Kitchen inventory restock</b> is at stage 9 of 11, a spending session is awaiting your authorisation before payment can execute.<div class="chat-card"><div class="cc-h">${ic('shield')} Action needed</div><div style="padding:13px"><button class="btn btn-pri btn-sm" style="width:100%" onclick="go('approvals')">Review approval ${ic('arr')}</button></div></div>`;
+   else reply=`Got it. I will treat that as a procurement task, source matching suppliers and come back with an evidence backed comparison. Any payment stays within the limits you have approved.<div class="chat-card"><div class="cc-h">${ic('bolt')} Ready to source</div><div style="padding:13px"><button class="btn btn-pri btn-sm" style="width:100%" onclick="go('newreq')">Create request ${ic('arr')}</button></div></div>`;
+   s.insertAdjacentHTML('beforeend',msgA(reply));s.scrollTop=s.scrollHeight;},1200);}
+
+/* PERMISSIONS */
+VIEWS.permissions=()=>`
+ <div class="phead"><div><h1>Agent permissions</h1><p>Define what Procura can do on behalf of your business. Your agent can never increase its own authority.</p></div></div>
+ <div class="lvl-grid">
+   <div class="lvl" onclick="pickLevel(this)"><div class="radio"></div><div class="ln">Level 1</div><h3>Research</h3><p>Discover suppliers, compare quotations and prepare recommendations. No payments.</p></div>
+   <div class="lvl" onclick="pickLevel(this)"><div class="radio"></div><div class="ln">Level 2</div><h3>Prepare</h3><p>Prepare purchase orders and payment instructions. No financial execution without authorisation.</p></div>
+   <div class="lvl on" onclick="pickLevel(this)"><div class="radio"></div><div class="ln">Level 3</div><h3>Approved execution</h3><p>Execute payments within a user approved spending session and configured restrictions.</p></div>
+ </div>
+ <div class="two-col" style="align-items:start">
+   <div class="card" style="padding:22px"><h2 style="font-size:16px;margin-bottom:6px">Spending configuration</h2><p class="mut" style="font-size:12.5px;margin-bottom:8px">Enforced by Kite Passport, not the frontend.</p>
+     <div class="cfg-row"><div><div class="lab">Maximum monthly spend</div><div class="sub">Hard ceiling across all agents</div></div><input class="cfg-input" value="$20,000"></div>
+     <div class="cfg-row"><div><div class="lab">Maximum single transaction</div><div class="sub">Per payment limit</div></div><input class="cfg-input" value="$2,500"></div>
+     <div class="cfg-row"><div><div class="lab">Spending session duration</div><div class="sub">Authority auto expires</div></div><input class="cfg-input" value="30 min"></div>
+     <div class="cfg-row"><div><div class="lab">Require approval above</div><div class="sub">Passkey threshold</div></div><input class="cfg-input" value="$500"></div>
+     <div class="cfg-row"><div><div class="lab">Restrict to approved suppliers</div><div class="sub">Block unknown destinations</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:16px">${passportCard()}
+     <div class="agent-panel" style="padding:20px"><h3 style="color:#fff;font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px">${ic('shield')} Security guarantees</h3>
+       ${['Your agent cannot increase its own spending permissions.','Every payment is subject to your approved financial limits.','Revoke access whenever you need to.'].map(t=>`<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:10px;font-size:13px;color:var(--panel-ink)"><span style="color:var(--panel-accent);flex:none;margin-top:1px;width:15px">${ic('check')}</span>${t}</div>`).join('')}</div>
+   </div>
+ </div>`;
+function pickLevel(el){el.parentNode.querySelectorAll('.lvl').forEach(l=>l.classList.remove('on'));el.classList.add('on');toast('Permission level updated');}
+
+/* SETTINGS / INTEGRATIONS */
+VIEWS.settings=()=>`
+ <div class="phead"><div><h1>Business settings</h1><p>Company profile, team and defaults.</p></div></div>
+ <div class="two-col" style="align-items:start">
+  <div class="card" style="padding:22px"><h2 style="font-size:16px;margin-bottom:16px">Business profile</h2>${field('Company name','Northstar Kitchen')}${field('Industry','Food service, restaurant group')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${field('Country','Nigeria')}${field('Default currency','USD')}</div>${field('Address','14 Adeola Odeku St, Victoria Island, Lagos')}<button class="btn btn-pri" style="margin-top:8px" onclick="toast('Business profile saved')">Save changes</button></div>
+  <div class="card" style="padding:22px"><h2 style="font-size:16px;margin-bottom:16px">Team and access</h2>${[['Chris Godwin','Owner','CG','var(--forest-2)'],['Ada Nwosu','Procurement manager','AN','var(--info)'],['Tunde Afolabi','Finance manager','TA','var(--warn)']].map(m=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)"><div class="av" style="width:30px;height:30px;border-radius:50%;background:${m[3]};display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px">${m[2]}</div><div style="flex:1"><div style="font-weight:600;font-size:13.5px">${m[0]}</div><div class="mut3" style="font-size:12px">${m[1]}</div></div><span class="chip" style="font-size:11px">Active</span></div>`).join('')}<button class="btn btn-sec" style="margin-top:14px" onclick="toast('Invite sent')">${ic('plus')} Invite member</button></div>
+ </div>`;
+VIEWS.integrations=()=>`
+ <div class="phead"><div><h1>Integrations</h1><p>Connect the infrastructure that powers autonomous procurement.</p></div></div>
+ <div class="grid-3">${[['Kite Passport','Financial authority and spending sessions','shield','Connected','ok'],['SERV Reasoning','Agent orchestration engine','spark','Connected','ok'],['Supplier data providers','Discovery and verification sources','users','2 active','info'],['Notifications','Email and in app alerts','bell','Connected','ok'],['Accounting export','Sync records to your ledger','doc','Not connected','mute'],['Inventory','Stock levels for auto restock','pkg','Coming soon','mute']].map(x=>`<div class="card" style="padding:20px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span class="k-ic" style="width:38px;height:38px">${ic(x[2])}</span><span class="pill p-${x[4]}"><span class="dot"></span>${x[3]}</span></div><h3 style="font-size:14.5px">${x[0]}</h3><p class="mut" style="font-size:12.5px;margin-top:4px">${x[1]}</p><button class="btn ${x[4]==='ok'?'btn-sec':'btn-pri'} btn-sm" style="margin-top:14px;width:100%" onclick="toast('${x[0]} settings')">${x[4]==='ok'?'Manage':'Connect'}</button></div>`).join('')}</div>`;
+
+/* ===================== DETAIL SCREENS ===================== */
+const SUPPLIER_DIR=[...SUPPLIERS,
+ {id:'SUP-004',l:'D',n:'Rightway Packaging',loc:'Lagos, NG',cats:'Packaging',risk:'ok',ev:{id:1,contact:1,quote:1,pay:1,hist:1,deliv:1},lastQuote:'Last quote 1 Nov'},
+ {id:'SUP-005',l:'E',n:'Clearwater Beverages',loc:'Abeokuta, NG',cats:'Beverages',risk:'warn',ev:{id:1,contact:0,quote:1,pay:0,hist:0,deliv:0},lastQuote:'Last quote 24 Oct'}];
+function getSupplier(id){return SUPPLIER_DIR.find(s=>s.id===id)||SUPPLIER_DIR[1];}
+let curSupplierId='SUP-002', curOrderId='PO-2041';
+function openSupplier(id){curSupplierId=id;go('supplierProfile');}
+function openOrder(id){curOrderId=id;go('orderDetail');}
+function stat(v,l){return `<div class="stat"><div class="sv num">${v}</div><div class="sl">${l}</div></div>`;}
+function infoRow(l,v,tag){return `<div class="spec-row"><span class="mut">${l}</span><span style="display:flex;align-items:center;gap:8px">${tag?`<span class="pill ${tag==='Verified'?'p-ok':tag==='Supplier provided'?'p-mute':'p-warn'}" style="font-size:10px">${tag}</span>`:''}<span class="v">${v}</span></span></div>`;}
+function prodRow(n,p){return `<div class="item-line"><span>${n}</span><span class="q">${p}</span></div>`;}
+function vtl(t,s,on){return `<div class="vtl-i ${on?'on':''}"><span class="nd"></span><div class="vt">${t}</div><div class="vs">${s}</div></div>`;}
+function priceChart(){const d=[22.4,22.1,22.8,23.2,22.9,23.0],max=24,min=21;return `<svg viewBox="0 0 520 150" style="width:100%;height:auto" preserveAspectRatio="none" aria-label="Price history">${[21,22,23,24].map(y=>`<line x1="36" x2="510" y1="${140-(y-min)/(max-min)*120}" y2="${140-(y-min)/(max-min)*120}" stroke="var(--line)" stroke-width="1"/><text x="30" y="${144-(y-min)/(max-min)*120}" text-anchor="end" font-size="10" fill="var(--ink-3)">$${y}</text>`).join('')}${(()=>{const pts=d.map((v,i)=>`${36+i*(474/5)},${140-(v-min)/(max-min)*120}`);return `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--forest-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`+d.map((v,i)=>`<circle cx="${36+i*(474/5)}" cy="${140-(v-min)/(max-min)*120}" r="${i===5?4:3}" fill="${i===5?'var(--green)':'var(--forest-2)'}" stroke="var(--surface)" stroke-width="2"/>`).join('');})()}${['Jun','Jul','Aug','Sep','Oct','Nov'].map((m,i)=>`<text x="${36+i*(474/5)}" y="149" text-anchor="middle" font-size="9" fill="var(--ink-3)">${m}</text>`).join('')}</svg>`;}
+function poTotal(l,v){return `<div class="po-total-row"><span class="mut">${l}</span><span class="num">${v}</span></div>`;}
+
+VIEWS.supplierProfile=()=>{const s=getSupplier(curSupplierId),verified=s.risk==='ok';
+ const evMap=[['id','Business identity','Corporate registry match'],['contact','Contact information','Phone and email reachable'],['quote','Quotation received','Direct quote on file'],['pay','Payment destination','Wallet matched to business'],['hist','Delivery history','Past fulfilment records'],['deliv','Delivery evidence','Proof of past deliveries']];
+ return `<div class="phead"><div><div class="eyebrow" style="margin-bottom:8px">${s.id} · Supplier profile</div><div style="display:flex;align-items:center;gap:14px"><div class="q-logo" style="width:46px;height:46px;font-size:17px;background:${logoColor(s.l)}">${s.l}</div><div><h1 style="font-size:24px">${s.n}</h1><p style="margin-top:2px">${s.loc} · ${s.cats}</p></div></div></div>
+   <div class="acts"><button class="btn btn-sec btn-sm" onclick="go('suppliers')">${ic('prev')} Directory</button><button class="btn btn-sec" onclick="toast('Quotation requested from ${s.n}')">Request quote</button><button class="btn btn-pri" onclick="go('newreq')">${ic('plus')} New procurement</button></div></div>
+ <div style="margin-bottom:20px">${verified?'<span class="pill p-ok"><span class="dot"></span>Verified supplier</span>':s.risk==='warn'?'<span class="pill p-warn"><span class="dot"></span>Review required, insufficient evidence</span>':'<span class="pill p-info"><span class="dot"></span>Partial evidence</span>'} <span class="demo-tag" style="margin-left:6px">Demo data</span></div>
+ <div class="stat-strip">${stat(verified?'18':'0','Orders placed')}${stat(verified?'96%':'—','On-time delivery')}${stat(verified?'3.2h':'—','Avg quote response')}${stat(verified?'$9,840':'$0','Total spend')}</div>
+ <div class="grid-main"><div style="display:flex;flex-direction:column;gap:20px">
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Company information</h2></div>
+     ${infoRow('Legal name',s.n,'Verified')}${infoRow('Business type','Wholesale distributor','Supplier provided')}${infoRow('Location',s.loc,verified?'Verified':'Unverified')}${infoRow('Phone',verified?'+234 801 234 5678':'Not provided',verified?'Verified':'')}${infoRow('Email',verified?'sales@'+s.n.toLowerCase().split(' ')[0]+'.example':'Not provided',verified?'Verified':'')}</div>
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Products and pricing</h2><span class="demo-tag">Indicative</span></div>
+     ${prodRow('Premium basmati rice','$23.00 / bag')}${prodRow('Vegetable oil, 25L','$14.50 / carton')}${prodRow('Frozen chicken, 10kg','$14.00 / carton')}</div>
+   <div class="card chart-wrap"><div class="sec-head"><h2>Price history, basmati rice</h2><span class="chip">6 months</span></div>${priceChart()}</div>
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Recent quotations and orders</h2></div>
+     <div class="tbl-wrap" style="border:none;box-shadow:none;overflow-x:auto"><table class="tbl"><thead><tr><th>Ref</th><th>Request</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>
+       <tr onclick="openOrder('PO-2041')"><td class="r-id">PO-2041</td><td class="mut">Kitchen inventory restock</td><td class="num">$1,630</td><td><span class="pill p-ok"><span class="dot"></span>Paid</span></td><td class="mut num">3 Nov</td></tr>
+       <tr style="cursor:default"><td class="r-id">Q-0188</td><td class="mut">Beverage restock</td><td class="num">$1,180</td><td><span class="pill p-info"><span class="dot"></span>Quoted</span></td><td class="mut num">1 Nov</td></tr>
+       <tr style="cursor:default"><td class="r-id">PO-1994</td><td class="mut">Dry goods top up</td><td class="num">$640</td><td><span class="pill p-ok"><span class="dot"></span>Fulfilled</span></td><td class="mut num">18 Oct</td></tr>
+     </tbody></table></div></div>
+ </div>
+ <div style="display:flex;flex-direction:column;gap:20px">
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Verification evidence</h2></div>
+     ${evMap.map(e=>{const ok=s.ev&&s.ev[e[0]]===1;return `<div class="ev-row"><div class="ev-ic ${ok?'yes':'no'}">${ok?ic('check'):ic('x')}</div><div style="flex:1"><div class="et">${e[1]}</div><div class="es">${ok?e[2]:'Not verified, insufficient evidence'}</div></div></div>`;}).join('')}
+     <p class="mut3" style="font-size:11.5px;margin-top:10px">Procura never marks a supplier verified on model confidence alone. Each item reflects actual evidence on file.</p></div>
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Risk observations</h2></div>
+     ${verified?'<div class="insight" style="margin-bottom:0"><div class="ic" style="color:var(--ok)">'+ic('check')+'</div><p>No risk flags. Consistent fulfilment and a verified payment destination.</p></div>':'<div class="insight" style="margin-bottom:10px"><div class="ic" style="color:var(--warn)">'+ic('alert')+'</div><p>Payment destination not yet matched to a verified business identity.</p></div><div class="insight" style="margin-bottom:0"><div class="ic" style="color:var(--warn)">'+ic('alert')+'</div><p>No historical delivery records on file.</p></div>'}</div>
+   <div class="card" style="padding:20px"><div class="sec-head"><h2>Activity</h2></div><div class="vtl">
+     ${vtl('Quotation received','3 Nov, 09:44',true)}${vtl('Added to comparison','3 Nov, 09:46',true)}${vtl('Selected for PO-2041','3 Nov, 09:47',verified)}${vtl('Payment confirmed','3 Nov, 09:51',verified)}${vtl('Discovered by agent','18 Oct',false)}
+   </div></div>
+ </div></div>`;};
+
+const ORDERS={
+ 'PO-2041':{sup:'Greenfield Supply Co.',supAddr:'12 Marina Rd, Lagos, NG',wallet:'0x7Af3…9e21',req:'Kitchen inventory restock',status:'Paid',tone:'ok',items:[['Premium basmati rice','50 bags','$23.00','$1,150.00'],['Vegetable oil, 25L','20 cartons','$14.50','$290.00'],['Frozen chicken, 10kg','10 cartons','$14.00','$140.00']],sub:'1,580.00',del:'50.00',tot:'1,630.00',paid:true,tx:'0x9f3c7a…e21b04',date:'3 Nov 2026',deadline:'10 Nov 2026'},
+ 'PO-2039':{sup:'Rightway Packaging',supAddr:'8 Industrial Ave, Lagos, NG',wallet:'0x3B1c…77a2',req:'Packaging supplies',status:'Pending approval',tone:'warn',items:[['Kraft boxes, medium','400 units','$1.20','$480.00'],['Food containers','1,000 units','$0.32','$320.00'],['Branded labels','2,000 units','$0.04','$80.00']],sub:'880.00',del:'0.00',tot:'880.00',paid:false,tx:null,date:'3 Nov 2026',deadline:'12 Nov 2026'},
+ 'PO-2035':{sup:'TechPoint Office',supAddr:'22 Allen Ave, Ikeja, Lagos, NG',wallet:'0x9D2a…5c7f',req:'Office equipment',status:'Fulfilled',tone:'ok',items:[['Office desk, oak','4 units','$320.00','$1,280.00'],['Ergonomic chair','6 units','$140.00','$840.00'],['Monitor, 27 inch','2 units','$145.00','$290.00']],sub:'2,410.00',del:'0.00',tot:'2,410.00',paid:true,tx:'0x2a71c4…8b3c9f',date:'28 Oct 2026',deadline:'2 Nov 2026'},
+ 'PO-2031':{sup:'Harvest Bulk Foods',supAddr:'5 Trade Fair Complex, Lagos, NG',wallet:'0x44Be…22a1',req:'Dry goods top up',status:'Processing',tone:'info',items:[['Jasmine rice','30 bags','$18.00','$540.00'],['Table salt, 5kg','20 units','$5.00','$100.00']],sub:'640.00',del:'0.00',tot:'640.00',paid:true,tx:'0x5d18a0…1c4ae',date:'26 Oct 2026',deadline:'1 Nov 2026'},
+ 'PO-2028':{sup:'Uniforma Ltd',supAddr:'18 Awolowo Rd, Ikoyi, Lagos, NG',wallet:'0x1Fc8…90de',req:'Uniform order',status:'Fulfilled',tone:'ok',items:[['Chef jacket','20 units','$22.00','$440.00'],['Apron, branded','40 units','$5.50','$220.00'],['Cap','30 units','$3.00','$90.00']],sub:'750.00',del:'0.00',tot:'750.00',paid:true,tx:'0x8e02f3…ab11c',date:'24 Oct 2026',deadline:'29 Oct 2026'},
+};
+VIEWS.orderDetail=()=>{const id=ORDERS[curOrderId]?curOrderId:'PO-2041',o=ORDERS[id];
+ return `<div class="phead"><div><div class="eyebrow" style="margin-bottom:6px">Purchase order <span class="demo-tag" style="margin-left:4px">Demo</span></div><h1>${id}</h1><p>${o.req}</p></div>
+   <div class="acts"><button class="btn btn-sec btn-sm" onclick="go('orders')">${ic('prev')} All orders</button><button class="btn btn-sec" onclick="toast('Exporting ${id}.pdf')">${ic('doc')} Export PDF</button>${o.paid?`<button class="btn btn-pri" onclick="openPayment(0)">View payment ${ic('arr')}</button>`:`<button class="btn btn-pri" onclick="go('approvals')">${ic('key')} Approve</button>`}</div></div>
+ <div class="card po-doc">
+   <div class="po-head"><div><div class="eyebrow">Status</div><div style="margin-top:7px"><span class="pill p-${o.tone}"><span class="dot"></span>${o.status}</span></div></div>
+     <div style="text-align:right"><div class="eyebrow">Total</div><div class="num" style="font-size:24px;font-weight:800;margin-top:4px">$${o.tot}</div><div class="mut3" style="font-size:12px">USDC.e · issued ${o.date}</div></div></div>
+   <div class="po-parties">
+     <div class="po-party"><div class="pl">Buyer</div><div class="pn">Northstar Kitchen</div><div class="pa">14 Adeola Odeku St, Victoria Island, Lagos, NG<br>Wallet 0x4C8e…B217 · Kite testnet</div></div>
+     <div class="po-party"><div class="pl">Supplier</div><div class="pn">${o.sup}</div><div class="pa">${o.supAddr}<br>Wallet ${o.wallet} · ${o.paid?'Verified destination':'Pending verification'}</div></div></div>
+   <div class="po-items"><table class="tbl"><thead><tr><th>Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit price</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+     ${o.items.map(it=>`<tr style="cursor:default"><td><b>${it[0]}</b></td><td class="num" style="text-align:right">${it[1]}</td><td class="num" style="text-align:right">${it[2]}</td><td class="num" style="text-align:right">${it[3]}</td></tr>`).join('')}</tbody></table></div>
+   <div style="padding:10px 0 2px">${poTotal('Subtotal','$'+o.sub)}${poTotal('Delivery','$'+o.del)}<div class="po-total-row grand"><span>Total</span><span class="num">$${o.tot}</span></div></div>
+   <div class="po-section"><div class="eyebrow" style="margin-bottom:12px">Terms</div><div class="two-col">${specRow('Delivery terms','Delivered duty paid')}${specRow('Payment conditions','On authorisation')}${specRow('Delivery deadline',o.deadline)}${specRow('Currency','USDC.e')}</div></div>
+   <div class="po-section"><div class="eyebrow" style="margin-bottom:12px">Approval and payment</div>
+     ${o.paid?`<div class="feed-i"><div class="feed-dot" style="background:var(--ok-bg);color:var(--ok)">${ic('shield')}</div><div><div class="ft">Approved by Chris Godwin</div><div class="fs">Passkey authorised · session sess_8K2…a1 · ${o.date}, 09:50</div></div></div><div class="feed-i"><div class="feed-dot" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</div><div><div class="ft">Payment confirmed</div><div class="fs">tx ${o.tx} · Kite testnet · ${o.date}, 09:51</div></div></div>`:`<div class="insight" style="margin-bottom:0"><div class="ic" style="color:var(--warn)">${ic('alert')}</div><p>Awaiting your authorisation. No payment has been made on this order.</p></div>`}</div>
+   ${o.paid?`<div class="po-section"><div class="eyebrow" style="margin-bottom:12px">Fulfilment</div><div class="vtl">${vtl('Payment confirmed',o.date+', 09:51',true)}${vtl('Order acknowledged',o.date+', 10:20',o.status!=='Processing'||true)}${vtl('Preparing shipment',o.status==='Fulfilled'?'Completed':'In progress',o.status==='Fulfilled')}${vtl('Delivered',o.status==='Fulfilled'?o.deadline:'Expected '+o.deadline,o.status==='Fulfilled')}</div></div>`:''}
+ </div>`;};
+
+const PAYMENTS=[
+ {tx:'0x9f3c…b04',full:'0x9f3c7a4b2e…d9e21b04f9',sup:'Greenfield Supply Co.',po:'PO-2041',req:'Kitchen inventory restock',amt:'1,630.00',net:'Kite testnet',status:'ok',statusTxt:'Confirmed',date:'3 Nov 2026, 09:51',to:'0x7Af3…9e21',session:'sess_8K2…a1',asset:'USDC.e'},
+ {tx:'0x2a71…c9f',full:'0x2a71c4f8…6b3c9f',sup:'TechPoint Office',po:'PO-2035',req:'Office equipment',amt:'2,410.00',net:'Kite testnet',status:'ok',statusTxt:'Confirmed',date:'28 Oct 2026, 14:02',to:'0x9D2a…5c7f',session:'sess_7F1…b9',asset:'USDC.e'},
+ {tx:'0x5d18…4ae',full:'0x5d18a09c…b1c4ae',sup:'Harvest Bulk Foods',po:'PO-2031',req:'Dry goods top up',amt:'640.00',net:'Kite testnet',status:'info',statusTxt:'Pending',date:'26 Oct 2026, 11:30',to:'0x44Be…22a1',session:'sess_6C9…22',asset:'USDC.e'},
+ {tx:'0x8e02…11c',full:'0x8e02f37a…5ab11c',sup:'Uniforma Ltd',po:'PO-2028',req:'Uniform order',amt:'750.00',net:'Kite testnet',status:'ok',statusTxt:'Confirmed',date:'24 Oct 2026, 16:45',to:'0x1Fc8…90de',session:'sess_5A3…7d',asset:'USDC.e'},
+];
+function drow(l,v,mono){return `<div class="pp-stat"><span class="mut">${l}</span><span class="v" style="${mono?'font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;text-align:right;max-width:62%':''}">${v}</span></div>`;}
+function openPayment(i){const p=PAYMENTS[i]||PAYMENTS[0];
+ document.getElementById('drawer').innerHTML=`
+  <div class="drawer-head"><div><div class="eyebrow">Payment</div><div style="font-weight:700;font-size:15px;margin-top:3px;font-family:ui-monospace,monospace">${p.tx}</div></div><button class="icon-btn" onclick="closeDrawer()">${ic('x')}</button></div>
+  <div class="drawer-body">
+    <div style="text-align:center;padding:8px 0 18px"><div class="num" style="font-size:30px;font-weight:800">$${p.amt}</div><div class="mut" style="font-size:13px;margin-top:4px">${p.asset} · ${p.net}</div><div style="margin-top:10px"><span class="pill p-${p.status}"><span class="dot"></span>${p.statusTxt}</span></div></div>
+    <div class="card" style="padding:4px 16px">${drow('Recipient',p.sup)}${drow('To address',p.to,true)}${drow('Transaction',p.full,true)}${drow('Network',p.net)}${drow('Asset',p.asset)}${drow('Timestamp',p.date)}</div>
+    <div class="eyebrow" style="margin:18px 0 8px">Linked records</div>
+    <div class="card" style="padding:4px 16px">${drow('Purchase order',p.po)}${drow('Request',p.req)}${drow('Passport session',p.session,true)}</div>
+    <div class="tx-hash" style="margin-top:16px">${ic('ext')} View on Kite explorer</div>
+    <p class="mut3" style="font-size:11px;text-align:center;margin-top:10px">Status reflects the actual chain response for this testnet transaction.</p>
+  </div>
+  <div class="drawer-foot"><button class="btn btn-sec" style="flex:1" onclick="closeDrawer();openOrder('${p.po}')">View purchase order ${ic('arr')}</button></div>`;
+ document.getElementById('drawerOv').classList.add('on');document.getElementById('drawer').classList.add('on');}
+function closeDrawer(){document.getElementById('drawerOv').classList.remove('on');document.getElementById('drawer').classList.remove('on');}
+
+/* ===================== GUIDED DEMO ===================== */
+let demoMode=false, demoIdx=0, demoPlaying=true, demoTimer=null;
+const DEMO=[
+ {view:'dashboard',sel:'#kpiRow',dur:5200,cap:'<b>Northstar Kitchen</b> is a growing restaurant group. This is its procurement overview: spend, active requests, savings found, and what needs authorisation.'},
+ {view:'newreq',sel:'#askCard',dur:6200,cap:'The owner describes the need in plain language: <b>50 bags of rice, 20 cartons of oil, 10 of chicken</b>, under a $2,000 delivered budget. No forms required.'},
+ {view:'workspace',sel:'#execCard',dur:8500,cap:'Procura runs the request through an <b>11 stage workflow</b> orchestrated by SERV Reasoning. Watch it source, collect quotes, evaluate evidence and compare, live.'},
+ {view:'compare',sel:'#recBanner',dur:6500,cap:'Seven quotes compared. <b>Greenfield Supply</b> is recommended: the lowest delivered price that meets the requirements, with delivery history on record.'},
+ {view:'compare',sel:'#cmpGrid .cmp-card[data-i="2"] .ev-grid',dur:6500,cap:'Every recommendation is backed by <b>evidence</b>. Suppliers missing verified contact or payment data are flagged, never marked verified by guesswork.'},
+ {view:'orders',sel:'.tbl-wrap',dur:5500,cap:'The agent prepares a <b>purchase order</b> with validated quantities and totals. Nothing moves until a person authorises it.'},
+ {view:'approvals',sel:'#apprCard',dur:7000,cap:'Before any money moves, the owner reviews <b>exactly who gets paid, how much</b>, and the session limits enforced by Kite Passport.'},
+ {view:'approvals',sel:'#apprActions',dur:7500,cap:'Authorisation happens with a <b>passkey</b>. The agent can only spend inside the approved session, and can never raise its own limits.',action:demoRunPasskey},
+ {view:'payments',sel:'#payTop',dur:7000,cap:'Payment is <b>confirmed on chain</b>. The purchase order is marked paid, and the full trail is recorded in Activity. That is one complete procurement cycle, start to finish.'},
+];
+function buildDemoBar(){
+ const d=DEMO[demoIdx], pct=((demoIdx+1)/DEMO.length)*100;
+ document.getElementById('demoBar').innerHTML=`<div class="db-prog"><i style="width:${pct}%"></i></div>
+   <div class="db-main"><div class="db-num">${String(demoIdx+1).padStart(2,'0')} / ${String(DEMO.length).padStart(2,'0')}</div>
+   <div class="db-cap">${d.cap}</div>
+   <div class="db-ctrls">
+     <button class="db-btn" onclick="demoNav(-1)" ${demoIdx===0?'disabled':''} title="Previous">${ic('prev')}</button>
+     <button class="db-btn" id="demoPlay" onclick="demoToggle()" title="Play or pause">${demoPlaying?ic('pause'):ic('play')}</button>
+     <button class="db-btn pri" onclick="demoNav(1)" title="${demoIdx===DEMO.length-1?'Finish':'Next'}">${demoIdx===DEMO.length-1?ic('check'):ic('next')}</button>
+   </div></div>`;
+}
+function startDemo(){
+ document.getElementById('landing').style.display='none';
+ document.getElementById('app').style.display='block';
+ document.body.classList.add('demo');
+ demoMode=true;demoIdx=0;demoPlaying=true;
+ demoGo(0);
+}
+function demoGo(n){
+ if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}
+ demoIdx=Math.max(0,Math.min(DEMO.length-1,n));
+ const step=DEMO[demoIdx];
+ go(step.view);
+ buildDemoBar();
+ setTimeout(()=>{
+   document.querySelectorAll('.demo-spot').forEach(e=>e.classList.remove('demo-spot'));
+   if(step.sel){const el=document.querySelector('#view '+step.sel)||document.querySelector(step.sel);if(el){el.classList.add('demo-spot');el.scrollIntoView({block:'center'});}}
+   if(step.action)step.action();
+ },420);
+ if(demoPlaying)scheduleDemo(step.dur||5500);
+}
+function scheduleDemo(ms){if(demoTimer)clearTimeout(demoTimer);demoTimer=setTimeout(()=>{if(demoIdx<DEMO.length-1)demoGo(demoIdx+1);else{demoPlaying=false;buildDemoBar();}},ms);}
+function demoNav(dir){if(dir>0&&demoIdx===DEMO.length-1){exitDemo();return;}demoGo(demoIdx+dir);}
+function demoToggle(){demoPlaying=!demoPlaying;if(demoPlaying)scheduleDemo(2600);else if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}buildDemoBar();}
+function demoRunPasskey(){openPasskey();setTimeout(()=>{const b=document.getElementById('pkConfirm');if(b)runPasskey();},1500);}
+function exitDemo(){
+ if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}
+ demoMode=false;demoPlaying=false;
+ document.body.classList.remove('demo');
+ document.querySelectorAll('.demo-spot').forEach(e=>e.classList.remove('demo-spot'));
+ closePasskey();
+ go('dashboard');
+ toast('Demo complete. You are now in the live app.');
+}
+
+/* ===================== ONBOARDING ===================== */
+const OB_STEPS=['Business','Requirements','Preferences','Financials','Your agent'];
+let obStep=0;
+const obState={name:'Northstar Kitchen',industry:'Restaurant',country:'Nigeria',currency:'USD',size:'11-50',website:'',categories:new Set(['Food & ingredients','Packaging','Beverages']),quality:'Balanced',frequency:'Weekly',delivery:'Balanced',suppliers:'',monthly:'20,000',single:'2,500',approveAbove:'500'};
+function obSel(el,group,val){obState[group]=val;el.parentNode.querySelectorAll('.seg-i').forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+function obCat(el,val){if(obState.categories.has(val)){obState.categories.delete(val);el.classList.remove('on');}else{obState.categories.add(val);el.classList.add('on');}}
+function seg(group,o){return `<div class="seg-i ${obState[group]===o?'on':''}" onclick="obSel(this,'${group}','${o}')">${o}</div>`;}
+function curInput(key){return `<div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:600;pointer-events:none">$</span><input class="ob-input num" style="padding-left:24px" value="${obState[key]}" oninput="obState['${key}']=this.value"></div>`;}
+function obCurrency(){return `<select class="ob-input" onchange="obState.currency=this.value">${['USD','NGN','GBP','EUR','GHS'].map(c=>`<option ${obState.currency===c?'selected':''}>${c}</option>`).join('')}</select>`;}
+function sumRow(l,v){return `<div class="ob-sum-row"><span class="mut">${l}</span><span class="v">${v}</span></div>`;}
+const OB_VIEWS=[
+ ()=>`<div class="ob-step"><h2 class="ob-kick">Tell us about your business</h2><p class="ob-sub">This helps Procura tailor sourcing and spending to how you operate.</p>
+   <div class="ob-field"><label>Business name</label><input class="ob-input" value="${obState.name}" oninput="obState.name=this.value"></div>
+   <div class="ob-field"><label>Industry</label><div class="seg">${['Restaurant','Hotel','Catering','Food service','Retail','Other'].map(o=>seg('industry',o)).join('')}</div></div>
+   <div class="ob-grid2"><div class="ob-field"><label>Country</label><input class="ob-input" value="${obState.country}" oninput="obState.country=this.value"></div><div class="ob-field"><label>Default currency</label>${obCurrency()}</div></div>
+   <div class="ob-field"><label>Business size <span class="hint">team members</span></label><div class="seg">${['1-10','11-50','51-200','200+'].map(o=>seg('size',o)).join('')}</div></div>
+   <div class="ob-field"><label>Website <span class="hint">optional</span></label><input class="ob-input" placeholder="northstarkitchen.com" value="${obState.website}" oninput="obState.website=this.value"></div></div>`,
+ ()=>`<div class="ob-step"><h2 class="ob-kick">What do you buy regularly?</h2><p class="ob-sub">Select the categories Procura should source for. You can refine these anytime.</p>
+   <div class="ob-chips">${['Food & ingredients','Beverages','Packaging','Cleaning & sanitation','Equipment','Office supplies','Electronics','Raw materials','Professional services'].map(c=>`<div class="ob-chip ${obState.categories.has(c)?'on':''}" onclick="obCat(this,'${c}')"><span class="ck">${ic('check')}</span>${c}</div>`).join('')}</div>
+   <p class="mut3" style="font-size:12.5px;margin-top:18px">Tip: pick the handful you order most. Procura learns the rest from your activity.</p></div>`,
+ ()=>`<div class="ob-step"><h2 class="ob-kick">Your purchasing preferences</h2><p class="ob-sub">How Procura should weigh its recommendations when offers are close.</p>
+   <div class="ob-field"><label>Quality priority</label><div class="seg">${['Budget','Balanced','Premium'].map(o=>seg('quality',o)).join('')}</div></div>
+   <div class="ob-field"><label>Purchasing frequency</label><div class="seg">${['Weekly','Fortnightly','Monthly','Ad hoc'].map(o=>seg('frequency',o)).join('')}</div></div>
+   <div class="ob-field"><label>Delivery preference</label><div class="seg">${['Fastest','Cheapest','Balanced'].map(o=>seg('delivery',o)).join('')}</div></div>
+   <div class="ob-field"><label>Preferred suppliers <span class="hint">optional, comma separated</span></label><input class="ob-input" placeholder="Greenfield Supply, Harvest Bulk" value="${obState.suppliers}" oninput="obState.suppliers=this.value"></div></div>`,
+ ()=>`<div class="ob-step"><h2 class="ob-kick">Set your financial guardrails</h2><p class="ob-sub">Procura can only ever spend within these limits. Change them anytime, and fund your wallet later.</p>
+   <div class="ob-field"><label>Monthly procurement budget</label>${curInput('monthly')}</div>
+   <div class="ob-grid2"><div class="ob-field"><label>Maximum single purchase</label>${curInput('single')}</div><div class="ob-field"><label>Require approval above</label>${curInput('approveAbove')}</div></div>
+   <div class="card" style="padding:16px;display:flex;gap:12px;align-items:flex-start;margin-top:4px"><span style="color:var(--forest-2);flex:none;width:18px">${ic('shield')}</span><p style="font-size:12.5px;color:var(--ink-2);line-height:1.5">These limits are enforced by Kite Passport, not the interface. Your agent can never raise its own authority.</p></div></div>`,
+ ()=>{const cats=[...obState.categories];return `<div class="ob-step"><div class="ob-agent-hero"><div class="ob-orb-xl">${ic('spark')}</div><h2 class="ob-kick">Your procurement assistant is ready.</h2><p class="ob-sub">Procura can now source products, evaluate suppliers and organise your purchasing, within the authority you set.</p></div>
+   <div class="ob-summary">${sumRow('Business',obState.name+' · '+obState.industry)}${sumRow('Location',obState.country+' · '+obState.currency)}${sumRow('Buys',cats.length?cats.slice(0,3).join(', ')+(cats.length>3?' +'+(cats.length-3)+' more':''):'Not set')}${sumRow('Monthly budget','$'+obState.monthly)}${sumRow('Max single purchase','$'+obState.single)}</div>
+   <p class="mut3" style="font-size:12px;text-align:center;margin-top:16px">You will connect and fund Kite Passport when you first authorise a payment.</p></div>`;},
+];
+function startOnboarding(){document.getElementById('landing').style.display='none';document.getElementById('app').style.display='none';const o=document.getElementById('onboarding');o.style.display='flex';obStep=0;
+ o.innerHTML=`<div class="ob-top"><div class="ob-top-in"><div class="wordmark"><span class="mark">${ic('leaf')}</span>Procura</div><div class="ob-steplabel" id="obLabel"></div></div><div class="ob-prog"><i id="obProg" style="width:0%"></i></div></div>
+   <div class="ob-body"><div class="ob-wrap"><div class="ob-dots" id="obDots"></div><div id="obStep"></div></div></div>
+   <div class="ob-foot"><div class="ob-foot-in"><button class="btn btn-ghost" id="obBack" onclick="obBack()">${ic('prev')} Back</button><div style="flex:1"></div><button class="btn btn-pri btn-lg" id="obNextBtn" onclick="obNext()"></button></div></div>`;
+ renderObStep();}
+function renderObStep(){
+ document.getElementById('obStep').innerHTML=OB_VIEWS[obStep]();
+ document.getElementById('obLabel').textContent=`Step ${obStep+1} of ${OB_STEPS.length} · ${OB_STEPS[obStep]}`;
+ document.getElementById('obProg').style.width=((obStep+1)/OB_STEPS.length*100)+'%';
+ document.getElementById('obDots').innerHTML=OB_STEPS.map((s,i)=>`<div class="ob-dot ${i<obStep?'done':i===obStep?'now':''}"></div>`).join('');
+ document.getElementById('obBack').style.visibility=obStep===0?'hidden':'visible';
+ document.getElementById('obNextBtn').innerHTML=obStep===OB_STEPS.length-1?`${ic('bolt')} Enter workspace`:`Continue ${ic('arr')}`;
+ const b=document.querySelector('.ob-body');if(b)b.scrollTop=0;
+}
+function obNext(){if(obStep===0&&!obState.name.trim()){toast('Please enter your business name');return;}if(obStep===1&&obState.categories.size===0){toast('Select at least one category');return;}if(obStep<OB_STEPS.length-1){obStep++;renderObStep();}else obFinish();}
+function obBack(){if(obStep>0){obStep--;renderObStep();}}
+function obFinish(){document.getElementById('onboarding').style.display='none';enterApp('dashboard');toast('Welcome to Procura, '+obState.name.split(' ')[0]+'. Your agent is ready.');}
+
+/* ===================== POLISH: palette, popups, filters, loading ===================== */
+function setActiveNav(active){document.querySelectorAll('.nav-i').forEach(n=>n.classList.toggle('on',n.dataset.k===active));}
+function emptyState(icn,title,sub){return `<div class="empty"><div class="empty-ic">${ic(icn)}</div><h3>${title}</h3><p>${sub}</p></div>`;}
+
+/* functional filters */
+const PROC_ROWS=[['PR-0142','Kitchen inventory restock','Chris G.','$2,000','info','Sourcing','3 Nov'],['PR-0141','Packaging supplies','Ada N.','$1,000','warn','Awaiting approval','3 Nov'],['PR-0140','Cleaning and sanitation','Chris G.','$600','mute','Draft','2 Nov'],['PR-0139','Beverage restock','Ada N.','$1,400','info','Comparing','1 Nov'],['PR-0138','Office equipment','Chris G.','$2,500','ok','Completed','28 Oct'],['PR-0137','Uniform order','Tunde A.','$750','ok','Completed','24 Oct'],['PR-0136','Table linens','Ada N.','$420','err','Cancelled','20 Oct']];
+function procRowHTML(r){const dest=r[0]==='PR-0142'?'workspace':r[5]==='Completed'?'orders':r[5]==='Awaiting approval'?'approvals':'compare';return `<tr onclick="go('${dest}')"><td class="r-id">${r[0]}</td><td><b>${r[1]}</b></td><td class="mut">${r[2]}</td><td class="num">${r[3]}</td><td><span class="pill p-${r[4]}"><span class="dot"></span>${r[5]}</span></td><td class="mut num">${r[6]}</td></tr>`;}
+function filterProc(el,f){el.parentNode.querySelectorAll('.filt').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+ const rows=f==='All'?PROC_ROWS:PROC_ROWS.filter(r=>r[5]===f),body=document.getElementById('procBody');
+ body.innerHTML=rows.length?rows.map(procRowHTML).join(''):`<tr><td colspan="6" style="padding:0">${emptyState('pkg','No '+f.toLowerCase()+' requests','Nothing here right now. Try another filter or create a request.')}</td></tr>`;}
+function supCardHTML(s){return `<div class="card" style="padding:18px;cursor:pointer" onclick="openSupplier('${s.id}')"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div class="q-logo" style="width:40px;height:40px;background:${logoColor(s.l)}">${s.l}</div><div style="min-width:0"><div style="font-weight:700;font-size:14.5px">${s.n}</div><div class="mut3" style="font-size:12px">${s.loc}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${s.cats.split(' · ').map(c=>`<span class="chip" style="padding:3px 9px;font-size:11px">${c}</span>`).join('')}</div><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line)">${s.risk==='ok'?'<span class="pill p-ok"><span class="dot"></span>Verified</span>':s.risk==='warn'?'<span class="pill p-warn"><span class="dot"></span>Review required</span>':'<span class="pill p-info"><span class="dot"></span>Partial evidence</span>'}<span class="mut3" style="font-size:11.5px">${s.lastQuote||'Active supplier'}</span></div></div>`;}
+function filterSup(el,f){el.parentNode.querySelectorAll('.filt').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+ let list=SUPPLIER_DIR;
+ if(f==='Verified')list=list.filter(s=>s.risk==='ok');else if(f==='Review required')list=list.filter(s=>s.risk==='warn');
+ else if(['Dry goods','Packaging','Beverages'].includes(f))list=list.filter(s=>s.cats.toLowerCase().includes(f.toLowerCase()));
+ const g=document.getElementById('supGrid');
+ g.innerHTML=list.length?list.map(supCardHTML).join(''):`<div style="grid-column:1/-1">${emptyState('users','No matching suppliers','Try a different filter, or add a supplier.')}</div>`;}
+
+/* command palette */
+let palFlat=[], palSel=0;
+function paletteData(){return [
+ {g:'Navigate',items:NAV.flatMap(gr=>gr.items).map(it=>({t:it.t,ic:it.i,run:()=>go(it.k)}))},
+ {g:'Actions',items:[{t:'New procurement request',ic:'plus',run:()=>go('newreq')},{t:'Talk to Procura',ic:'msg',run:()=>go('assistant')},{t:'Watch guided demo',ic:'play',run:()=>startDemo()},{t:'Toggle light / dark',ic:'moon',run:()=>toggleTheme()},{t:'Sign out',ic:'arr',sub:'Back to landing',run:()=>signOut()}]},
+ {g:'Suppliers',items:SUPPLIER_DIR.map(s=>({t:s.n,ic:'users',sub:s.loc,run:()=>openSupplier(s.id)}))},
+];}
+function openPalette(){const ov=document.getElementById('cmdkOv');closePopups();
+ document.getElementById('cmdk').innerHTML=`<div class="cmdk-in">${ic('search')}<input id="cmdkInput" placeholder="Search actions, suppliers, pages…" autocomplete="off"><kbd>ESC</kbd></div><div class="cmdk-list" id="cmdkList"></div><div class="cmdk-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span></div>`;
+ ov.classList.add('on');palSel=0;renderPalette('');
+ const inp=document.getElementById('cmdkInput');inp.value='';setTimeout(()=>inp.focus(),30);
+ inp.oninput=()=>{palSel=0;renderPalette(inp.value);};
+ inp.onkeydown=(e)=>{if(e.key==='ArrowDown'){e.preventDefault();palSel=Math.min(palFlat.length-1,palSel+1);highlightPal();}else if(e.key==='ArrowUp'){e.preventDefault();palSel=Math.max(0,palSel-1);highlightPal();}else if(e.key==='Enter'){e.preventDefault();if(palFlat[palSel])runPal(palSel);}else if(e.key==='Escape'){closePalette();}};}
+function renderPalette(q){q=(q||'').trim().toLowerCase();palFlat=[];let html='';
+ paletteData().forEach(gr=>{const items=gr.items.filter(it=>!q||it.t.toLowerCase().includes(q)||(it.sub&&it.sub.toLowerCase().includes(q))||gr.g.toLowerCase().includes(q));
+   if(items.length){html+=`<div class="cmdk-grp">${gr.g}</div>`;items.forEach(it=>{const idx=palFlat.length;palFlat.push(it);html+=`<div class="cmdk-i" data-idx="${idx}" onclick="runPal(${idx})" onmouseenter="palSel=${idx};highlightPal()"><div class="ci">${ic(it.ic)}</div><div><div>${it.t}</div>${it.sub?`<div class="sub">${it.sub}</div>`:''}</div><span class="go-arr">${ic('arr')}</span></div>`;});}});
+ document.getElementById('cmdkList').innerHTML=html||`<div class="cmdk-empty">No matches for “${q}”</div>`;
+ if(palSel>=palFlat.length)palSel=Math.max(0,palFlat.length-1);highlightPal();}
+function highlightPal(){document.querySelectorAll('#cmdkList .cmdk-i').forEach(el=>el.classList.toggle('sel',+el.dataset.idx===palSel));const s=document.querySelector('#cmdkList .cmdk-i.sel');if(s)s.scrollIntoView({block:'nearest'});}
+function runPal(i){const it=palFlat[i];closePalette();if(it&&it.run)setTimeout(it.run,130);}
+function closePalette(){document.getElementById('cmdkOv').classList.remove('on');}
+
+/* notifications */
+const NOTIFS=[
+ {ic:'check',t:'Payment confirmed',s:'Greenfield Supply · $1,630',time:'2m',to:'payments',unread:true},
+ {ic:'shield',t:'Approval required',s:'Packaging supplies · $880',time:'1h',to:'approvals',unread:true},
+ {ic:'spark',t:'Recommendation ready',s:'Kitchen restock · Supplier B',time:'1h',to:'compare',unread:false},
+ {ic:'users',t:'New supplier evidence',s:'Clearwater Beverages profile',time:'3h',to:'suppliers',unread:false},
+];
+function buildNotifHTML(){return `<div class="notif-h"><h3>Notifications</h3><a onclick="markAllRead()">Mark all read</a></div><div class="notif-list">${NOTIFS.map(x=>`<div class="notif-i ${x.unread?'unread':''}" onclick="go('${x.to}')">${x.unread?'<span class="nd2"></span>':''}<div class="feed-dot" ${x.ic==='check'?'style="background:var(--ok-bg);color:var(--ok)"':''}>${ic(x.ic)}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${x.t}</div><div style="font-size:11.5px;color:var(--ink-3)">${x.s}</div></div><div style="font-size:11px;color:var(--ink-3)">${x.time}</div></div>`).join('')}</div>`;}
+function toggleNotif(e){if(e)e.stopPropagation();const n=document.getElementById('notif'),open=n.classList.contains('on');closePopups();if(open)return;n.innerHTML=buildNotifHTML();n.classList.add('on');setTimeout(()=>document.addEventListener('click',outsideNotif),0);}
+function outsideNotif(e){const n=document.getElementById('notif');if(!n.contains(e.target)&&!e.target.closest('#bellBtn'))closePopups();}
+function markAllRead(){NOTIFS.forEach(x=>x.unread=false);const d=document.querySelector('#bellBtn .ndot');if(d)d.remove();document.getElementById('notif').innerHTML=buildNotifHTML();}
+
+/* user menu */
+function toggleUserMenu(e){if(e)e.stopPropagation();const m=document.getElementById('userMenu'),open=m.classList.contains('on');closePopups();if(open)return;
+ m.innerHTML=`<div class="menu-i" onclick="toggleTheme()">${ic('moon')} Toggle light / dark</div><div class="menu-i" onclick="closePopups();openPalette()">${ic('search')} Command menu</div><div class="menu-i" onclick="go('settings')">${ic('cog')} Business settings</div><div class="menu-i" onclick="signOut()">${ic('arr')} Sign out</div>`;
+ m.classList.add('on');setTimeout(()=>document.addEventListener('click',outsideMenu),0);}
+function outsideMenu(e){const m=document.getElementById('userMenu');if(!m.contains(e.target)&&!e.target.closest('.side-user'))closePopups();}
+
+function closePopups(){document.getElementById('notif')?.classList.remove('on');document.getElementById('userMenu')?.classList.remove('on');document.removeEventListener('click',outsideNotif);document.removeEventListener('click',outsideMenu);}
+function closeAll(){closePalette();closeDrawer();closePasskey();closePopups();toggleSide(false);}
+function signOut(){closeAll();if(agentTimer){clearInterval(agentTimer);agentTimer=null;}if(demoTimer){clearTimeout(demoTimer);demoTimer=null;}document.body.classList.remove('demo');demoMode=false;document.getElementById('app').style.display='none';document.getElementById('onboarding').style.display='none';document.getElementById('landing').style.display='block';window.scrollTo(0,0);}
+
+/* sourcing loading transition */
+function startSourcing(){const v=document.getElementById('view');closePopups();
+ document.getElementById('crumb').innerHTML=`Procura <span>›</span> <b>Procurement workspace</b>`;setActiveNav('procurement');curView='workspace';v.scrollTop=0;
+ v.innerHTML=`<div class="sourcing"><div class="ap-orb live">${ic('spark')}</div><h2>Spinning up your procurement agent</h2><p class="mut">Procura is reading your request and preparing to source suppliers.</p><div class="src-steps">${['Parsing request','Extracting purchasing constraints','Searching supplier networks'].map((s,i)=>`<div class="src-step" style="animation-delay:${i*0.4}s">${s}</div>`).join('')}</div></div>`;
+ setTimeout(()=>go('workspace'),1700);}
+
+/* keyboard */
+document.addEventListener('keydown',e=>{
+ if((e.metaKey||e.ctrlKey)&&(e.key==='k'||e.key==='K')){if(document.getElementById('app').style.display==='block'){e.preventDefault();openPalette();}}
+ else if(e.key==='Escape'){closeAll();}
+});
+
+/* boot */
+hydrate();buildNav();
+(function playHero(){const rows=document.getElementById('heroRows');if(!rows)return;
+ const data=[['A','Harvest Bulk','4-5 days','$1,730'],['B','Greenfield Supply','3-4 days','$1,630'],['C','Prime Provisions','2-3 days','$1,725']];
+ rows.innerHTML=data.map((d,i)=>`<div class="q-row ${d[0]==='B'?'rec':''}" data-i="${i}"><div class="q-logo" style="background:${logoColor(d[0])}">${d[0]}</div><div class="q-meta"><div class="nm">${d[1]} ${d[0]==='B'?'<span class="pill p-ok" style="font-size:10px;padding:2px 7px">Recommended</span>':''}</div><div class="sb">${d[2]}, evidence checked</div></div><div class="q-price num">${d[3]}<div class="sub">delivered</div></div></div>`).join('');
+ rows.querySelectorAll('.q-row').forEach((r,i)=>setTimeout(()=>r.classList.add('in'),400+i*450));
+ setTimeout(()=>{const b=document.getElementById('heroBudgetBar');if(b)b.style.width='81.5%';},1800);
+})();
+</script>

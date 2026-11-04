@@ -1,0 +1,20 @@
+{
+  "name": "@procura/procurement",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./core": "./src/core.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@procura/database": "workspace:*",
+    "@procura/policies": "workspace:*",
+    "@procura/shared": "workspace:*",
+    "drizzle-orm": "^0.45.0",
+    "zod": "^4.1.0"
+  }
+}
