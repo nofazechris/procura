@@ -108,10 +108,10 @@ async function seed(): Promise<DemoState> {
     });
   };
 
-  addRequest(142, "Kitchen inventory restock", "comparing", 2000, "Chris Godwin", ago(0, 2), [
-    { productName: "Premium basmati rice", category: "food", quantity: "50.000000", unit: "bags" },
-    { productName: "Vegetable oil", category: "food", quantity: "20.000000", unit: "cartons" },
-    { productName: "Frozen chicken", category: "food", quantity: "10.000000", unit: "cartons" },
+  addRequest(142, "Desk setup", "comparing", 120, "Chris Godwin", ago(0, 2), [
+    { productName: "USB-C charger", category: "electronics", quantity: "2.000000", unit: "pieces" },
+    { productName: "Desk lamp", category: "office", quantity: "1.000000", unit: "piece" },
+    { productName: "Notebook", category: "stationery", quantity: "3.000000", unit: "packs" },
   ]);
   addRequest(141, "Packaging supplies", "awaiting_approval", 1000, "Ada Nwosu", ago(0, 5), [
     { productName: "Kraft boxes, medium", category: "packaging", quantity: "400.000000", unit: "units" },
@@ -133,7 +133,7 @@ async function seed(): Promise<DemoState> {
     { productName: "Table linen set", category: "linens", quantity: "30.000000", unit: "sets" },
   ]);
 
-  // Suppliers for the Northstar scenario come from the real demo provider.
+  // Sellers for the sample request come from the real demo provider.
   const provider = new DemoSupplierProvider();
   await runSourcingInto(s, "demo-req-142", provider, ago(0, 2));
 

@@ -4,7 +4,7 @@ import type {
 } from "./types";
 
 /**
- * DemoSupplierProvider (Technical PRD s9.2): the fictional Northstar Kitchen dataset.
+ * DemoSupplierProvider (Technical PRD s9.2): a small fictional dataset for a desk setup (chargers, a lamp, notebooks).
  *
  * Everything here is invented for demonstration. It is stored with source_type = 'demo' and
  * every UI must label it as demo data. It is never presented as live, verified supplier data.
@@ -20,34 +20,34 @@ interface DemoSupplier extends Omit<SupplierSearchResult, "sourceType" | "eviden
   evidenceFlags: Partial<Record<EvidenceInput["evidenceType"], EvidenceInput["verificationStatus"]>>;
 }
 
-const KEYWORDS = ["rice", "oil", "chicken"] as const;
+const KEYWORDS = ["charger", "lamp", "notebook"] as const;
 const keywordFor = (name: string) => KEYWORDS.find((k) => name.toLowerCase().includes(k)) ?? null;
 
 const CATALOGUE: DemoSupplier[] = [
   {
-    externalRef: "demo-atlas",
-    name: "Atlas Food Distribution",
-    legalName: "Atlas Food Distribution Ltd (demo)",
-    description: "Fictional dry goods and frozen distributor.",
-    city: "Lagos", countryCode: "NG", email: "sales@atlas.demo.invalid", phone: "+234 000 000 0001",
-    categories: ["food", "dry goods", "frozen"],
+    externalRef: "demo-harbor",
+    name: "Harbor Electronics",
+    legalName: "Harbor Electronics Ltd (demo)",
+    description: "Fictional electronics and desk accessories shop.",
+    city: "Lagos", countryCode: "NG", email: "sales@harbor.demo.invalid", phone: "+234 000 000 0001",
+    categories: ["electronics", "office"],
     matchedItems: [],
-    prices: { rice: "24.00", oil: "15.00", chicken: "15.00" },
-    deliveryCost: "80.00", deliveryDays: 5,
+    prices: { charger: "8.50", lamp: "17.00", notebook: "3.75" },
+    deliveryCost: "6.00", deliveryDays: 5,
     // No delivery history yet: a concern, not a blocker.
     evidenceFlags: { business_identity: "verified", contact_information: "verified", payment_destination: "verified" },
     payoutDestination: { address: "0xDe30000000000000000000000000000000000001", network: PAYMENT_NETWORK, asset: PAYMENT_ASSET },
   },
   {
-    externalRef: "demo-meridian",
-    name: "Meridian Wholesale",
-    legalName: "Meridian Wholesale Co (demo)",
-    description: "Fictional wholesaler with a full evidence trail.",
-    city: "Lagos", countryCode: "NG", email: "sales@meridian.demo.invalid", phone: "+234 000 000 0002",
-    categories: ["food", "dry goods", "oils", "frozen"],
+    externalRef: "demo-northgate",
+    name: "Northgate Supply",
+    legalName: "Northgate Supply Co (demo)",
+    description: "Fictional seller of desk and stationery items with a full evidence trail.",
+    city: "Lagos", countryCode: "NG", email: "sales@northgate.demo.invalid", phone: "+234 000 000 0002",
+    categories: ["office", "electronics", "stationery"],
     matchedItems: [],
-    prices: { rice: "23.00", oil: "14.50", chicken: "14.00" },
-    deliveryCost: "50.00", deliveryDays: 4,
+    prices: { charger: "8.00", lamp: "16.50", notebook: "3.50" },
+    deliveryCost: "4.00", deliveryDays: 4,
     evidenceFlags: {
       business_identity: "verified", contact_information: "verified", payment_destination: "verified",
       delivery_history: "verified",
@@ -55,17 +55,17 @@ const CATALOGUE: DemoSupplier[] = [
     payoutDestination: { address: "0xDe30000000000000000000000000000000000002", network: PAYMENT_NETWORK, asset: PAYMENT_ASSET },
   },
   {
-    externalRef: "demo-primeharvest",
-    name: "PrimeHarvest Supplies",
-    legalName: "PrimeHarvest Supplies Ltd (demo)",
-    description: "Fictional supplier with missing verification evidence.",
+    externalRef: "demo-cornertech",
+    name: "Corner Tech Shop",
+    legalName: "Corner Tech Shop Ltd (demo)",
+    description: "Fictional shop with missing verification evidence.",
     city: "Ibadan", countryCode: "NG",
-    categories: ["food", "dry goods"],
+    categories: ["electronics", "office"],
     matchedItems: [],
-    prices: { rice: "24.50", oil: "15.50", chicken: "16.50" },
-    deliveryCost: "25.00", deliveryDays: 3,
+    prices: { charger: "8.75", lamp: "17.50", notebook: "3.85" },
+    deliveryCost: "2.50", deliveryDays: 3,
     // Contact and payment destination were never verified. Missing means unknown, so this
-    // supplier needs review and is not recommended automatically.
+    // seller needs review and is not recommended automatically.
     evidenceFlags: { business_identity: "verified" },
     payoutDestination: { address: "0xDe30000000000000000000000000000000000003", network: PAYMENT_NETWORK, asset: PAYMENT_ASSET },
   },

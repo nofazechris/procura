@@ -74,7 +74,7 @@ export default function DashboardPage() {
         <label htmlFor="dash-ask" className="dash-ask-l">What do you need to buy?</label>
         <div className="dash-ask-r">
           <input id="dash-ask" className="input" value={ask} maxLength={300} onChange={(e) => setAsk(e.target.value)}
-            placeholder={mode === "demo" ? "50 bags of basmati rice under $2,000" : "A 65W USB-C charger and two label rolls, under $60"} />
+            placeholder={mode === "demo" ? "2 chargers and a desk lamp under $120" : "A 65W USB-C charger and two label rolls, under $60"} />
           <button className="btn btn-pri" type="submit"><Icon name="bolt" /> Find it</button>
         </div>
         <p className="mut3" style={{ fontSize: 12, margin: "8px 0 0" }}>Searching is free and buys nothing. You see every option before anything is ordered.</p>

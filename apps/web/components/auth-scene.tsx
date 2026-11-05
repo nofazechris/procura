@@ -25,10 +25,10 @@ const SANS = '"Inter Variable", system-ui, sans-serif';
 
 interface Stage { label: string; value: string }
 const STAGES: Stage[] = [
-  { label: "REQUEST", value: "50 bags rice · budget $2,000" },
-  { label: "SOURCE", value: "3 suppliers · 3 quotes" },
+  { label: "REQUEST", value: "2 chargers, a lamp · budget $120" },
+  { label: "SOURCE", value: "3 sellers · 3 quotes" },
   { label: "PROVE", value: "2 verified · 1 held for review" },
-  { label: "COMPARE", value: "$1,630 recommended" },
+  { label: "COMPARE", value: "$47 recommended" },
   { label: "YOU APPROVE", value: "passkey approved" },
   { label: "PAY", value: "paid inside your approved limit" },
 ];

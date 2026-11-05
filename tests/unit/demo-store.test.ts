@@ -21,13 +21,13 @@ async function code(p: Promise<unknown>): Promise<string> {
 beforeEach(async () => { await resetDemo(); });
 
 describe("demo scenario", () => {
-  it("starts with the Northstar comparison computed by the real engine", async () => {
+  it("starts with the sample comparison computed by the real engine", async () => {
     const v = await demoComparison(REQ);
     const name = (id: string) => v.suppliers.find((s) => s.id === id)!.name;
     expect(v.comparison.rows.map((r) => [name(r.supplierId), r.verdict, r.rank])).toEqual([
-      ["Meridian Wholesale", "eligible", 1], ["Atlas Food Distribution", "eligible", 2], ["PrimeHarvest Supplies", "review_required", null],
+      ["Northgate Supply", "eligible", 1], ["Harbor Electronics", "eligible", 2], ["Corner Tech Shop", "review_required", null],
     ]);
-    expect(v.comparison.estimatedSavings?.amount).toBe("100.00");
+    expect(v.comparison.estimatedSavings?.amount).toBe("4.25");
   });
 
   it("labels every demo supplier as demo", async () => {
@@ -39,8 +39,8 @@ describe("demo scenario", () => {
     const s = await getDemo();
     const po = s.orders.find((o) => o.orderNumber === "PO-2041")!;
     expect(po.status).toBe("pending_approval");
-    expect(po.totalAmount).toBe("1630.000000");
-    expect(s.destinations.filter((d) => d.supplierId.includes("meridian"))[0]!.status).toBe("pending");
+    expect(po.totalAmount).toBe("47.000000");
+    expect(s.destinations.filter((d) => d.supplierId.includes("northgate"))[0]!.status).toBe("pending");
   });
 });
 
@@ -51,7 +51,7 @@ describe("approval and payment guards", () => {
 
   it("approves once a person approves the address", async () => {
     const s = await getDemo();
-    const dest = s.destinations.find((d) => d.supplierId.includes("meridian"))!;
+    const dest = s.destinations.find((d) => d.supplierId.includes("northgate"))!;
     await demoApprovePayout(dest.id);
     const r = await demoApproveOrder("demo-order-2041");
     expect(r.fingerprint).toMatch(/^[0-9a-f]{64}$/);
@@ -79,13 +79,13 @@ describe("approval and payment guards", () => {
 
 describe("new requests in the demo", () => {
   const items = [
-    { productName: "Premium basmati rice", quantity: "50", unit: "bags" },
-    { productName: "Vegetable oil", quantity: "20", unit: "cartons" },
-    { productName: "Frozen chicken", quantity: "10", unit: "cartons" },
+    { productName: "USB-C charger", quantity: "2", unit: "pieces" },
+    { productName: "Desk lamp", quantity: "1", unit: "piece" },
+    { productName: "Notebook", quantity: "3", unit: "packs" },
   ];
 
   it("sources a new request and finds the same three suppliers", async () => {
-    const r = await demoCreateRequest({ title: "Second restock", budgetAmount: "2000", currency: "USD", items });
+    const r = await demoCreateRequest({ title: "Second restock", budgetAmount: "120", currency: "USD", items });
     expect(r.status).toBe("draft");
     const summary = await demoSourcing(r.id);
     expect(summary).toMatchObject({ suppliersFound: 3, quotationsCreated: 3, requestStatus: "comparing" });
@@ -100,13 +100,13 @@ describe("new requests in the demo", () => {
   });
 
   it("will not order from a quote that needs review unless acknowledged, and refuses an over-budget request", async () => {
-    const r = await demoCreateRequest({ title: "Restock", budgetAmount: "2000", currency: "USD", items });
+    const r = await demoCreateRequest({ title: "Restock", budgetAmount: "120", currency: "USD", items });
     await demoSourcing(r.id);
     const v = await demoComparison(r.id);
     const review = v.comparison.rows.find((x) => x.verdict === "review_required")!;
     expect(await code(demoCreateOrder(r.id, review.quoteId, false))).toBe("REVIEW_REQUIRED");
 
-    const tight = await demoCreateRequest({ title: "Tight", budgetAmount: "100", currency: "USD", items });
+    const tight = await demoCreateRequest({ title: "Tight", budgetAmount: "30", currency: "USD", items });
     await demoSourcing(tight.id);
     const rows = (await demoComparison(tight.id)).comparison.rows;
     expect(rows.every((x) => x.verdict === "ineligible")).toBe(true);

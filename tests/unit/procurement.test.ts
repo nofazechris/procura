@@ -310,25 +310,25 @@ describe("buildPurchaseOrder", () => {
 describe("DemoSupplierProvider", () => {
   const provider = new DemoSupplierProvider();
   const items = [
-    { name: "Premium basmati rice", quantity: "50" },
-    { name: "Vegetable oil", quantity: "20" },
-    { name: "Frozen chicken", quantity: "10" },
+    { name: "USB-C charger", quantity: "2" },
+    { name: "Desk lamp", quantity: "1" },
+    { name: "Notebook", quantity: "3" },
   ];
 
   it("finds the three fictional suppliers, all labelled demo", async () => {
     const found = await provider.searchSuppliers({ items });
-    expect(found.map((s) => s.name)).toEqual(["Atlas Food Distribution", "Meridian Wholesale", "PrimeHarvest Supplies"]);
+    expect(found.map((s) => s.name)).toEqual(["Harbor Electronics", "Northgate Supply", "Corner Tech Shop"]);
     expect(found.every((s) => s.sourceType === "demo")).toBe(true);
     expect(found.every((s) => s.evidence.every((e) => e.sourceName.includes("fictional")))).toBe(true);
   });
 
   it("returns nothing for products it does not stock rather than inventing a result", async () => {
     expect(await provider.searchSuppliers({ items: [{ name: "Industrial forklift", quantity: "1" }] })).toEqual([]);
-    expect(await provider.getQuotations("demo-atlas", { currency: "USD", items: [{ name: "Industrial forklift", quantity: "1" }] })).toEqual([]);
+    expect(await provider.getQuotations("demo-harbor", { currency: "USD", items: [{ name: "Industrial forklift", quantity: "1" }] })).toEqual([]);
   });
 
   it("marks a quote partial when only some items are stocked", async () => {
-    const [q] = await provider.getQuotations("demo-atlas", { currency: "USD", items: [...items, { name: "Forklift", quantity: "1" }] });
+    const [q] = await provider.getQuotations("demo-harbor", { currency: "USD", items: [...items, { name: "Forklift", quantity: "1" }] });
     expect(q!.availability).toBe("partial");
     expect(q!.lines).toHaveLength(3);
   });

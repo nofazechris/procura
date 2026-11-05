@@ -50,11 +50,11 @@ async function expectServiceError(p: Promise<unknown>, code: string) {
 async function newRequest(id: string, number: string, status = "draft") {
   await pg.exec(`
     INSERT INTO procurement_requests(id, business_id, request_number, title, status, budget_amount, currency, priority)
-      VALUES ('${id}','${A}','${number}','Kitchen restock','${status}',2000,'USD','price');
+      VALUES ('${id}','${A}','${number}','Desk setup','${status}',120,'USD','price');
     INSERT INTO procurement_items(business_id, request_id, product_name, category, quantity, unit) VALUES
-      ('${A}','${id}','Premium basmati rice','food',50,'bags'),
-      ('${A}','${id}','Vegetable oil','food',20,'cartons'),
-      ('${A}','${id}','Frozen chicken','food',10,'cartons');
+      ('${A}','${id}','USB-C charger','electronics',2,'pieces'),
+      ('${A}','${id}','Desk lamp','office',1,'piece'),
+      ('${A}','${id}','Notebook','stationery',3,'packs');
   `);
 }
 
@@ -125,15 +125,15 @@ describe("sourcing", () => {
 });
 
 describe("comparison", () => {
-  it("recommends Meridian, ranks Atlas second and leaves PrimeHarvest for review", async () => {
+  it("recommends Northgate, ranks Harbor second and leaves Corner Tech for review", async () => {
     const { comparison, suppliers } = await asApp({ userId: "u-a", businessId: A }, (tx) => loadComparison(tx, ctxA, R1));
     const name = (id: string) => suppliers.find((s) => s.id === id)!.name;
     expect(comparison.rows.map((r) => [name(r.supplierId), r.verdict, r.rank, r.totalCost])).toEqual([
-      ["Meridian Wholesale", "eligible", 1, "1630.000000"],
-      ["Atlas Food Distribution", "eligible", 2, "1730.000000"],
-      ["PrimeHarvest Supplies", "review_required", null, "1725.000000"],
+      ["Northgate Supply", "eligible", 1, "47.000000"],
+      ["Harbor Electronics", "eligible", 2, "51.250000"],
+      ["Corner Tech Shop", "review_required", null, "49.050000"],
     ]);
-    expect(comparison.estimatedSavings?.amount).toBe("100.00");
+    expect(comparison.estimatedSavings?.amount).toBe("4.25");
     expect(suppliers.every((s) => s.sourceType === "demo")).toBe(true);
   });
 });
@@ -146,8 +146,8 @@ describe("purchase order and approval", () => {
   beforeAll(async () => {
     const { comparison, suppliers } = await asApp({ userId: "u-a", businessId: A }, (tx) => loadComparison(tx, ctxA, R1));
     const q = (n: string) => comparison.rows.find((r) => suppliers.find((s) => s.id === r.supplierId)!.name === n)!.quoteId;
-    meridianQuote = q("Meridian Wholesale");
-    primeQuote = q("PrimeHarvest Supplies");
+    meridianQuote = q("Northgate Supply");
+    primeQuote = q("Corner Tech Shop");
   });
 
   it("refuses a quote that needs review unless a person acknowledges it", async () => {
@@ -174,10 +174,10 @@ describe("purchase order and approval", () => {
 
   it("creates a purchase order from the recommended quote with server-calculated totals", async () => {
     const res = await asApp({ userId: "u-a", businessId: A }, (tx) =>
-      createPurchaseOrder(tx, ctxA, { requestId: R1, quotationId: meridianQuote, claimedTotal: "1630.00", conversion: CONVERSION }));
+      createPurchaseOrder(tx, ctxA, { requestId: R1, quotationId: meridianQuote, claimedTotal: "47.00", conversion: CONVERSION }));
     orderId = res.order.id;
-    expect(res.order).toMatchObject({ orderNumber: "PO-0001", status: "pending_approval", totalAmount: "1630.000000", paymentAsset: "USDC.e", paymentAmount: "1630.000000" });
-    expect(res.lines.map((l) => l.totalPrice)).toEqual(["1150.00", "290.00", "140.00"]);
+    expect(res.order).toMatchObject({ orderNumber: "PO-0001", status: "pending_approval", totalAmount: "47.000000", paymentAsset: "USDC.e", paymentAmount: "47.000000" });
+    expect(res.lines.map((l) => l.totalPrice)).toEqual(["16.00", "16.50", "10.50"]);
     expect(res.policy.requiresApproval).toBe(true);
 
     const { rows } = await pg.query<{ rs: string; qs: string; ap: string }>(`
@@ -200,7 +200,7 @@ describe("purchase order and approval", () => {
 
   it("approves the order once a person approves the payout address, and records a fingerprint", async () => {
     const { rows } = await pg.query<{ id: string }>(`
-      select d.id from supplier_payout_destinations d join suppliers s on s.id=d.supplier_id where s.name='Meridian Wholesale'`);
+      select d.id from supplier_payout_destinations d join suppliers s on s.id=d.supplier_id where s.name='Northgate Supply'`);
     const dest = await asApp({ userId: "u-a", businessId: A }, (tx) => approvePayoutDestination(tx, ctxA, rows[0]!.id));
     expect(dest.status).toBe("approved");
     expect(dest.approvedBy).toBe("u-a");
@@ -228,7 +228,7 @@ describe("purchase order and approval", () => {
     const { rows } = await pg.query<{ approved_fingerprint: string }>(`select approved_fingerprint from purchase_orders where id='${orderId}'`);
     expect(before).toBe(rows[0]!.approved_fingerprint); // untouched: matches
 
-    await pg.exec(`update purchase_order_items set unit_price = 1.00 where purchase_order_id='${orderId}' and description='Vegetable oil'`);
+    await pg.exec(`update purchase_order_items set unit_price = 1.00 where purchase_order_id='${orderId}' and description='Desk lamp'`);
     const after = await asApp({ userId: "u-a", businessId: A }, async (tx) => {
       const [po] = await tx.select().from(schema.purchaseOrders).where(eq(schema.purchaseOrders.id, orderId));
       return fingerprintFor(tx, po!, "0xDe30000000000000000000000000000000000002");
@@ -264,7 +264,7 @@ describe("policy and rejection", () => {
   });
 
   it("rejects an order that exceeds the per-transaction limit, with reason codes", async () => {
-    await pg.exec(`update spending_policies set max_transaction_amount = 1000 where business_id='${A}'`);
+    await pg.exec(`update spending_policies set max_transaction_amount = 30 where business_id='${A}'`);
     try {
       const e = await expectServiceError(
         asApp({ userId: "u-a", businessId: A }, (tx) => createPurchaseOrder(tx, ctxA, { requestId: R2, quotationId: quoteId, conversion: CONVERSION })),
@@ -310,10 +310,10 @@ describe("policy and rejection", () => {
   it("an acknowledged review-required quote can be ordered, and the acknowledgement is audited", async () => {
     await asApp({ userId: "u-a", businessId: A }, (tx) => runSourcing(tx, ctxA, R3, provider));
     const { comparison, suppliers } = await asApp({ userId: "u-a", businessId: A }, (tx) => loadComparison(tx, ctxA, R3));
-    const prime = comparison.rows.find((r) => suppliers.find((s) => s.id === r.supplierId)!.name === "PrimeHarvest Supplies")!;
+    const prime = comparison.rows.find((r) => suppliers.find((s) => s.id === r.supplierId)!.name === "Corner Tech Shop")!;
     const res = await asApp({ userId: "u-a", businessId: A }, (tx) =>
       createPurchaseOrder(tx, ctxA, { requestId: R3, quotationId: prime.quoteId, conversion: CONVERSION, acknowledgeReview: true }));
-    expect(res.order.totalAmount).toBe("1725.000000");
+    expect(res.order.totalAmount).toBe("49.050000");
     const { rows } = await pg.query<{ metadata: { acknowledgedReview: boolean; verdict: string } }>(
       `select metadata from audit_logs where resource_id='${res.order.id}' and action='order.created'`);
     expect(rows[0]!.metadata).toMatchObject({ acknowledgedReview: true, verdict: "review_required" });

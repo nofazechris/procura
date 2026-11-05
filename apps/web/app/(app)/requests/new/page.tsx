@@ -17,7 +17,7 @@ const PRIORITIES = [
   { v: "speed", l: "Delivery speed" }, { v: "quality", l: "Quality" },
 ] as const;
 
-const EXAMPLE = "I need 50 bags of premium basmati rice, 20 cartons of vegetable oil and 10 cartons of frozen chicken. Find reliable sellers. My maximum budget is $2,000, including delivery.";
+const EXAMPLE = "I need 2 USB-C chargers, a desk lamp and 3 notebooks. Find reliable sellers. My maximum budget is $120, including delivery.";
 const CHIPS = ["A 65W USB-C charger under $25", "Printer labels, two rolls", "A standing desk mat under $60", "Gift for a coffee lover under $40"];
 
 export default function NewProcurementPage() {
@@ -129,13 +129,13 @@ export default function NewProcurementPage() {
 
   function submitPrompt() {
     if (mode !== "demo") return;
-    // Demo: natural language is not parsed (that needs SERV Reasoning). The prompt maps to the Northstar scenario.
+    // Demo: natural language is not parsed (that needs SERV Reasoning). The prompt maps to the sample desk-setup scenario.
     void run({
-      title: "Kitchen inventory restock", budgetAmount: "2000", currency: "USD", priority: "price", deliveryLocation: "Victoria Island, Lagos",
+      title: "Desk setup", budgetAmount: "120", currency: "USD", priority: "price", deliveryLocation: "Lagos",
       items: [
-        { productName: "Premium basmati rice", quantity: "50", unit: "bags", category: "food" },
-        { productName: "Vegetable oil", quantity: "20", unit: "cartons", category: "food" },
-        { productName: "Frozen chicken", quantity: "10", unit: "cartons", category: "food" },
+        { productName: "USB-C charger", quantity: "2", unit: "pieces", category: "electronics" },
+        { productName: "Desk lamp", quantity: "1", unit: "piece", category: "office" },
+        { productName: "Notebook", quantity: "3", unit: "packs", category: "stationery" },
       ],
     });
   }
@@ -169,7 +169,7 @@ export default function NewProcurementPage() {
           <p className="mut" style={{ fontSize: 12.5, margin: 0 }}>
             {source === "amazon"
               ? "Searches Amazon through Kite Passport. Searching is free and buys nothing. Prices are in USD, and shipping and tax are added at checkout."
-              : "Fictional sellers for rice, vegetable oil and frozen chicken, to try the flow."}
+              : "Fictional sellers for USB-C chargers, desk lamps and notebooks, to try the flow."}
           </p>
           {source === "amazon" && currency !== "USD" ? <div className="callout warn"><Icon name="alert" /><div>Amazon prices are in USD and Procura does not guess exchange rates. Set the currency to USD to get quotes.</div></div> : null}
         </div>
@@ -194,7 +194,7 @@ export default function NewProcurementPage() {
           ) : (
             <div className="callout info" style={{ marginBottom: 14 }}>
               <Icon name="alert" />
-              <div>In this demo, any prompt starts the Northstar Kitchen scenario. Plain-language parsing arrives with SERV Reasoning.</div>
+              <div>In this demo, any prompt starts the sample desk-setup scenario. Plain-language parsing arrives with SERV Reasoning.</div>
             </div>
           )}
           <textarea className="input" style={{ minHeight: 120, background: "var(--surface-2)" }} aria-label="Describe what you need to buy"
@@ -228,14 +228,14 @@ export default function NewProcurementPage() {
           <p className="mut" style={{ fontSize: 13, marginBottom: 16 }}>Precise control over line items and requirements.</p>
 
           <Field label="Request title" error={errors["title"]}>
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Kitchen inventory restock" aria-invalid={!!errors["title"]} />
+            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Desk setup" aria-invalid={!!errors["title"]} />
           </Field>
 
           <div className="eyebrow" style={{ margin: "18px 0 10px" }}>Items</div>
           {lines.map((l, i) => (
             <div key={i} style={{ border: "1px solid var(--line)", borderRadius: "var(--r-sm)", padding: 12, marginBottom: 10 }}>
               <Field label="Product or service" error={errors[`items.${i}.productName`]}>
-                <input className="input" value={l.productName} onChange={(e) => setLine(i, { productName: e.target.value })} placeholder="Premium basmati rice" aria-invalid={!!errors[`items.${i}.productName`]} />
+                <input className="input" value={l.productName} onChange={(e) => setLine(i, { productName: e.target.value })} placeholder="USB-C charger" aria-invalid={!!errors[`items.${i}.productName`]} />
               </Field>
               <div className="grid-2">
                 <Field label="Quantity" error={errors[`items.${i}.quantity`]}>
@@ -253,10 +253,10 @@ export default function NewProcurementPage() {
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setLines((ls) => [...ls, blankLine()])}><Icon name="plus" /> Add another item</button>
 
           <div style={{ height: 14 }} />
-          <Field label="Delivery location"><input className="input" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Victoria Island, Lagos" /></Field>
+          <Field label="Delivery location"><input className="input" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Lagos" /></Field>
           <div className="grid-2">
             <Field label="Budget (delivered)" error={errors["budgetAmount"]}>
-              <input className="input num" inputMode="decimal" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="2000" aria-invalid={!!errors["budgetAmount"]} />
+              <input className="input num" inputMode="decimal" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="120" aria-invalid={!!errors["budgetAmount"]} />
             </Field>
             <Field label="Currency">
               <select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
@@ -285,7 +285,7 @@ export default function NewProcurementPage() {
           {mode === "live" ? (
             <div className="callout warn" style={{ marginTop: 14 }}>
               <Icon name="alert" />
-              <div>Seller data comes from the demo provider, which covers rice, vegetable oil and frozen chicken. Other products will find no sellers until live providers are connected.</div>
+              <div>Seller data comes from the demo provider, which covers USB-C chargers, desk lamps and notebooks. Other products will find no sellers until live providers are connected.</div>
             </div>
           ) : null}
           <button className="btn btn-pri btn-lg" type="submit" style={{ marginTop: 18, width: "100%" }}><Icon name="bolt" /> Start sourcing</button>
@@ -301,7 +301,7 @@ function Field({ label, error, children }: { label: string; error?: string | und
 
 function friendly(message: string, key: string): string {
   if (key.endsWith("quantity")) return "Enter a quantity greater than zero, such as 50 or 2.5.";
-  if (key === "budgetAmount") return "Enter a budget such as 2000 or 2000.50.";
+  if (key === "budgetAmount") return "Enter a budget such as 120 or 120.50.";
   if (key.endsWith("productName")) return "Enter the product or service.";
   if (key.endsWith("unit")) return "Enter a unit, such as bags or cartons.";
   if (key === "title") return "Give the request a short title.";

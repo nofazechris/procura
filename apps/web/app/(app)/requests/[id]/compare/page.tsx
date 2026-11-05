@@ -72,7 +72,7 @@ export default function ComparePage() {
               <div className="card">
                 <EmptyState icon="search" title="No quotations yet"
                   action={<button className="btn btn-pri" disabled={sourcing.isPending} onClick={() => void runSourcing()}><Icon name="bolt" /> {sourcing.isPending ? "Sourcing…" : "Start sourcing"}</button>}>
-                  Procura has not collected any quotes for this request. Amazon search needs a clear product name and USD, and the demo suppliers only cover rice, vegetable oil and frozen chicken.
+                  Procura has not collected any quotes for this request. Amazon search needs a clear product name and USD, and the demo sellers only cover USB-C chargers, desk lamps and notebooks.
                 </EmptyState>
               </div>
             );
