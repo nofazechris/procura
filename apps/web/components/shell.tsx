@@ -14,6 +14,7 @@ import { Icon } from "./icon";
 import { WalletChip } from "./wallet-chip";
 import { activeHref, NAV, titleFor } from "./nav";
 import { CommandPalette } from "./palette";
+import { BuyerPanels } from "./buyer-panels";
 
 /** The persistent app frame: sidebar, top bar, command menu, notifications, demo banner. */
 export function Shell({ children }: { children: ReactNode }) {
@@ -142,10 +143,10 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className={`menu ${popup === "user" ? "on" : ""}`} data-popup>
         <div className="menu-i" onClick={() => toggleTheme()}><Icon name="moon" /> Toggle light / dark</div>
         <div className="menu-i" onClick={() => { setPopup(null); setPaletteOpen(true); }}><Icon name="search" /> Command menu</div>
-        <div className="menu-i" onClick={() => router.push("/settings/account")}><Icon name="cog" /> Account settings</div>
         <div className="menu-i" onClick={() => void signOut()}><Icon name="logout" /> Sign out</div>
       </div>
 
+      <BuyerPanels />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} actions={paletteActions} />
     </>
   );

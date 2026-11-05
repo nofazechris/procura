@@ -155,7 +155,7 @@ export interface PassportDTO {
   sessions: PassportSessionDTO[];
   live: {
     loggedIn: boolean; backendEnv: string | null; backendReachable: boolean; ownerHint: string | null;
-    allowance: "none" | "active" | "unknown"; wallet: { address: string | null; usdcTotal: string | null };
+    allowance: "none" | "active" | "unknown"; wallet: { address: string | null; usdcTotal: string | null; chains: { chain: string; amount: string }[] };
   } | null;
   liveError: { code: string; message: string } | null;
   /** Present only while Passport is not enabled for this business: the value to put in PASSPORT_BUSINESS_ID. */

@@ -6,6 +6,8 @@ import { Icon } from "@/components/icon";
 import { useToast } from "@/components/overlays";
 import { PageHead, Toggle } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
+import { WalletRequired } from "@/components/wallet-required";
+import { useWalletGate } from "@/lib/wallet-gate";
 import { errorMessage, useAgentStatus, useBusinessDetail, useCreateRequest, useInterpret, usePassport, useStartSourcing, type NewRequestInput, type SourceChoice } from "@/lib/queries";
 import { CreateProcurementRequestSchema } from "@procura/shared";
 
@@ -22,6 +24,7 @@ const CHIPS = ["A 65W USB-C charger under $25", "Printer labels, two rolls", "A 
 
 export default function NewProcurementPage() {
   const { mode, business } = useApp();
+  const gate = useWalletGate();
   const router = useRouter();
   const { show } = useToast();
   const create = useCreateRequest();
@@ -138,6 +141,10 @@ export default function NewProcurementPage() {
         { productName: "Notebook", quantity: "3", unit: "packs", category: "stationery" },
       ],
     });
+  }
+
+  if (gate.needsWallet) {
+    return (<><PageHead title="New request" sub="Connect your wallet first." /><WalletRequired /></>);
   }
 
   if (busy) {

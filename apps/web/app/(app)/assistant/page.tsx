@@ -62,7 +62,7 @@ export default function AssistantPage() {
       return <>You have <b>{r.length}</b> open {r.length === 1 ? "request" : "requests"}{r[0] ? <>. The latest is <b>{r[0].title}</b> ({r[0].requestNumber}), which is {r[0].status.replace("_", " ")}.</> : "."}{card("pkg", "Procurement", "/requests", "Open procurement")}</>;
     }
     if (/supplier|packaging|box|find|source|compare/.test(lower)) {
-      return <>I can source suppliers, but starting from free text needs SERV Reasoning. In this demo, create the request in the form and I will run the comparison.{card("agent", "Start a request", "/requests/new", "Create request")}</>;
+      return <>I can source sellers, but starting from free text needs SERV Reasoning. In this demo, create the request in the form and I will run the comparison.{card("agent", "Start a request", "/requests/new", "Create request")}</>;
     }
     return <>I do not have a rule for that in the demo. Try asking about spending, approvals or requests.</>;
   }

@@ -49,7 +49,7 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
   }
 
   return (
-    <Modal open={open} onClose={onClose} label="Approve purchase order" wide>
+    <Modal open={open} onClose={onClose} label="Approve order" wide>
       <div className="modal-body" style={{ textAlign: "left" }}>
         <h3>Approve {order.orderNumber}</h3>
         <p>Check who will be paid and how much. Approving records your decision. It does not move money.</p>

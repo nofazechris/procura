@@ -9,7 +9,7 @@ import { AmazonShopProvider } from "../server/shop-provider";
  * Everything the landing page shows, produced by the real engine from a fictional sample scenario:
  * a shop buying a label printer, a charger and label rolls. The Amazon options go through the same
  * basket rules the live app uses (on a fixed sample catalogue instead of a live search), a cheaper
- * local supplier has gaps in its evidence, and the comparison, order fingerprint and session cap
+ * local seller has gaps in its evidence, and the comparison, order fingerprint and session cap
  * are computed, not typed in.
  */
 
@@ -127,7 +127,7 @@ export async function buildLandingData(): Promise<LandingData> {
     }
   }
 
-  // A local supplier: the cheapest on paper, but its contact and payout address are not verified.
+  // A local seller: the cheapest on paper, but its contact and payout address are not verified.
   const direct = { id: "local-ikeja", name: "Ikeja Office Supply" };
   const dLines = [
     { description: ITEMS[0]!.name, quantity: "1", unitPrice: "18.00" },

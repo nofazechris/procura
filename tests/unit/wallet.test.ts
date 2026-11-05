@@ -88,3 +88,32 @@ describe("wallet permission", () => {
     expect(MEMBER_ROLES.filter((r) => roleHasPermission(r, "wallet:manage")).sort()).toEqual(["finance_manager", "owner"]);
   });
 });
+
+describe("funding the buyer", () => {
+  it("reads a USDC amount exactly, never through a float", async () => {
+    const { parseUsdcAmount } = await import("@procura/shared");
+    expect(parseUsdcAmount("25")).toBe(25_000_000n);
+    expect(parseUsdcAmount("12.5")).toBe(12_500_000n);
+    expect(parseUsdcAmount("0.000001")).toBe(1n);
+    expect(parseUsdcAmount(" 3.10 ")).toBe(3_100_000n);
+  });
+
+  it("rejects anything that is not a positive amount with at most six decimals", async () => {
+    const { parseUsdcAmount } = await import("@procura/shared");
+    for (const bad of ["", "0", "0.0", "-5", "1e3", "1,000", "1.1234567", "abc", "1.", ".5", "1000000000"]) expect(parseUsdcAmount(bad), bad).toBeNull();
+  });
+
+  it("builds the ERC-20 transfer call data", async () => {
+    const { usdcTransferData } = await import("@procura/shared");
+    expect(usdcTransferData("0x1111111111111111111111111111111111111111", 25_000_000n)).toBe(
+      "0xa9059cbb" + "0".repeat(24) + "1".repeat(40) + "0".repeat(57) + "17d7840",
+    );
+  });
+
+  it("refuses an invalid recipient or a zero amount rather than sending something odd", async () => {
+    const { usdcTransferData } = await import("@procura/shared");
+    expect(() => usdcTransferData("0x123", 1n)).toThrow();
+    expect(() => usdcTransferData("not an address", 1n)).toThrow();
+    expect(() => usdcTransferData("0x1111111111111111111111111111111111111111", 0n)).toThrow();
+  });
+});

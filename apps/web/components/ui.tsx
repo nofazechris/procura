@@ -12,7 +12,7 @@ import { Icon, type IconName } from "./icon";
 type Tone = "ok" | "warn" | "err" | "info" | "mute";
 
 const REQUEST_LABEL: Record<RequestStatus, [string, Tone]> = {
-  draft: ["Draft", "mute"], submitted: ["Submitted", "info"], analysing: ["Analysing", "info"], sourcing: ["Sourcing", "info"],
+  draft: ["Draft", "mute"], submitted: ["Submitted", "info"], analysing: ["Analysing", "info"], sourcing: ["Searching", "info"],
   comparing: ["Comparing", "info"], awaiting_approval: ["Awaiting approval", "warn"], approved: ["Approved", "ok"],
   processing: ["Processing", "info"], completed: ["Completed", "ok"], failed: ["Failed", "err"], cancelled: ["Cancelled", "err"],
 };
@@ -53,7 +53,7 @@ export function PaymentStatusPill({ status }: { status: PaymentStatus }) {
   return <Pill tone={tone}>{label}</Pill>;
 }
 
-/** Fictional demo suppliers must always be labelled (Technical PRD s9.2). */
+/** Fictional demo sellers must always be labelled (Technical PRD s9.2). */
 export function DemoTag({ children = "Demo data" }: { children?: ReactNode }) {
   return <span className="demo-tag">{children}</span>;
 }

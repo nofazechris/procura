@@ -12,7 +12,7 @@ import { Icon } from "./icon";
 const SUMMARY = [
   { label: "Analysed requirements", upTo: 2 },
   { label: "Found options", upTo: 3 },
-  { label: "Collected quotations", upTo: 4 },
+  { label: "Collected offers", upTo: 4 },
   { label: "Compared delivered prices", upTo: 6 },
   { label: "Generated recommendation", upTo: 7 },
 ];
@@ -66,7 +66,7 @@ export function AgentPanel({ request }: { request: RequestDTO | undefined }) {
       {mode === "live" ? (
         <div className="ap-task" style={{ fontSize: 11.5, color: "var(--panel-ink-2)", marginTop: 14 }}>
           {serv.data?.configured ? "SERV Reasoning reads your requests and explains comparisons." : "SERV Reasoning is not connected, so requests are filled in by hand."}{" "}
-          {passport.data?.enabled ? "Amazon search runs through Kite Passport. Checkout comes next." : "Sourcing uses the demo supplier set."}
+          {passport.data?.enabled ? "Amazon search runs through Kite Passport. Checkout comes next." : "Sourcing uses the demo seller set."}
         </div>
       ) : null}
     </div>

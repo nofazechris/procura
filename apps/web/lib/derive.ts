@@ -42,7 +42,7 @@ export function spendBySupplier(orders: OrderDTO[], currency: string): { name: s
 const ACTIVE = new Set(["submitted", "analysing", "sourcing", "comparing", "awaiting_approval", "approved", "processing"]);
 export const isActiveRequest = (r: RequestDTO) => ACTIVE.has(r.status);
 
-/** Average days from a request being created to its purchase order being approved. */
+/** Average days from a request being created to its order being approved. */
 export function averageCycleDays(requests: RequestDTO[], orders: OrderDTO[]): number | null {
   const byId = new Map(requests.map((r) => [r.id, r]));
   const days: number[] = [];

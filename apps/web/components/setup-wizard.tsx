@@ -10,21 +10,19 @@ import { AuthScene } from "./auth-scene";
 import { Icon } from "./icon";
 import { ToastProvider, useToast } from "./overlays";
 
-const STEPS = ["You", "What you buy", "How it chooses", "Limits", "Fund your agent", "Ready"];
+const STEPS = ["You", "How it chooses", "Limits", "Your wallet", "Ready"];
 /** Where the 3D rack is for each step: the agent is built up as the questions are answered. */
-const RACK_PROGRESS = [0.15, 0.3, 0.45, 0.84, 0.95, 1];
+const RACK_PROGRESS = [0.15, 0.45, 0.84, 0.95, 1];
 const CAPTIONS = [
   "It starts by knowing who it works for.",
-  "Then what you buy, so it knows where to look.",
   "How it should choose when options are close.",
   "The limits it can never go past.",
-  "Link the wallet you fund it from.",
+  "Connect the wallet you fund it from. This one is required.",
   "Ready. It can search now, and it asks before it spends.",
 ];
 
 const COUNTRIES: [string, string][] = [["NG", "Nigeria"], ["GH", "Ghana"], ["KE", "Kenya"], ["ZA", "South Africa"], ["GB", "United Kingdom"], ["US", "United States"], ["AE", "United Arab Emirates"], ["IN", "India"], ["CA", "Canada"]];
 const CURRENCIES = ["USD", "NGN", "GBP", "EUR", "GHS", "KES", "ZAR"];
-const CATEGORIES = ["Electronics", "Home & kitchen", "Office & desk", "Tools & hardware", "Groceries & household", "Health & personal care", "Pets", "Gifts", "Books & media", "Sports & outdoors"];
 
 type Choice = "Budget" | "Balanced" | "Premium";
 const CHOICES: { value: Choice; title: string; sub: string }[] = [
@@ -53,7 +51,6 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [custom, setCustom] = useState("");
   // Your account record is created when Limits is done, so a wallet can be linked to it before the wizard ends.
   const [created, setCreated] = useState(false);
   const [wallet, setWallet] = useState<{ address: string } | null>(null);
@@ -69,8 +66,7 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
 
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (step === 1 && s.categories.length === 0) e["categories"] = "Select at least one category.";
-    if (step === 3) {
+    if (step === 2) {
       if (!decimalString.safeParse(clean(s.monthly)).success || Number(clean(s.monthly)) <= 0) e["monthly"] = "Enter a monthly limit such as 500.";
       if (!decimalString.safeParse(clean(s.single)).success || Number(clean(s.single)) <= 0) e["single"] = "Enter a maximum such as 150.";
       if (!e["monthly"] && !e["single"] && Number(clean(s.single)) > Number(clean(s.monthly))) e["single"] = "This cannot exceed the monthly limit.";
@@ -124,11 +120,10 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
 
   const next = async () => {
     if (!validate()) return;
-    if (step === 3 && !created) { if (!(await createBusiness())) return; }
+    if (step === 3 && !wallet) { setWalletErr("Connect your wallet to continue. It is required."); return; }
+    if (step === 2 && !created) { if (!(await createBusiness())) return; }
     if (step < STEPS.length - 1) setStep(step + 1); else finish();
   };
-  const toggleCat = (c: string) => set({ categories: s.categories.includes(c) ? s.categories.filter((x) => x !== c) : [...s.categories, c] });
-  const addCustom = () => { const c = custom.trim(); if (c && !s.categories.includes(c)) set({ categories: [...s.categories, c] }); setCustom(""); };
 
   const seg = <T extends string>(options: readonly T[], value: T, onPick: (v: T) => void, label: string) => (
     <div className="seg" role="radiogroup" aria-label={label}>
@@ -182,26 +177,6 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
 
             {step === 1 ? (
               <div className="ob-step" key="s1">
-                <h2 className="ob-kick">What do you usually shop for?</h2>
-                <p className="ob-sub">Pick a few, so your buyer knows where to look first. You can change these later.</p>
-                <div className="ob-chips">
-                  {[...CATEGORIES, ...s.categories.filter((c) => !CATEGORIES.includes(c))].map((c) => (
-                    <div key={c} role="checkbox" tabIndex={0} aria-checked={s.categories.includes(c)} className={`ob-chip ${s.categories.includes(c) ? "on" : ""}`} onClick={() => toggleCat(c)}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleCat(c); } }}>
-                      <span className="ck"><Icon name="check" strokeWidth={3} /></span>{c}
-                    </div>
-                  ))}
-                </div>
-                {err("categories")}
-                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-                  <input className="ob-input" placeholder="Add your own category" aria-label="Custom category" value={custom} onChange={(e) => setCustom(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustom(); } }} />
-                  <button type="button" className="btn btn-sec" onClick={addCustom}>Add</button>
-                </div>
-              </div>
-            ) : null}
-
-            {step === 2 ? (
-              <div className="ob-step" key="s2">
                 <h2 className="ob-kick">How should it choose?</h2>
                 <p className="ob-sub">When several options meet your requirements, this is what your agent leans towards. Evidence and your limits always come first.</p>
                 <div className="wz-choices" role="radiogroup" aria-label="How the agent chooses">
@@ -215,8 +190,8 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
               </div>
             ) : null}
 
-            {step === 3 ? (
-              <div className="ob-step" key="s3">
+            {step === 2 ? (
+              <div className="ob-step" key="s2">
                 <h2 className="ob-kick">Set the limits it can never pass</h2>
                 <p className="ob-sub">Your agent can only spend inside these, and Kite Passport enforces its own session caps on top. Change them anytime.</p>
                 {money("monthly", "Monthly limit")}
@@ -231,10 +206,10 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
               </div>
             ) : null}
 
-            {step === 4 ? (
-              <div className="ob-step" key="s4">
-                <h2 className="ob-kick">Fund your agent</h2>
-                <p className="ob-sub">Your agent pays from a Kite Passport wallet, inside limits you approve with your passkey. Link the wallet you will fund it from, so every purchase traces back to you.</p>
+            {step === 3 ? (
+              <div className="ob-step" key="s3">
+                <h2 className="ob-kick">Connect your wallet</h2>
+                <p className="ob-sub">This step is required. Your buyer pays from its own Kite Passport wallet, which you fund from the wallet you connect here, so every purchase traces back to you. It can only spend inside a session you approve with your passkey.</p>
                 <div className="card" style={{ padding: 18, display: "grid", gap: 12 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <span style={{ color: "var(--forest-2)", flex: "none", width: 20, display: "flex" }}><Icon name="wallet" /></span>
@@ -254,12 +229,12 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
                   ) : null}
                   {walletErr ? <div role="alert" style={{ color: "var(--err)", fontSize: 12.5 }}>{walletErr}</div> : null}
                 </div>
-                <p className="mut3" style={{ fontSize: 12, marginTop: 12 }}>This is optional now. You can link or change it anytime in Settings, Wallets. Funding the agent itself happens later in Settings, Kite Passport.</p>
+                <p className="mut3" style={{ fontSize: 12, marginTop: 12 }}>Next you fund your buyer: you send USDC to its Passport wallet from this one. You can do that right after setup, in Wallet.</p>
               </div>
             ) : null}
 
-            {step === 5 ? (
-              <div className="ob-step" key="s5">
+            {step === 4 ? (
+              <div className="ob-step" key="s4">
                 <div className="ob-agent-hero" style={{ paddingTop: 0 }}>
                   <div className="ob-orb-xl" style={{ width: 72, height: 72, borderRadius: 22 }}><Icon name="agent" /></div>
                   <h2 className="ob-kick">Your buyer is ready.</h2>
@@ -268,14 +243,16 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
                 <div className="ob-summary">
                   {[
                     ["Where",  `${COUNTRIES.find(([c]) => c === s.countryCode)?.[1] ?? s.countryCode} · ${s.currency}`],
-                    ["Buys", s.categories.length ? s.categories.slice(0, 3).join(", ") + (s.categories.length > 3 ? ` +${s.categories.length - 3} more` : "") : "Not set"],
                     ["Chooses", CHOICES.find((c) => c.value === s.quality)?.title ?? "Balanced"],
                     ["Monthly limit", `${clean(s.monthly)} ${s.currency}`],
                     ["Largest purchase", `${single} ${s.currency}`],
                     ["Wallet", wallet ? shortAddress(wallet.address) : "Not linked yet"],
                   ].map(([l, v]) => <div key={l} className="ob-sum-row"><span className="mut">{l}</span><span className="v">{v}</span></div>)}
                 </div>
-                <button type="button" className="linkbtn" style={{ marginTop: 14, fontSize: 13.5 }} disabled={busy} onClick={() => finish("/requests/new")}>
+                <button type="button" className="linkbtn" style={{ marginTop: 14, fontSize: 13.5, display: "block" }} disabled={busy} onClick={() => finish("/dashboard?buyer=fund")}>
+                  Fund my buyer next <Icon name="arr" />
+                </button>
+                <button type="button" className="linkbtn" style={{ marginTop: 8, fontSize: 13.5, display: "block" }} disabled={busy} onClick={() => finish("/requests/new")}>
                   Or describe my first purchase now <Icon name="arr" />
                 </button>
               </div>
@@ -285,10 +262,10 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
           <div className="setup-foot">
             <button className="btn btn-ghost" style={{ visibility: step === 0 || created ? "hidden" : "visible" }} disabled={busy} onClick={() => { setErrors({}); setStep(step - 1); }}><Icon name="prev" /> Back</button>
             <div style={{ flex: 1 }} />
-            <button className="btn btn-pri btn-lg" disabled={busy || walletBusy} onClick={() => void next()}>
+            <button className="btn btn-pri btn-lg" disabled={busy || walletBusy || (step === 3 && !wallet)} onClick={() => void next()}>
               {step === STEPS.length - 1 ? <><Icon name="bolt" /> {busy ? "Opening…" : "Go to Home"}</>
-                : step === 3 ? <>{busy ? "Creating your buyer…" : "Create my buyer"} <Icon name="arr" /></>
-                : step === 4 && !wallet ? <>Skip for now <Icon name="arr" /></>
+                : step === 2 ? <>{busy ? "Creating your buyer…" : "Create my buyer"} <Icon name="arr" /></>
+                : step === 3 && !wallet ? <>Connect your wallet to continue</>
                 : <>Continue <Icon name="arr" /></>}
             </button>
           </div>

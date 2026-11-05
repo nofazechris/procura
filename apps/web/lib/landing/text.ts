@@ -23,7 +23,7 @@ export const reasonText = (c: string) => REASON_TEXT[c] ?? c.toLowerCase().repla
 
 export const REJECTION_TEXT: Record<ExecutionRejection, string> = {
   POLICY_NOT_ALLOWED: "The spending policy does not allow this order.",
-  SUPPLIER_RESTRICTED: "This supplier is on the restricted list.",
+  SUPPLIER_RESTRICTED: "This seller is on the restricted list.",
   SESSION_MISSING: "There is no authorised session.",
   SESSION_NOT_ACTIVE: "The session is not active.",
   SESSION_EXPIRED: "The session has expired.",

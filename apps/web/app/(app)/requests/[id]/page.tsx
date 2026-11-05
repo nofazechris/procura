@@ -60,7 +60,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
     try {
       await cancel.mutateAsync(requestId);
       setConfirmCancel(false);
-      show("Procurement cancelled");
+      show("Request cancelled");
     } catch (e) { setConfirmCancel(false); show(errorMessage(e), "err"); }
   }
 
@@ -70,8 +70,8 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
     <>
       <PageHead
         eyebrow={<>{r.requestNumber} · {r.title}</>}
-        title="Procurement workspace"
-        sub="Agent command centre: sourcing, evidence and execution for this request."
+        title="Your request"
+        sub="What your buyer found, how it checked each option, and what happens next."
         actions={<>
           {hasQuotes ? <Link href={`/requests/${requestId}/compare`} className="btn btn-sec btn-sm"><Icon name="scale" /> View comparison</Link> : null}
           {cancellable ? <button className="btn btn-sec btn-sm" onClick={() => setConfirmCancel(true)}>Cancel procurement</button> : null}
@@ -113,7 +113,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
               </div>
             ) : hasQuotes && !comparison.isPending && cmp ? (
               <div className="reason"><div className="rl"><Icon name="alert" /> No recommendation</div>
-                <span>{cmp.rows.length === 0 ? "No suppliers matched this request." : cmp.notes.join(" ")}</span></div>
+                <span>{cmp.rows.length === 0 ? "No sellers matched this request." : cmp.notes.join(" ")}</span></div>
             ) : null}
 
             <div style={{ marginTop: 18 }}>
@@ -124,17 +124,17 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
               })}
             </div>
             <p className="mut3" style={{ fontSize: 11.5, marginTop: 14 }}>
-              {mode === "live" ? "Sourcing runs on the source you chose: live Amazon search through Kite Passport, or the demo supplier set." : "Demo: the stages replay on sample data."}
+              {mode === "live" ? "Sourcing runs on the source you chose: live Amazon search through Kite Passport, or the demo seller set." : "Demo: the stages replay on sample data."}
             </p>
           </div>
         </div>
 
         <div className="ws-col">
           <div className="card ws-card">
-            <h3>Supplier shortlist</h3>
-            {!hasQuotes ? <p className="mut" style={{ fontSize: 13 }}>No quotes yet. Start sourcing to find suppliers.</p>
+            <h3>Seller shortlist</h3>
+            {!hasQuotes ? <p className="mut" style={{ fontSize: 13 }}>No prices yet. Start the search to find sellers.</p>
               : comparison.isPending ? <p className="mut" style={{ fontSize: 13 }}>Loading…</p>
-              : (cmp?.rows ?? []).length === 0 ? <p className="mut" style={{ fontSize: 13 }}>No suppliers matched.</p>
+              : (cmp?.rows ?? []).length === 0 ? <p className="mut" style={{ fontSize: 13 }}>No sellers matched.</p>
               : (cmp?.rows ?? []).map((row) => (
                 <Link key={row.quoteId} href={`/sellers/${row.supplierId}`} className={`short-i ${row.quoteId === cmp?.recommendedQuoteId ? "rec" : ""}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <SupplierLogo name={nameOf(row.supplierId)} size={30} />
@@ -167,7 +167,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
               </>
             ) : r.status === "comparing" ? (
               <>
-                <p className="mut" style={{ fontSize: 13 }}>Review the comparison and select a supplier to prepare the purchase order.</p>
+                <p className="mut" style={{ fontSize: 13 }}>Review the comparison and select a seller to prepare the order.</p>
                 <Link href={`/requests/${requestId}/compare`} className="btn btn-pri btn-sm" style={{ width: "100%", marginTop: 12 }}>Review comparison <Icon name="arr" /></Link>
               </>
             ) : r.status === "awaiting_approval" ? (
@@ -178,16 +178,16 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
             ) : r.status === "approved" ? (
               <>
                 <p className="mut" style={{ fontSize: 13 }}>Approved. Payment needs an approved Kite Passport spending session{mode === "live" ? ", which is not connected yet" : ""}.</p>
-                {openOrder ? <Link href={`/orders/${openOrder.id}`} className="btn btn-sec btn-sm" style={{ width: "100%", marginTop: 12 }}>View purchase order</Link> : null}
+                {openOrder ? <Link href={`/orders/${openOrder.id}`} className="btn btn-sec btn-sm" style={{ width: "100%", marginTop: 12 }}>View order</Link> : null}
               </>
             ) : <p className="mut" style={{ fontSize: 13 }}>{progress.note}</p>}
           </div>
         </div>
       </div>
 
-      <Modal open={confirmCancel} onClose={() => setConfirmCancel(false)} label="Cancel procurement">
+      <Modal open={confirmCancel} onClose={() => setConfirmCancel(false)} label="Cancel request">
         <div className="modal-body" style={{ textAlign: "left" }}>
-          <h3>Cancel this procurement?</h3>
+          <h3>Cancel this request?</h3>
           <p>{r.requestNumber} · {r.title} will be stopped. You can always create a new request.</p>
         </div>
         <div className="modal-foot">

@@ -107,7 +107,11 @@ export interface PassportStatus {
   /** First letter and domain only, so the owner can recognise the account without exposing the address. */
   ownerHint: string | null;
   allowance: "none" | "active" | "unknown";
-  wallet: { address: string | null; usdcTotal: string | null };
+  wallet: {
+    address: string | null; usdcTotal: string | null;
+    /** USDC held on each chain, so a person can see where the money is. */
+    chains: { chain: string; amount: string }[];
+  };
 }
 
 const maskEmail = (e: string) => e.replace(/^(.).*(@.+)$/, "$1***$2");
@@ -133,7 +137,11 @@ export async function passportStatus(): Promise<PassportStatus> {
     backendReachable: rec(status.json?.["backend"])["reachable"] === true,
     ownerHint: email ? maskEmail(email) : null,
     allowance: state === "none" ? "none" : state ? "active" : "unknown",
-    wallet: { address: addr, usdcTotal: str(total["total"]) },
+    wallet: {
+      address: addr, usdcTotal: str(total["total"]),
+      chains: (Array.isArray(total["chains"]) ? (total["chains"] as unknown[]) : [])
+        .map((c) => ({ chain: str(rec(c)["chain"]) ?? "", amount: str(rec(c)["amount"]) ?? "0" })).filter((c) => c.chain),
+    },
   };
 }
 

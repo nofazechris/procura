@@ -8,7 +8,7 @@ import { errorMessage, useAddSupplier } from "@/lib/queries";
 
 const EMPTY = { name: "", legalName: "", countryCode: "", city: "", email: "", phone: "", website: "", categories: "" };
 
-/** Add a supplier by hand. What is typed here is "supplier provided"; only a verification check can make it verified. */
+/** Add a seller by hand. What is typed here is "supplier provided"; only a verification check can make it verified. */
 export function AddSupplierModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [f, setF] = useState(EMPTY);
   const [err, setErr] = useState<Record<string, string>>({});

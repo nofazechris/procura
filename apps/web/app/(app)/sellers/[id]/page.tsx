@@ -18,11 +18,11 @@ function Stat({ v, l }: { v: string | number; l: string }) {
   return <div className="stat"><div className="sv num">{v}</div><div className="sl">{l}</div></div>;
 }
 
-function InfoRow({ label, value, tag }: { label: string; value: string; tag?: "Verified" | "Supplier provided" | "Not verified" }) {
+function InfoRow({ label, value, tag }: { label: string; value: string; tag?: "Verified" | "Seller provided" | "Not verified" }) {
   return (
     <div className="spec-row"><span className="mut">{label}</span>
       <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {tag ? <span className={`pill ${tag === "Verified" ? "p-ok" : tag === "Supplier provided" ? "p-mute" : "p-warn"}`} style={{ fontSize: 10 }}>{tag}</span> : null}
+        {tag ? <span className={`pill ${tag === "Verified" ? "p-ok" : tag === "Seller provided" ? "p-mute" : "p-warn"}`} style={{ fontSize: 10 }}>{tag}</span> : null}
         <span className="v">{value}</span>
       </span>
     </div>
@@ -64,10 +64,10 @@ export default function SupplierProfilePage() {
             </div>
 
             <div className="stat-strip">
-              <Stat v={d.quotations.length} l="Quotes received" />
+              <Stat v={d.quotations.length} l="Prices received" />
               <Stat v={mine.length} l="Orders placed" />
               <Stat v={mine.length ? moneyShort(spend, "USD") : "$0"} l="Total paid" />
-              <Stat v={d.quotations[0] ? shortDate(d.quotations[0].createdAt) : "-"} l="Latest quote" />
+              <Stat v={d.quotations[0] ? shortDate(d.quotations[0].createdAt) : "-"} l="Latest price" />
             </div>
 
             <div className="grid-main">
@@ -75,10 +75,10 @@ export default function SupplierProfilePage() {
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>About this seller</h2></div>
                   <InfoRow label="Legal name" value={s.legalName ?? s.name} tag={ev.identityVerified ? "Verified" : "Not verified"} />
-                  <InfoRow label="Location" value={[s.city, s.countryCode].filter(Boolean).join(", ") || "Not provided"} tag="Supplier provided" />
-                  <InfoRow label="Phone" value={s.phone ?? "Not provided"} {...(s.phone ? { tag: ev.contactVerified ? "Verified" as const : "Supplier provided" as const } : {})} />
-                  <InfoRow label="Email" value={s.email ?? "Not provided"} {...(s.email ? { tag: ev.contactVerified ? "Verified" as const : "Supplier provided" as const } : {})} />
-                  <InfoRow label="Categories" value={s.categories.join(", ") || "Not provided"} tag="Supplier provided" />
+                  <InfoRow label="Location" value={[s.city, s.countryCode].filter(Boolean).join(", ") || "Not provided"} tag="Seller provided" />
+                  <InfoRow label="Phone" value={s.phone ?? "Not provided"} {...(s.phone ? { tag: ev.contactVerified ? "Verified" as const : "Seller provided" as const } : {})} />
+                  <InfoRow label="Email" value={s.email ?? "Not provided"} {...(s.email ? { tag: ev.contactVerified ? "Verified" as const : "Seller provided" as const } : {})} />
+                  <InfoRow label="Categories" value={s.categories.join(", ") || "Not provided"} tag="Seller provided" />
                 </div>
 
                 <div className="card" style={{ padding: 20 }}>
@@ -106,8 +106,8 @@ export default function SupplierProfilePage() {
                 </div>
 
                 <div className="card" style={{ padding: 20 }}>
-                  <div className="sec-head"><h2>Quotations</h2></div>
-                  {d.quotations.length === 0 ? <EmptyState icon="doc" title="No quotations">Quotes appear here when this supplier is asked to quote.</EmptyState> : (
+                  <div className="sec-head"><h2>Offers</h2></div>
+                  {d.quotations.length === 0 ? <EmptyState icon="doc" title="No offers">Prices appear here when this seller is asked for one.</EmptyState> : (
                     <div className="tbl-wrap" style={{ border: "none", boxShadow: "none" }}>
                       <table className="tbl">
                         <thead><tr><th>Reference</th><th>Total</th><th>Delivery</th><th>Status</th><th>Date</th></tr></thead>
@@ -156,7 +156,7 @@ export default function SupplierProfilePage() {
                       </div>
                     );
                   })}
-                  <p className="mut3" style={{ fontSize: 11.5, marginTop: 10 }}>Procura never marks a supplier verified on model confidence alone. Each item reflects evidence actually on file.</p>
+                  <p className="mut3" style={{ fontSize: 11.5, marginTop: 10 }}>Procura never marks a seller verified on model confidence alone. Each item reflects evidence actually on file.</p>
                 </div>
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Risk observations</h2></div>

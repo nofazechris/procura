@@ -2,7 +2,7 @@ import type { IconName } from "@/components/icon";
 import { amount } from "./format";
 import type { ActivityDTO } from "./dto";
 
-export type ActivityCategory = "Procurement" | "Supplier" | "Payment" | "Approval" | "Agent" | "Security";
+export type ActivityCategory = "Requests" | "Sellers" | "Payment" | "Approval" | "Agent" | "Security";
 
 export interface ActivityView {
   title: string;
@@ -28,8 +28,8 @@ export function describeActivity(a: ActivityDTO): ActivityView {
       case "procurement_request": return `/requests/${a.resourceId}`;
       case "purchase_order": return `/orders/${a.resourceId}`;
       case "payment": return `/payments/${a.resourceId}`;
-      case "business": return "/settings/account";
-      case "spending_policy": return "/settings/agent-permissions";
+      case "business": return "/dashboard";
+      case "spending_policy": return "/limits";
       default: return "/approvals";
     }
   };
@@ -43,21 +43,21 @@ export function describeActivity(a: ActivityDTO): ActivityView {
     case "policy.updated":
       return { title: "Spending limits changed", sub: `Monthly ${amount(str(s["maxTotalSpend"]), 0)} · per purchase ${amount(str(s["maxTransactionAmount"]), 0)}`, icon: "sliders", category: "Security", ok: false, href };
     case "procurement.created":
-      return { title: "Procurement request created", sub: [requestNumber, s["itemCount"] ? `${s["itemCount"]} items` : ""].filter(Boolean).join(" · "), icon: "pkg", category: "Procurement", ok: false, href };
+      return { title: "Request created", sub: [requestNumber, s["itemCount"] ? `${s["itemCount"]} items` : ""].filter(Boolean).join(" · "), icon: "pkg", category: "Requests", ok: false, href };
     case "procurement.sourced":
       return {
-        title: "Suppliers discovered and quotes collected",
-        sub: md["suppliersFound"] !== undefined ? `${md["suppliersFound"]} suppliers · ${md["quotationsCreated"]} new quotes` : "Request moved to comparing",
+        title: "Sellers found and prices collected",
+        sub: md["suppliersFound"] !== undefined ? `${md["suppliersFound"]} sellers · ${md["quotationsCreated"]} new prices` : "Request moved to comparing",
         icon: "search", category: "Agent", ok: false, href,
       };
     case "order.created":
-      return { title: "Purchase order created", sub: orderNumber, icon: "doc", category: "Procurement", ok: false, href };
+      return { title: "Order created", sub: orderNumber, icon: "doc", category: "Requests", ok: false, href };
     case "order.approved":
-      return { title: "Purchase order approved", sub: orderNumber, icon: "shield", category: "Approval", ok: true, href };
+      return { title: "Order approved", sub: orderNumber, icon: "shield", category: "Approval", ok: true, href };
     case "order.rejected":
-      return { title: "Purchase order rejected", sub: orderNumber, icon: "x", category: "Approval", ok: false, href };
+      return { title: "Order rejected", sub: orderNumber, icon: "x", category: "Approval", ok: false, href };
     case "supplier.payout_destination.approved":
-      return { title: "Supplier payment address approved", sub: str(s["address"]), icon: "wallet", category: "Approval", ok: true, href };
+      return { title: "Seller payment address approved", sub: str(s["address"]), icon: "wallet", category: "Approval", ok: true, href };
     case "payment.confirmed":
       return { title: "Payment confirmed", sub: [orderNumber, s["amount"] ? `${amount(str(s["amount"]))}` : ""].filter(Boolean).join(" · "), icon: "check", category: "Payment", ok: true, href };
     default:

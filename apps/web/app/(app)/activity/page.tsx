@@ -8,7 +8,7 @@ import { describeActivity } from "@/lib/activity";
 import { dateTime } from "@/lib/format";
 import { useActivity } from "@/lib/queries";
 
-const FILTERS = ["All", "Procurement", "Supplier", "Payment", "Approval", "Agent", "Security"];
+const FILTERS = ["All", "Requests", "Sellers", "Payment", "Approval", "Agent", "Security"];
 
 export default function ActivityPage() {
   const activity = useActivity();

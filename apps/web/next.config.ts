@@ -19,7 +19,9 @@ const config: NextConfig = {
       { source: "/procurement/:path*", destination: "/requests/:path*", permanent: true },
       { source: "/suppliers", destination: "/sellers", permanent: true },
       { source: "/suppliers/:path*", destination: "/sellers/:path*", permanent: true },
-      { source: "/settings/business", destination: "/settings/account", permanent: true },
+      { source: "/settings/agent-permissions", destination: "/limits", permanent: true },
+      { source: "/settings/:path*", destination: "/dashboard", permanent: true },
+      { source: "/settings", destination: "/limits", permanent: true },
     ];
   },
 };

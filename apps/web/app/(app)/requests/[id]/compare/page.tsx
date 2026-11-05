@@ -54,8 +54,8 @@ export default function ComparePage() {
     <>
       <PageHead
         eyebrow={request.data ? <>{request.data.requestNumber} · {request.data.title}</> : undefined}
-        title="Supplier comparison"
-        sub="Compare available suppliers and choose the best purchasing option."
+        title="Compare options"
+        sub="Compare the options and choose the best one to buy."
         actions={<Link href={`/requests/${id}`} className="btn btn-sec btn-sm"><Icon name="prev" /> Back to workspace</Link>}
       />
       <Async query={comparison}>
@@ -70,7 +70,7 @@ export default function ComparePage() {
           if (cmp.rows.length === 0) {
             return (
               <div className="card">
-                <EmptyState icon="search" title="No quotations yet"
+                <EmptyState icon="search" title="No offers yet"
                   action={<button className="btn btn-pri" disabled={sourcing.isPending} onClick={() => void runSourcing()}><Icon name="bolt" /> {sourcing.isPending ? "Sourcing…" : "Start sourcing"}</button>}>
                   Procura has not collected any quotes for this request. Amazon search needs a clear product name and USD, and the demo sellers only cover USB-C chargers, desk lamps and notebooks.
                 </EmptyState>
@@ -83,7 +83,7 @@ export default function ComparePage() {
               {openOrder ? (
                 <div className="callout ok" style={{ marginBottom: 18 }}>
                   <Icon name="check" />
-                  <div>{openOrder.orderNumber} has been prepared from this comparison. <Link className="linkbtn" href={`/orders/${openOrder.id}`}>View purchase order</Link></div>
+                  <div>{openOrder.orderNumber} has been prepared from this comparison. <Link className="linkbtn" href={`/orders/${openOrder.id}`}>View order</Link></div>
                 </div>
               ) : null}
 
@@ -125,7 +125,7 @@ export default function ComparePage() {
                         <SupplierLogo name={name(row.supplierId)} size={36} />
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontWeight: 700, fontSize: 14 }}>{name(row.supplierId)}</div>
-                          <div className="mut3" style={{ fontSize: 11.5 }}>{source(row.supplierId) === "demo" ? "Demo supplier" : source(row.supplierId) === "marketplace" ? "Live Amazon listings" : "Supplier"}</div>
+                          <div className="mut3" style={{ fontSize: 11.5 }}>{source(row.supplierId) === "demo" ? "Demo seller" : source(row.supplierId) === "marketplace" ? "Live Amazon listings" : "Supplier"}</div>
                         </div>
                       </div>
                       {(view.lines?.[row.quoteId] ?? []).some((l) => l.listing) ? (
@@ -166,7 +166,7 @@ export default function ComparePage() {
                         </div>
                       ) : null}
                       {source(row.supplierId) === "marketplace" ? (
-                        <div className="mut3" style={{ padding: "0 16px 12px", fontSize: 11.5 }}>Paid through Amazon&apos;s checkout, so there is no supplier address to verify. Shipping and tax are added at checkout.</div>
+                        <div className="mut3" style={{ padding: "0 16px 12px", fontSize: 11.5 }}>Paid through Amazon&apos;s checkout, so there is no seller address to verify. Shipping and tax are added at checkout.</div>
                       ) : null}
                       <div className="cmp-foot">
                         <button className={`btn ${row.verdict === "eligible" ? "btn-pri" : "btn-sec"} btn-sm`} style={{ flex: 1 }}
@@ -186,12 +186,12 @@ export default function ComparePage() {
                 <button className="btn btn-ghost btn-sm" disabled={sourcing.isPending || !canSelect} onClick={() => void runSourcing()}><Icon name="search" /> {sourcing.isPending ? "Sourcing…" : "Re-run sourcing"}</button>
               </div>
 
-              <Modal open={!!selected} onClose={() => setSelected(null)} label="Prepare purchase order">
+              <Modal open={!!selected} onClose={() => setSelected(null)} label="Prepare order">
                 {selected ? (
                   <>
                     <div className="modal-body" style={{ textAlign: "left" }}>
-                      <h3>Prepare a purchase order</h3>
-                      <p>Procura will create a purchase order from {name(selected.supplierId)}&apos;s quotation. Every total is recalculated from unit prices on the server. Nothing is paid until you approve the order.</p>
+                      <h3>Prepare an order</h3>
+                      <p>Procura will create an order from {name(selected.supplierId)}&apos;s offer. Every total is recalculated from unit prices on the server. Nothing is paid until you approve the order.</p>
                       <div className="modal-sum">
                         <div className="r"><span className="mut">Supplier</span><b>{name(selected.supplierId)}</b></div>
                         <div className="r"><span className="mut">Total delivered</span><b className="num">{amount(selected.totalCost)} {selected.currency}</b></div>
@@ -201,7 +201,7 @@ export default function ComparePage() {
                         <div className="callout warn" style={{ marginBottom: 12 }}>
                           <Icon name="alert" />
                           <div>
-                            <b>This supplier needs review.</b>
+                            <b>This seller needs review.</b>
                             <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>{selected.eligibility.reasons.map((c) => <li key={c}>{reasonText(c)}</li>)}</ul>
                             <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, cursor: "pointer" }}>
                               <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} style={{ marginTop: 3 }} />
@@ -214,7 +214,7 @@ export default function ComparePage() {
                     <div className="modal-foot">
                       <button className="btn btn-sec" style={{ flex: 1 }} onClick={() => setSelected(null)}>Cancel</button>
                       <button className="btn btn-pri" style={{ flex: 1 }} disabled={createOrder.isPending || (selected.verdict === "review_required" && !ack)} onClick={() => void confirm()}>
-                        {createOrder.isPending ? "Creating…" : "Create purchase order"}
+                        {createOrder.isPending ? "Creating…" : "Create order"}
                       </button>
                     </div>
                   </>

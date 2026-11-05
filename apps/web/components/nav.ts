@@ -21,16 +21,7 @@ export const NAV: NavGroup[] = [
     items: [
       { label: "Ask Procura", href: "/assistant", icon: "agent" },
       { label: "Waiting for you", href: "/approvals", icon: "shield", badge: "approvals" },
-    ],
-  },
-  {
-    group: "Settings",
-    items: [
-      { label: "Limits", href: "/settings/agent-permissions", icon: "sliders" },
-      { label: "Kite Passport", href: "/settings/passport", icon: "key" },
-      { label: "Wallet", href: "/settings/wallets", icon: "wallet" },
-      { label: "Account", href: "/settings/account", icon: "cog" },
-      { label: "Connections", href: "/settings/integrations", icon: "plug" },
+      { label: "Limits", href: "/limits", icon: "sliders" },
     ],
   },
 ];
@@ -44,8 +35,6 @@ export function titleFor(pathname: string): string {
   if (/^\/sellers\/[^/]+$/.test(p)) return "Seller";
   if (/^\/orders\/[^/]+$/.test(p)) return "Order";
   if (/^\/payments\/[^/]+$/.test(p)) return "Payment";
-  if (p === "/settings/wallets") return "Wallet";
-  if (p === "/settings/passport") return "Kite Passport";
   const flat = NAV.flatMap((g) => g.items);
   return flat.find((n) => p === n.href)?.label ?? flat.find((n) => p.startsWith(n.href + "/"))?.label ?? "Home";
 }

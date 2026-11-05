@@ -7,6 +7,7 @@ import { Icon } from "@/components/icon";
 import { useToast } from "@/components/overlays";
 import { Pill } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
+import { openBuyerPanel } from "@/lib/buyer-panels";
 import type { VerifyRunDTO } from "@/lib/dto";
 import { errorMessage, useVerifyPlan, useVerifySupplier } from "@/lib/queries";
 
@@ -16,7 +17,7 @@ const TONE = { verified: "ok", unverified: "warn", unknown: "mute", failed: "err
 const WORD = { verified: "Verified", unverified: "Not verified", unknown: "Unknown", failed: "Failed" } as const;
 
 /**
- * Paid checks on a supplier, bought through an approved Kite Passport session. Nothing is bought until
+ * Paid checks on a seller, bought through an approved Kite Passport session. Nothing is bought until
  * the person presses the button, and the button says exactly what it will spend.
  */
 export function VerifyPanel({ supplierId, canSpend }: { supplierId: string; canSpend: boolean }) {
@@ -48,7 +49,7 @@ export function VerifyPanel({ supplierId, canSpend }: { supplierId: string; canS
     return card(
       <div className="callout"><Icon name="shield" /><div>
         Verification checks are bought through Kite Passport, which is not set up for this business.{" "}
-        <Link href="/settings/passport" style={{ textDecoration: "underline" }}>Set up Passport</Link>
+        <button className="linkbtn" style={{ textDecoration: "underline" }} onClick={() => openBuyerPanel("session")}>Set up spending</button>
       </div></div>,
     );
   }

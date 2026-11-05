@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AgentPanel } from "@/components/agent";
 import { SetupChecklist } from "@/components/setup-checklist";
+import { WalletRequired } from "@/components/wallet-required";
+import { useWalletGate } from "@/lib/wallet-gate";
+import { openBuyerPanel } from "@/lib/buyer-panels";
+import { shortAddress } from "@procura/shared";
 import { Icon, type IconName } from "@/components/icon";
 import { EmptyState, Kpi, PageHead, RequestStatusPill } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
 import { describeActivity } from "@/lib/activity";
 import { isActiveRequest, spentOrders, totalOf } from "@/lib/derive";
 import { firstName, greeting, minus, moneyShort, relativeTime, shortDate } from "@/lib/format";
-import { useActivity, useApprovals, useOrders, usePassport, usePolicy, useRequests, useSavingsEstimate } from "@/lib/queries";
+import { useActivity, useApprovals, useOrders, usePassport, usePolicy, useRequests, useSavingsEstimate, useWallets } from "@/lib/queries";
 
 export default function DashboardPage() {
   const { user, business, mode } = useApp();
@@ -23,6 +27,9 @@ export default function DashboardPage() {
   const policy = usePolicy();
   const passport = usePassport();
   const [ask, setAsk] = useState("");
+  const gate = useWalletGate();
+  const wallets = useWallets();
+  const linkedWallet = (wallets.data ?? []).find((w) => w.status === "active") ?? null;
 
   const cur = business.defaultCurrency;
   const reqs = requests.data ?? [];
@@ -70,7 +77,7 @@ export default function DashboardPage() {
         actions={<Link href="/assistant" className="btn btn-sec"><Icon name="agent" /> Ask Procura</Link>}
       />
 
-      <form className="card dash-ask" onSubmit={go} role="search">
+      {gate.needsWallet ? <div style={{ marginBottom: 20 }}><WalletRequired /></div> : <form className="card dash-ask" onSubmit={go} role="search">
         <label htmlFor="dash-ask" className="dash-ask-l">What do you need to buy?</label>
         <div className="dash-ask-r">
           <input id="dash-ask" className="input" value={ask} maxLength={300} onChange={(e) => setAsk(e.target.value)}
@@ -78,7 +85,7 @@ export default function DashboardPage() {
           <button className="btn btn-pri" type="submit"><Icon name="bolt" /> Find it</button>
         </div>
         <p className="mut3" style={{ fontSize: 12, margin: "8px 0 0" }}>Searching is free and buys nothing. You see every option before anything is ordered.</p>
-      </form>
+      </form>}
 
       <SetupChecklist requests={reqs} orders={ords} approvals={approvals.data ?? []} ready={!loading && !approvals.isPending} />
 
@@ -157,15 +164,24 @@ export default function DashboardPage() {
           <AgentPanel request={active[0]} />
 
           <div className="card" style={{ padding: 20 }}>
-            <div className="sec-head"><h2>Your limits</h2><Link href="/settings/agent-permissions">Change</Link></div>
+            <div className="sec-head"><h2>Your buyer</h2><Link href="/limits">Limits</Link></div>
+            {mode === "live" ? (
+              <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
+                <button className="btn btn-sec btn-sm" style={{ justifyContent: "flex-start" }} onClick={() => openBuyerPanel(linkedWallet ? "fund" : "wallet")}>
+                  <Icon name="wallet" /> {linkedWallet ? `Wallet ${shortAddress(linkedWallet.address)}, add funds` : "Connect your wallet"}
+                </button>
+                <button className="btn btn-sec btn-sm" style={{ justifyContent: "flex-start" }} onClick={() => openBuyerPanel("session")}>
+                  <Icon name="key" /> {sessions.length ? `${sessions.length} spending session${sessions.length === 1 ? "" : "s"} active` : "Approve a spending session"}
+                </button>
+              </div>
+            ) : null}
             {policy.data ? (
               <>
                 <div className="dash-meter" role="img" aria-label={`${Math.round(used)} percent of the monthly limit spent`}><i style={{ width: `${used}%` }} /></div>
                 <div className="appr-row"><span className="mut">Left this month</span><span className="v num">{left ? moneyShort(left, cur) : "-"}</span></div>
                 <div className="appr-row"><span className="mut">Largest purchase</span><span className="v num">{moneyShort(policy.data.maxTransactionAmount, cur)}</span></div>
                 <div className="appr-row"><span className="mut">Asks you</span><span className="v">{policy.data.approvalRequiredAbove ? `above ${moneyShort(policy.data.approvalRequiredAbove, cur)}` : "every time"}</span></div>
-                <div className="appr-row"><span className="mut">Spending session</span><span className="v">{mode === "demo" ? "Not in the demo" : sessions.length ? `${sessions.length} active` : "None active"}</span></div>
-                {mode === "live" && !sessions.length ? <p className="mut3" style={{ fontSize: 12, marginTop: 10 }}>The agent can search now. To let it pay, approve a session with your passkey in <Link href="/settings/passport" style={{ textDecoration: "underline" }}>Kite Passport</Link>.</p> : null}
+                {mode === "live" && !sessions.length ? <p className="mut3" style={{ fontSize: 12, marginTop: 10 }}>To let it pay, fund it from your wallet, then approve a spending session with your passkey.</p> : null}
               </>
             ) : <p className="mut3" style={{ fontSize: 13 }}>Loading your limits…</p>}
           </div>

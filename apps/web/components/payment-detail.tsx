@@ -39,7 +39,7 @@ export function PaymentDetailBody({ p, demo }: { p: PaymentDTO; demo: boolean })
       {p.failureReason ? <div className="callout err" style={{ marginTop: 12 }}><Icon name="alert" /><div>{p.failureReason}</div></div> : null}
       <div className="eyebrow" style={{ margin: "18px 0 8px" }}>Linked records</div>
       <div className="card" style={{ padding: "4px 16px" }}>
-        <div className="pp-stat"><span className="mut">Purchase order</span><Link className="linkbtn" href={`/orders/${p.orderId}`}>{p.orderNumber}</Link></div>
+        <div className="pp-stat"><span className="mut">Order</span><Link className="linkbtn" href={`/orders/${p.orderId}`}>{p.orderNumber}</Link></div>
         <div className="pp-stat"><span className="mut">Supplier</span><Link className="linkbtn" href={`/sellers/${p.supplierId}`}>{p.supplierName}</Link></div>
       </div>
       <p className="mut3" style={{ fontSize: 11, textAlign: "center", marginTop: 14 }}>

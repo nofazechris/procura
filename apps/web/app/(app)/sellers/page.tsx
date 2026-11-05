@@ -54,7 +54,7 @@ export default function SuppliersPage() {
               <input className="input" style={{ paddingLeft: 34 }} placeholder="Search sellers" aria-label="Search sellers" value={q} onChange={(e) => setQ(e.target.value)} />
               <span style={{ position: "absolute", left: 11, top: 10, color: "var(--ink-3)", display: "flex" }}><Icon name="search" /></span>
             </div>
-            {rows.length === 0 ? <div className="card"><EmptyState icon="search" title="No matching suppliers">Try a different filter or search.</EmptyState></div> : (
+            {rows.length === 0 ? <div className="card"><EmptyState icon="search" title="No matching sellers">Try a different filter or search.</EmptyState></div> : (
               <div className="grid-3">
                 {rows.map((s) => (
                   <Link key={s.id} href={`/sellers/${s.id}`} className="card" style={{ padding: 18, textDecoration: "none", color: "inherit" }}>

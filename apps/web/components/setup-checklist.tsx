@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { openBuyerPanel, type BuyerPanel } from "@/lib/buyer-panels";
 import { Icon } from "./icon";
 import { useApp } from "@/lib/app-context";
 import { usePassport, useWallets } from "@/lib/queries";
@@ -25,14 +26,14 @@ export function SetupChecklist({ requests, orders, approvals, ready }: {
 
   const comparing = requests.find((r) => r.status === "comparing");
   const steps = [
-    { done: true, title: "Set up your buyer", sub: "Your limits are saved.", href: "/settings/agent-permissions", cta: "Review" },
+    { done: true, title: "Set up your buyer", sub: "Your limits are saved.", href: "/limits", cta: "Review" },
     { done: requests.length > 0, title: "Make your first request", sub: "Describe what you need and let Procura search for it.", href: "/requests/new", cta: "Create" },
     { done: orders.length > 0, title: "Compare options and make an order", sub: "Pick the one you want from the comparison.", href: comparing ? `/requests/${comparing.id}/compare` : "/requests", cta: "Compare" },
     { done: orders.some((o) => o.approvedAt) || approvals.some((a) => a.destination?.status === "approved"), title: "Approve your first order", sub: "Only addresses you approve can ever be paid.", href: "/approvals", cta: "Review" },
-    { done: walletLinked, title: "Connect your wallet", sub: "Link the wallet you pay from by signing a message. Nothing moves and Procura never holds your keys.", href: "/settings/wallets", cta: "Connect" },
+    { done: walletLinked, title: "Connect your wallet", sub: "Sign one message to prove it is yours. Nothing moves and Procura never holds your keys.", panel: "wallet" as BuyerPanel, cta: "Connect" },
     ...(passport.isLoading ? [] : [passportOn
-      ? { done: passport.data?.agent != null && passport.data.sessions.some((s) => s.status === "active"), title: "Approve a Kite Passport session", sub: "Set the limits your agent must stay inside, then approve with your passkey.", href: "/settings/passport", cta: "Open" }
-      : { done: false, soon: true, title: "Connect Kite Passport", sub: "Lets the agent pay inside limits you set. It needs to be switched on for your account.", href: "/settings/passport", cta: "Details" }]),
+      ? { done: passport.data?.agent != null && passport.data.sessions.some((s) => s.status === "active"), title: "Let your buyer pay", sub: "Fund it, then approve a spending session with your passkey.", panel: "session" as BuyerPanel, cta: "Set up" }
+      : { done: false, soon: true, title: "Let your buyer pay", sub: "Paying opens once Kite Passport is switched on for your account.", panel: "session" as BuyerPanel, cta: "Details" }]),
   ];
   const core = steps.filter((s) => !("soon" in s));
   const doneCount = core.filter((s) => s.done).length;
@@ -55,7 +56,7 @@ export function SetupChecklist({ requests, orders, approvals, ready }: {
             <div style={{ fontSize: 13.5, fontWeight: 600, textDecoration: s.done ? "line-through" : "none", color: s.done ? "var(--ink-3)" : "var(--ink)" }}>{s.title}</div>
             <div className="mut3" style={{ fontSize: 12 }}>{s.sub}</div>
           </div>
-          {s.done ? null : "soon" in s ? <span className="pill p-mute">Soon</span> : <Link href={s.href} className="btn btn-sec btn-sm">{s.cta}</Link>}
+          {s.done ? null : "soon" in s ? <span className="pill p-mute">Soon</span> : "panel" in s ? <button className="btn btn-sec btn-sm" onClick={() => openBuyerPanel(s.panel as BuyerPanel)}>{s.cta}</button> : <Link href={s.href} className="btn btn-sec btn-sm">{s.cta}</Link>}
         </div>
       ))}
     </div>

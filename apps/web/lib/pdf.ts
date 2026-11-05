@@ -3,7 +3,7 @@ import { amount, dateTime, shortAddress } from "./format";
 
 /**
  * A small dependency-free PDF writer: text only, standard fonts, A4, automatic page breaks.
- * Enough for a clear purchase order. Content is reduced to ASCII so byte offsets equal string
+ * Enough for a clear order. Content is reduced to ASCII so byte offsets equal string
  * offsets, which the cross-reference table needs.
  */
 
@@ -58,7 +58,7 @@ function buildPdf(pages: Line[][][]): Uint8Array {
 const pad = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "~" : s.padEnd(n));
 const padL = (s: string, n: number) => s.padStart(n);
 
-/** A purchase order as a PDF. Every figure is the stored, server-calculated value. */
+/** An order as a PDF. Every figure is the stored, server-calculated value. */
 export function purchaseOrderPdf(d: OrderDetailDTO): Uint8Array {
   const o = d.order;
   const rows: Line[][] = [];
@@ -67,11 +67,11 @@ export function purchaseOrderPdf(d: OrderDetailDTO): Uint8Array {
   const gap = () => row(text("", 6));
 
   const orderNumber = d.request ? `${d.request.requestNumber}` : "";
-  row(text("PURCHASE ORDER", 20, "F2"));
+  row(text("ORDER", 20, "F2"));
   row(text(`Order ${o.orderNumber}${orderNumber ? `   Request ${orderNumber}` : ""}`, 11));
   row(text(`Status: ${o.status.replace(/_/g, " ")}     Issued: ${dateTime(o.createdAt)}`, 10));
   gap();
-  row(text("BUYER", 9, "F2"), text("SUPPLIER", 9, "F2", 320));
+  row(text("BUYER", 9, "F2"), text("SELLER", 9, "F2", 320));
   row(text(d.business?.name ?? "", 11, "F2"), text(d.supplier?.name ?? "", 11, "F2", 320));
   row(text(d.business?.address ?? "", 9), text([d.supplier?.city, d.supplier?.countryCode].filter(Boolean).join(", "), 9, "F1", 320));
   row(text("", 9), text(d.destination ? `Pays to ${shortAddress(d.destination.address)} (${d.destination.status})` : "No payment address", 9, "F1", 320));

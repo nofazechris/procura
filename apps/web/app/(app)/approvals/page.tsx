@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { openBuyerPanel } from "@/lib/buyer-panels";
 import { ApproveOrderModal, DestinationPill, type ApprovableOrder } from "@/components/approve-order";
 import { Icon } from "@/components/icon";
 import { Modal, useToast } from "@/components/overlays";
 import { DemoPasskeyModal } from "@/components/passkey";
-import { PassportCard } from "@/components/passport-card";
 import { Async, DemoTag, EmptyState, FilterChips, OrderStatusPill, PageHead, Pill } from "@/components/ui";
 import { useApp, useCan } from "@/lib/app-context";
 import type { ApprovalDTO } from "@/lib/dto";
@@ -47,7 +47,7 @@ export default function ApprovalsPage() {
 
   return (
     <>
-      <PageHead title="Approvals" sub="Review the financial actions that require your authorisation." />
+      <PageHead title="Approvals" sub="Purchases that need your OK before anything is paid." />
       <FilterChips options={[...TABS]} value={tab} onChange={(v) => setTab(v as (typeof TABS)[number])} />
       <div className="appr-grid">
         <div>
@@ -118,7 +118,14 @@ export default function ApprovalsPage() {
             })}
           </Async>
         </div>
-        <div><PassportCard /></div>
+        <div className="card" style={{ padding: 20 }}>
+          <div className="sec-head"><h2>How this gets paid</h2></div>
+          <p className="mut" style={{ fontSize: 13, lineHeight: 1.6 }}>
+            Approving records your OK. The payment comes from your buyer&apos;s own wallet, inside a spending session you approve with your passkey, and never
+            above your limits. Procura cannot pay without both.
+          </p>
+          <button className="btn btn-sec btn-sm" style={{ marginTop: 10 }} onClick={() => openBuyerPanel("session")}>Spending session</button>
+        </div>
       </div>
 
       <ApproveOrderModal open={!!approving} onClose={() => setApproving(null)} order={approving ? toApprovable(approving) : null} />

@@ -13,7 +13,7 @@ const schema = z.object({
   REQUIRE_EMAIL_VERIFICATION: z.enum(["true", "false"]).default("true"),
   /** Demo only: treat 1 USD as 1 USDC.e. Keep "false" in production; there is no rate feed yet. */
   ALLOW_FIXED_USD_PEG: z.enum(["true", "false"]).default("false"),
-  /** The controlled testnet wallet that demo suppliers propose as their payout address. */
+  /** The controlled testnet wallet that demo sellers propose as their payout address. */
   /** ERC-20 the escrow and payments will use on Kite. Not published in the Kite docs yet, so it is explicit config; balances show the native token only until it is set. */
   PAYMENT_TOKEN_ADDRESS: z.string().regex(/^0x[0-9a-fA-F]{40}$/, "Must be a 0x address").optional().or(z.literal("").transform(() => undefined)),
   /** SERV Reasoning (https://docs.openserv.ai/serv-reasoning/api). Without a key the agent features report "not connected". */
