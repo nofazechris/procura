@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 import type { NextConfig } from "next";
 
-// The repo keeps a single .env at the root (see .env.example). Next only reads its own folder.
+// The repo keeps a single .env at the root (never committed). Next only reads its own folder.
 // Existing process variables win, so real deployments (Vercel) are unaffected.
 loadEnv({ path: resolve(process.cwd(), "../../.env"), quiet: true });
 

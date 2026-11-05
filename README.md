@@ -36,8 +36,8 @@ pnpm dev:db        # terminal 1: local Postgres on :5433 (applies migrations, ke
 pnpm dev           # terminal 2: the app on http://localhost:3000
 ```
 
-`.env` is already set for local development (gitignored). For a real deployment use
-`.env.example` and [docs/neon-setup.md](docs/neon-setup.md).
+`.env` is already set for local development (gitignored). For a real deployment see
+[docs/neon-setup.md](docs/neon-setup.md), which lists every variable.
 
 ### Landing page, sign-in and first run
 
