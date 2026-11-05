@@ -98,6 +98,8 @@ export interface OrderDetailDTO {
   request: { id: string; requestNumber: string; title: string } | null;
   business: { name: string; address: string | null; countryCode: string } | null;
   destination: PayoutDestinationDTO | null;
+  /** Payments recorded for this order. A network of "simulation" is a practice checkout: no money moved. */
+  payments?: { id: string; status: string; network: string; amount: string; asset: string; reference: string | null; confirmedAt: Iso | null }[];
 }
 
 export interface ApprovalDTO extends ApprovalRowDTO {
@@ -177,4 +179,10 @@ export interface VerifyRunDTO {
     charged?: string | null; error?: { kind: string; message: string };
   }[];
   stopped: boolean;
+}
+
+/** What the agent would say on a call. Nothing is dialled: `placed` is always false. */
+export interface CallScriptDTO {
+  opening: string; questions: string[]; mustConfirm: string[]; closing: string; notes: string[];
+  model: string; placed: false; price: string; currency: "USD";
 }

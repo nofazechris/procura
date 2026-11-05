@@ -9,9 +9,9 @@ export const NAV: NavGroup[] = [
     group: "Main",
     items: [
       { label: "Home", href: "/dashboard", icon: "grid" },
-      { label: "Requests", href: "/procurement", icon: "pkg" },
+      { label: "Requests", href: "/requests", icon: "pkg" },
       { label: "Orders", href: "/orders", icon: "doc" },
-      { label: "Sellers", href: "/suppliers", icon: "users" },
+      { label: "Sellers", href: "/sellers", icon: "users" },
       { label: "Spending", href: "/payments", icon: "card" },
       { label: "Activity", href: "/activity", icon: "clock" },
     ],
@@ -29,7 +29,7 @@ export const NAV: NavGroup[] = [
       { label: "Limits", href: "/settings/agent-permissions", icon: "sliders" },
       { label: "Kite Passport", href: "/settings/passport", icon: "key" },
       { label: "Wallet", href: "/settings/wallets", icon: "wallet" },
-      { label: "Account", href: "/settings/business", icon: "cog" },
+      { label: "Account", href: "/settings/account", icon: "cog" },
       { label: "Connections", href: "/settings/integrations", icon: "plug" },
     ],
   },
@@ -38,10 +38,10 @@ export const NAV: NavGroup[] = [
 /** Page title for the breadcrumb, from the current path. */
 export function titleFor(pathname: string): string {
   const p = pathname.replace(/\/+$/, "") || "/";
-  if (/^\/procurement\/new$/.test(p)) return "New request";
-  if (/^\/procurement\/[^/]+\/compare$/.test(p)) return "Compare options";
-  if (/^\/procurement\/[^/]+$/.test(p)) return "Request";
-  if (/^\/suppliers\/[^/]+$/.test(p)) return "Seller";
+  if (/^\/requests\/new$/.test(p)) return "New request";
+  if (/^\/requests\/[^/]+\/compare$/.test(p)) return "Compare options";
+  if (/^\/requests\/[^/]+$/.test(p)) return "Request";
+  if (/^\/sellers\/[^/]+$/.test(p)) return "Seller";
   if (/^\/orders\/[^/]+$/.test(p)) return "Order";
   if (/^\/payments\/[^/]+$/.test(p)) return "Payment";
   if (p === "/settings/wallets") return "Wallet";

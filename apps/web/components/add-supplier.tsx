@@ -34,7 +34,7 @@ export function AddSupplierModal({ open, onClose }: { open: boolean; onClose: ()
       const created = await add.mutateAsync(parsed.data);
       show("Seller added");
       setF(EMPTY); onClose();
-      router.push(`/suppliers/${created.id}`);
+      router.push(`/sellers/${created.id}`);
     } catch (x) { show(errorMessage(x), "err"); }
   }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/settings/business", label: "Account" },
+  { href: "/settings/account", label: "Account" },
   { href: "/settings/agent-permissions", label: "Limits" },
   { href: "/settings/passport", label: "Passport" },
   { href: "/settings/wallets", label: "Wallet" },

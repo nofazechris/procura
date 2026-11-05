@@ -6,7 +6,7 @@ import { Icon } from "@/components/icon";
 import { useToast } from "@/components/overlays";
 import { PageHead, Toggle } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
-import { errorMessage, useAgentStatus, useCreateRequest, useInterpret, usePassport, useStartSourcing, type NewRequestInput, type SourceChoice } from "@/lib/queries";
+import { errorMessage, useAgentStatus, useBusinessDetail, useCreateRequest, useInterpret, usePassport, useStartSourcing, type NewRequestInput, type SourceChoice } from "@/lib/queries";
 import { CreateProcurementRequestSchema } from "@procura/shared";
 
 interface Line { productName: string; quantity: string; unit: string; category: string }
@@ -47,6 +47,13 @@ export default function NewProcurementPage() {
   const [budget, setBudget] = useState("");
   const [currency, setCurrency] = useState(business.defaultCurrency);
   const [priority, setPriority] = useState<NewRequestInput["priority"]>("price");
+  // Start from how you told your buyer to choose, until you pick something else here.
+  const detail = useBusinessDetail();
+  const touchedPriority = useRef(false);
+  useEffect(() => {
+    const q = (detail.data?.preferences as { quality?: string } | undefined)?.quality;
+    if (!touchedPriority.current && q === "Premium") setPriority("quality");
+  }, [detail.data]);
   const [includeDelivery, setIncludeDelivery] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [review, setReview] = useState<{ missing: string[]; notes: string[]; model: string } | null>(null);
@@ -89,7 +96,7 @@ export default function NewProcurementPage() {
       const request = await create.mutateAsync(input);
       setBusy("sourcing");
       await Promise.all([sourcing.mutateAsync({ id: request.id, source: amazonReady ? source : "demo" }), new Promise((r) => setTimeout(r, 1500))]);
-      router.push(`/procurement/${request.id}/compare`);
+      router.push(`/requests/${request.id}/compare`);
     } catch (e) {
       setBusy(null);
       show(errorMessage(e), "err");
@@ -260,7 +267,7 @@ export default function NewProcurementPage() {
           <div className="grid-2">
             <Field label="Delivery deadline (optional)"><input className="input" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></Field>
             <Field label="Priority">
-              <select className="input" value={priority} onChange={(e) => setPriority(e.target.value as NewRequestInput["priority"])}>
+              <select className="input" value={priority} onChange={(e) => { touchedPriority.current = true; setPriority(e.target.value as NewRequestInput["priority"]); }}>
                 {PRIORITIES.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
               </select>
             </Field>

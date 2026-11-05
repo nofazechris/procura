@@ -4,7 +4,7 @@ import {
   quotations, recordAudit, spendingPolicies, supplierPayoutDestinations, suppliers, type DbLike,
 } from "@procura/database";
 import {
-  evaluateOrderPolicy, orderFingerprint, type SpendingPolicy, type SpendingPolicyDecision,
+  evaluateOrderPolicy, MARKETPLACE_RECIPIENT, orderFingerprint, type SpendingPolicy, type SpendingPolicyDecision,
 } from "@procura/policies";
 import {
   assertPurchaseOrderTransition, assertRequestTransition, PAYMENT_ASSET, PAYMENT_NETWORK, ServiceError, sum,
@@ -197,9 +197,12 @@ export async function approveOrder(tx: DbLike, ctx: ServiceContext, orderId: str
     throw new ServiceError("APPROVAL_EXPIRED", "This approval request has expired.", 409);
   }
 
-  const destination = await approvedDestination(tx, order.supplierId, order.paymentAsset);
+  // A marketplace order is paid at the marketplace's own checkout, so there is no payout address to approve.
+  const [seller] = await tx.select({ sourceType: suppliers.sourceType }).from(suppliers).where(eq(suppliers.id, order.supplierId));
+  const marketplace = seller?.sourceType === "marketplace";
+  const destination = marketplace ? { address: MARKETPLACE_RECIPIENT } : await approvedDestination(tx, order.supplierId, order.paymentAsset);
   if (!destination) {
-    throw new ServiceError("RECIPIENT_NOT_APPROVED", "Approve the supplier's payment address before approving this order.", 409);
+    throw new ServiceError("RECIPIENT_NOT_APPROVED", "Approve the seller's payment address before approving this order.", 409);
   }
 
   const policy = await loadPolicy(tx, ctx.businessId);

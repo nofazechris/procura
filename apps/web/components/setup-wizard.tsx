@@ -275,7 +275,7 @@ function Wizard({ userName, scene }: { userName: string; scene: SceneData }) {
                     ["Wallet", wallet ? shortAddress(wallet.address) : "Not linked yet"],
                   ].map(([l, v]) => <div key={l} className="ob-sum-row"><span className="mut">{l}</span><span className="v">{v}</span></div>)}
                 </div>
-                <button type="button" className="linkbtn" style={{ marginTop: 14, fontSize: 13.5 }} disabled={busy} onClick={() => finish("/procurement/new")}>
+                <button type="button" className="linkbtn" style={{ marginTop: 14, fontSize: 13.5 }} disabled={busy} onClick={() => finish("/requests/new")}>
                   Or describe my first purchase now <Icon name="arr" />
                 </button>
               </div>

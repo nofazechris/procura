@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Icon } from "@/components/icon";
 import { Drawer } from "@/components/overlays";
 import { PaymentDetailBody } from "@/components/payment-detail";
-import { Async, EmptyState, Kpi, PageHead, PaymentStatusPill } from "@/components/ui";
+import { Async, EmptyState, Kpi, PageHead, PaymentStatusPill, Pill } from "@/components/ui";
 import { useApp } from "@/lib/app-context";
 import type { PaymentDTO } from "@/lib/dto";
 import { amount, moneyShort, shortAddress, shortDate } from "@/lib/format";
@@ -23,19 +23,22 @@ export default function PaymentsPage() {
       <Async query={payments}>
         {(rows) => {
           const asset = rows[0]?.asset ?? "USDC.e";
-          const total = (status: string[]) => sum(rows.filter((r) => status.includes(r.status) && r.asset === asset).map((r) => ({ amount: r.amount, currency: asset })), asset).amount;
+          // Practice checkouts moved no money, so they never count toward what was paid.
+          const real = rows.filter((r) => r.network !== "simulation");
+          const practice = rows.length - real.length;
+          const total = (status: string[]) => sum(real.filter((r) => status.includes(r.status) && r.asset === asset).map((r) => ({ amount: r.amount, currency: asset })), asset).amount;
           const failed = rows.filter((r) => r.status === "failed").length;
           return (
             <>
               <div className="kpis">
-                <Kpi label="Total paid" icon="card" tone={rows.some((r) => r.status === "confirmed") ? "up" : undefined} value={moneyShort(total(["confirmed"]), asset)} sub="confirmed on the network" />
+                <Kpi label="Total paid" icon="card" tone={real.some((r) => r.status === "confirmed") ? "up" : undefined} value={moneyShort(total(["confirmed"]), asset)} sub="confirmed on the network" />
                 <Kpi label="Pending" icon="clock" value={moneyShort(total(["prepared", "awaiting_authorisation", "authorised", "submitted", "pending"]), asset)} sub="not yet confirmed" />
                 <Kpi label="Failed" icon="shield" value={failed} sub={failed ? "need attention" : "no failed transactions"} />
-                <Kpi label="Transactions" icon="trend" value={rows.length} sub={rows.length ? `all on ${rows[0]!.network}` : "none yet"} />
+                <Kpi label="Transactions" icon="trend" value={real.length} sub={practice ? `${practice} practice, no money moved` : real.length ? `all on ${real[0]!.network}` : "none yet"} />
               </div>
               {rows.length === 0 ? (
                 <div className="card"><EmptyState icon="card" title="No payments yet">
-                  {mode === "live" ? "Payments appear here once Kite Passport is connected and you approve a spending session. Nothing has been paid." : "Approve the sample order to see a payment here."}
+                  {mode === "live" ? "Payments appear here once you check out an approved order. Nothing real has been paid yet." : "Approve the sample order to see a payment here."}
                 </EmptyState></div>
               ) : (
                 <div className="tbl-wrap" data-tour="payments-table">
@@ -48,8 +51,8 @@ export default function PaymentsPage() {
                           <td><b>{p.supplierName}</b></td>
                           <td className="mut">{p.orderNumber}</td>
                           <td className="num">{amount(p.amount)} {p.asset}</td>
-                          <td><span className="chip" style={{ fontSize: 11, padding: "3px 9px" }}>{p.network}</span></td>
-                          <td><PaymentStatusPill status={p.status} /></td>
+                          <td><span className="chip" style={{ fontSize: 11, padding: "3px 9px" }}>{p.network === "simulation" ? "Practice" : p.network}</span></td>
+                          <td>{p.network === "simulation" ? <Pill tone="info">Practice</Pill> : <PaymentStatusPill status={p.status} />}</td>
                           <td className="mut num">{shortDate(p.createdAt)}</td>
                         </tr>
                       ))}
@@ -58,7 +61,7 @@ export default function PaymentsPage() {
                 </div>
               )}
               <p className="mut3" style={{ fontSize: 12, marginTop: 14, display: "flex", alignItems: "center", gap: 7 }}>
-                <Icon name="shield" /> Payment states reflect actual provider or chain responses. A payment is confirmed only after the network confirms it.
+                <Icon name="shield" /> Payment states reflect actual provider or chain responses. A payment is confirmed only after the network confirms it. A practice payment is a rehearsal: no money moved.
               </p>
             </>
           );

@@ -25,10 +25,10 @@ export function describeActivity(a: ActivityDTO): ActivityView {
   const resourceHref = (kind: ActivityDTO["resourceType"]): string => {
     if (!a.resourceId) return "/activity";
     switch (kind) {
-      case "procurement_request": return `/procurement/${a.resourceId}`;
+      case "procurement_request": return `/requests/${a.resourceId}`;
       case "purchase_order": return `/orders/${a.resourceId}`;
       case "payment": return `/payments/${a.resourceId}`;
-      case "business": return "/settings/business";
+      case "business": return "/settings/account";
       case "spending_policy": return "/settings/agent-permissions";
       default: return "/approvals";
     }

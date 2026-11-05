@@ -49,8 +49,8 @@ export default function DashboardPage() {
 
   const attention: { icon: IconName; tone: "warn" | "info" | "ok"; title: string; sub: string; href: string; tag: string }[] = [];
   if (pendingApprovals.length) attention.push({ icon: "shield", tone: "warn", title: `${pendingApprovals.length} ${pendingApprovals.length === 1 ? "purchase is" : "purchases are"} waiting for your OK`, sub: pendingApprovals.slice(0, 2).map((a) => `${a.orderNumber} · ${a.supplierName}`).join(", "), href: "/approvals", tag: "Review" });
-  for (const r of reqs.filter((x) => x.status === "comparing").slice(0, 2)) attention.push({ icon: "scale", tone: "info", title: `Options ready: ${r.title}`, sub: `${r.requestNumber} · pick one to prepare the order`, href: `/procurement/${r.id}/compare`, tag: "Compare" });
-  for (const r of reqs.filter((x) => x.status === "draft").slice(0, 1)) attention.push({ icon: "bolt", tone: "info", title: `Not started: ${r.title}`, sub: `${r.requestNumber} · start the search to see options`, href: `/procurement/${r.id}`, tag: "Start" });
+  for (const r of reqs.filter((x) => x.status === "comparing").slice(0, 2)) attention.push({ icon: "scale", tone: "info", title: `Options ready: ${r.title}`, sub: `${r.requestNumber} · pick one to prepare the order`, href: `/requests/${r.id}/compare`, tag: "Compare" });
+  for (const r of reqs.filter((x) => x.status === "draft").slice(0, 1)) attention.push({ icon: "bolt", tone: "info", title: `Not started: ${r.title}`, sub: `${r.requestNumber} · start the search to see options`, href: `/requests/${r.id}`, tag: "Start" });
   const unapproved = (approvals.data ?? []).filter((a) => a.status === "pending" && a.destination?.status === "pending");
   if (unapproved.length) attention.push({ icon: "wallet", tone: "warn", title: "A payment address needs your OK", sub: `${unapproved[0]!.supplierName} · only addresses you approve can be paid`, href: "/approvals", tag: "Approve" });
 
@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const go = (e: React.FormEvent) => {
     e.preventDefault();
     const q = ask.trim();
-    router.push(q ? `/procurement/new?q=${encodeURIComponent(q)}` : "/procurement/new");
+    router.push(q ? `/requests/new?q=${encodeURIComponent(q)}` : "/requests/new");
   };
 
   return (
@@ -96,9 +96,9 @@ export default function DashboardPage() {
       <div className="grid-main">
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div className="card" style={{ padding: 20 }}>
-            <div className="sec-head"><h2>In progress</h2><Link href="/procurement">All requests</Link></div>
+            <div className="sec-head"><h2>In progress</h2><Link href="/requests">All requests</Link></div>
             {active.length === 0 && !loading ? (
-              <EmptyState icon="pkg" title="Nothing in progress" action={<Link href="/procurement/new" className="btn btn-pri btn-sm"><Icon name="plus" /> New request</Link>}>
+              <EmptyState icon="pkg" title="Nothing in progress" action={<Link href="/requests/new" className="btn btn-pri btn-sm"><Icon name="plus" /> New request</Link>}>
                 Describe something you need and Procura will find options and compare them.
               </EmptyState>
             ) : (
@@ -107,8 +107,8 @@ export default function DashboardPage() {
                   <thead><tr><th>Request</th><th>Status</th><th>Budget</th><th>Started</th></tr></thead>
                   <tbody>
                     {active.slice(0, 5).map((r) => (
-                      <tr key={r.id} className="row-link" onClick={() => router.push(`/procurement/${r.id}`)}>
-                        <td><Link href={`/procurement/${r.id}`} style={{ textDecoration: "none" }}><b>{r.title}</b></Link><div className="mut3" style={{ fontSize: 11.5 }}>{r.requestNumber}</div></td>
+                      <tr key={r.id} className="row-link" onClick={() => router.push(`/requests/${r.id}`)}>
+                        <td><Link href={`/requests/${r.id}`} style={{ textDecoration: "none" }}><b>{r.title}</b></Link><div className="mut3" style={{ fontSize: 11.5 }}>{r.requestNumber}</div></td>
                         <td><RequestStatusPill status={r.status} /></td>
                         <td className="num">{moneyShort(r.budgetAmount, r.currency)}</td>
                         <td className="mut num">{shortDate(r.createdAt)}</td>

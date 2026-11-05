@@ -10,7 +10,7 @@ import {
 } from "./demo/store";
 import type {
   ActivityDTO, ApprovalDTO, BusinessDTO, ComparisonView, MemberDTO, OrderDetailDTO, OrderDTO, PaymentDTO, PolicyDTO,
-  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO, WalletBalancesDTO, WalletDTO, PassportDTO, PassportSessionDTO, VerifyPlanDTO, VerifyRunDTO,
+  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO, WalletBalancesDTO, WalletDTO, PassportDTO, PassportSessionDTO, VerifyPlanDTO, VerifyRunDTO, CallScriptDTO,
 } from "./dto";
 
 /** Demo throws ServiceError; live throws ApiClientError. Present both the same way. */
@@ -142,6 +142,13 @@ export const useRejectOrder = () =>
     async (i) => demoRejectOrder(i.id),
   );
 
+/** Practice checkout: runs the real payment gate and records a payment on the simulation network. Nothing is charged. */
+export const useCheckout = () =>
+  useRefreshingMutation<string, { reference: string; simulated: true }>(
+    (id) => api(`/orders/${id}/checkout`, { method: "POST" }),
+    async () => { throw new ServiceError("NOT_AVAILABLE", "In the demo, open Approvals to simulate the payment.", 400); },
+  );
+
 export const useApprovePayout = () =>
   useRefreshingMutation<{ supplierId: string; destinationId: string }, unknown>(
     (i) => api(`/suppliers/${i.supplierId}/payout-destinations/${i.destinationId}/approve`, { method: "POST" }),
@@ -172,7 +179,7 @@ export const useUpdatePolicy = () =>
 
 export const useUpdateBusiness = () => {
   const { business } = useApp();
-  return useRefreshingMutation<Partial<{ name: string; industry: string; website: string; address: string }>, BusinessDTO>(
+  return useRefreshingMutation<Partial<{ name: string; industry: string; website: string; address: string; preferences: { quality?: string; categories?: string[] } }>, BusinessDTO>(
     (i) => api(`/business/${business.id}`, { method: "PATCH", body: i }),
     async (i) => {
       const s = await getDemo();
@@ -296,3 +303,9 @@ export const useVerifyPlan = (supplierId: string) =>
 export interface VerifyInput { checks: string[]; sessionId: string; maxCost: string }
 export const useVerifySupplier = (supplierId: string) =>
   useRefreshingMutation<VerifyInput, VerifyRunDTO>((i) => api(`/suppliers/${supplierId}/verify`, { method: "POST", body: i }), NOT_IN_DEMO);
+
+/** The agent drafts what it would say on a call. A rehearsal only: nobody is called. */
+export const useCallScript = (supplierId: string) =>
+  useMutation<CallScriptDTO, unknown, { requestId?: string }>({
+    mutationFn: (i) => api(`/suppliers/${supplierId}/call-script`, { method: "POST", body: i }),
+  });

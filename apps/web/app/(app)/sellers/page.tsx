@@ -44,7 +44,7 @@ export default function SuppliersPage() {
       <AddSupplierModal open={adding} onClose={() => setAdding(false)} />
       <Async query={suppliers}>
         {(all) => all.length === 0 ? (
-          <div className="card"><EmptyState icon="users" title="No sellers yet" action={addButton ?? <Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Start a procurement</Link>}>
+          <div className="card"><EmptyState icon="users" title="No sellers yet" action={addButton ?? <Link href="/requests/new" className="btn btn-pri"><Icon name="plus" /> Start a procurement</Link>}>
             Sellers appear here when Procura finds them for a request, or when you add one yourself and check it.
           </EmptyState></div>
         ) : (
@@ -57,7 +57,7 @@ export default function SuppliersPage() {
             {rows.length === 0 ? <div className="card"><EmptyState icon="search" title="No matching suppliers">Try a different filter or search.</EmptyState></div> : (
               <div className="grid-3">
                 {rows.map((s) => (
-                  <Link key={s.id} href={`/suppliers/${s.id}`} className="card" style={{ padding: 18, textDecoration: "none", color: "inherit" }}>
+                  <Link key={s.id} href={`/sellers/${s.id}`} className="card" style={{ padding: 18, textDecoration: "none", color: "inherit" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                       <SupplierLogo name={s.name} size={40} />
                       <div style={{ minWidth: 0 }}>

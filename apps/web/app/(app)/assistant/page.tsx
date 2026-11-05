@@ -59,10 +59,10 @@ export default function AssistantPage() {
     }
     if (/request|status|pr-/.test(lower)) {
       const r = (requests.data ?? []).filter((x) => !["completed", "cancelled", "failed"].includes(x.status));
-      return <>You have <b>{r.length}</b> open {r.length === 1 ? "request" : "requests"}{r[0] ? <>. The latest is <b>{r[0].title}</b> ({r[0].requestNumber}), which is {r[0].status.replace("_", " ")}.</> : "."}{card("pkg", "Procurement", "/procurement", "Open procurement")}</>;
+      return <>You have <b>{r.length}</b> open {r.length === 1 ? "request" : "requests"}{r[0] ? <>. The latest is <b>{r[0].title}</b> ({r[0].requestNumber}), which is {r[0].status.replace("_", " ")}.</> : "."}{card("pkg", "Procurement", "/requests", "Open procurement")}</>;
     }
     if (/supplier|packaging|box|find|source|compare/.test(lower)) {
-      return <>I can source suppliers, but starting from free text needs SERV Reasoning. In this demo, create the request in the form and I will run the comparison.{card("agent", "Start a request", "/procurement/new", "Create request")}</>;
+      return <>I can source suppliers, but starting from free text needs SERV Reasoning. In this demo, create the request in the form and I will run the comparison.{card("agent", "Start a request", "/requests/new", "Create request")}</>;
     }
     return <>I do not have a rule for that in the demo. Try asking about spending, approvals or requests.</>;
   }
@@ -74,7 +74,7 @@ export default function AssistantPage() {
       if (!agentReady) return;
       // The new-request page reads this once, runs the agent, and shows the result for review.
       try { sessionStorage.setItem("procura_ask", q); } catch { /* storage unavailable: the page opens empty */ }
-      router.push("/procurement/new");
+      router.push("/requests/new");
       return;
     }
     setText("");

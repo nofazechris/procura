@@ -2,3 +2,4 @@
 export * from "./spending";
 export * from "./canonical";
 export * from "./passport";
+export * from "./checkout";

@@ -20,6 +20,7 @@ function toApprovable(a: ApprovalDTO): ApprovableOrder {
   return {
     id: a.orderId, orderNumber: a.orderNumber, supplierId: a.supplierId, supplierName: a.supplierName, total: a.amount, currency: a.currency,
     paymentAsset: a.paymentAsset, paymentAmount: a.paymentAmount, destination: a.destination,
+    marketplace: a.supplierSource === "marketplace",
   };
 }
 
@@ -78,9 +79,9 @@ export default function ApprovalsPage() {
                     <span className="k-ic" style={{ background: "var(--surface)", color: "var(--forest-2)" }}><Icon name="wallet" /></span>
                     <div style={{ flex: 1, minWidth: 140 }}>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>Pays: {a.supplierName}</div>
-                      <div className="addr" title={a.destination?.address}>{a.destination ? `${shortAddress(a.destination.address)} · ${a.destination.network} · ${a.destination.asset}` : "No payment address"}</div>
+                      <div className="addr" title={a.destination?.address}>{a.supplierSource === "marketplace" ? "Paid at Amazon checkout, no address needed" : a.destination ? `${shortAddress(a.destination.address)} · ${a.destination.network} · ${a.destination.asset}` : "No payment address"}</div>
                     </div>
-                    <DestinationPill d={a.destination} />
+                    {a.supplierSource === "marketplace" ? <Pill tone="info">Marketplace</Pill> : <DestinationPill d={a.destination} />}
                   </div>
                   <div className="appr-row"><span className="mut">Order total</span><span className="v num">{amount(a.amount)} {a.currency}</span></div>
                   <div className="appr-row"><span className="mut">Payable as</span><span className="v num">{amount(a.paymentAmount)} {a.paymentAsset}</span></div>

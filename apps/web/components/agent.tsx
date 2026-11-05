@@ -52,13 +52,13 @@ export function AgentPanel({ request }: { request: RequestDTO | undefined }) {
               );
             })}
           </div>
-          <Link href={`/procurement/${request.id}`} className="btn btn-sm" style={{ background: "rgba(255,255,255,.1)", color: "#fff", marginTop: 16, width: "100%" }}>
+          <Link href={`/requests/${request.id}`} className="btn btn-sm" style={{ background: "rgba(255,255,255,.1)", color: "#fff", marginTop: 16, width: "100%" }}>
             Open request <Icon name="arr" />
           </Link>
         </>
       ) : (
         <div className="ap-task">No active request. Describe what you need and Procura will find options and compare them for you.
-          <Link href="/procurement/new" className="btn btn-sm" style={{ background: "var(--panel-accent)", color: "var(--panel)", marginTop: 16, width: "100%" }}>
+          <Link href="/requests/new" className="btn btn-sm" style={{ background: "var(--panel-accent)", color: "var(--panel)", marginTop: 16, width: "100%" }}>
             <Icon name="plus" /> New request
           </Link>
         </div>

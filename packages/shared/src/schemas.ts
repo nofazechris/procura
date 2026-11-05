@@ -91,6 +91,11 @@ export const UpdateBusinessSchema = z
     industry: z.string().trim().min(1).max(80),
     website: z.string().url().or(z.literal("")),
     address: z.string().max(300),
+    /** How the buyer leans when options are close, and what the person shops for. Merged into what is stored. */
+    preferences: z.object({
+      quality: z.enum(["Budget", "Balanced", "Premium"]),
+      categories: z.array(z.string().trim().min(1).max(80)).max(40),
+    }).partial(),
   })
   .partial()
   .refine((v) => Object.keys(v).length > 0, "Nothing to update");
@@ -189,6 +194,15 @@ export const AgentExplanationOutputSchema = z.object({
   questionsForYou: z.array(z.string()),
 });
 export type AgentExplanationOutput = z.infer<typeof AgentExplanationOutputSchema>;
+
+/** A phone call the agent would make to a seller, drafted for a person to read. Nothing is dialled. */
+export const CallScriptOutputSchema = z.object({
+  opening: z.string(),
+  questions: z.array(z.string()),
+  mustConfirm: z.array(z.string()),
+  closing: z.string(),
+});
+export type CallScriptOutput = z.infer<typeof CallScriptOutputSchema>;
 
 /** Asking Kite Passport for a spending session. The server checks these against the business policy. */
 export const RequestPassportSessionSchema = z.object({

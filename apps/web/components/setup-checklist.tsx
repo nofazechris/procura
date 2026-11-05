@@ -26,8 +26,8 @@ export function SetupChecklist({ requests, orders, approvals, ready }: {
   const comparing = requests.find((r) => r.status === "comparing");
   const steps = [
     { done: true, title: "Set up your buyer", sub: "Your limits are saved.", href: "/settings/agent-permissions", cta: "Review" },
-    { done: requests.length > 0, title: "Make your first request", sub: "Describe what you need and let Procura search for it.", href: "/procurement/new", cta: "Create" },
-    { done: orders.length > 0, title: "Compare options and make an order", sub: "Pick the one you want from the comparison.", href: comparing ? `/procurement/${comparing.id}/compare` : "/procurement", cta: "Compare" },
+    { done: requests.length > 0, title: "Make your first request", sub: "Describe what you need and let Procura search for it.", href: "/requests/new", cta: "Create" },
+    { done: orders.length > 0, title: "Compare options and make an order", sub: "Pick the one you want from the comparison.", href: comparing ? `/requests/${comparing.id}/compare` : "/requests", cta: "Compare" },
     { done: orders.some((o) => o.approvedAt) || approvals.some((a) => a.destination?.status === "approved"), title: "Approve your first order", sub: "Only addresses you approve can ever be paid.", href: "/approvals", cta: "Review" },
     { done: walletLinked, title: "Connect your wallet", sub: "Link the wallet you pay from by signing a message. Nothing moves and Procura never holds your keys.", href: "/settings/wallets", cta: "Connect" },
     ...(passport.isLoading ? [] : [passportOn

@@ -2,12 +2,12 @@
 
 import { useRef } from "react";
 
-interface Lane { name: string; status: "Live" | "Building next" | "Planned"; line: string; detail: string; cost: string; glyph: string }
+interface Lane { name: string; status: "Live" | "Needs funds" | "Preview"; line: string; detail: string; cost: string; glyph: string }
 
 const LANES: Lane[] = [
-  { name: "Shop", status: "Live", glyph: "01", line: "Search real products and compare baskets.", detail: "Amazon search through Kite Passport is free and buys nothing. Checkout inside a capped session is the next step.", cost: "search is free" },
-  { name: "Verify", status: "Building next", glyph: "02", line: "Check a supplier before you trust it.", detail: "Sanctions, company registry and email checks, bought per call for cents, and turned into evidence.", cost: "about 1 to 30 cents a check" },
-  { name: "Call", status: "Planned", glyph: "03", line: "Phone vendors that have no website.", detail: "An AI voice agent asks for a price and availability, with your approval before any real person is contacted.", cost: "about 54 cents a call" },
+  { name: "Shop", status: "Live", glyph: "01", line: "Search real products and compare baskets.", detail: "Amazon search through Kite Passport is free and buys nothing. Checkout runs as a practice for now: the full payment gate, with no money moved until a wallet is funded.", cost: "search is free, practice checkout is free" },
+  { name: "Verify", status: "Needs funds", glyph: "02", line: "Check a seller before you trust it.", detail: "Sanctions, company registry and email checks, bought per call for cents from a session you approve, and turned into evidence. Built, and waiting for a funded wallet.", cost: "about 1 to 30 cents a check" },
+  { name: "Call", status: "Preview", glyph: "03", line: "Phone sellers that have no website.", detail: "The agent drafts the call, saying it is an AI and only asking questions, and you read it first. Real calls are not switched on.", cost: "about 54 cents a call" },
 ];
 
 function Panel({ lane, i }: { lane: Lane; i: number }) {
@@ -24,7 +24,7 @@ function Panel({ lane, i }: { lane: Lane; i: number }) {
       <div className="lane-layer lane-base" />
       <div className="lane-layer lane-glyph">{lane.glyph}</div>
       <div className="lane-layer lane-body">
-        <span className={`lane-pill ${lane.status === "Live" ? "live" : lane.status === "Building next" ? "next" : ""}`}>{lane.status}</span>
+        <span className={`lane-pill ${lane.status === "Live" ? "live" : lane.status === "Needs funds" ? "next" : ""}`}>{lane.status}</span>
         <h3>{lane.name}</h3>
         <p className="lane-line">{lane.line}</p>
         <p className="lane-detail">{lane.detail}</p>

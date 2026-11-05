@@ -30,11 +30,11 @@ export function CommandPalette({ open, onClose, actions }: {
       ...NAV.flatMap((g) => g.items).map((n) => ({ group: "Navigate", title: n.label, icon: n.icon, run: () => router.push(n.href) })),
       ...actions.map((a) => ({ group: "Actions", ...a })),
       ...(requests.data ?? []).slice(0, 30).map((r) => ({
-        group: "Requests", title: r.title, sub: r.requestNumber, icon: "pkg" as IconName, run: () => router.push(`/procurement/${r.id}`),
+        group: "Requests", title: r.title, sub: r.requestNumber, icon: "pkg" as IconName, run: () => router.push(`/requests/${r.id}`),
       })),
       ...(suppliers.data ?? []).map((s) => ({
         group: "Sellers", title: s.name, sub: [s.city, s.sourceType === "demo" ? "Demo" : ""].filter(Boolean).join(" · "), icon: "users" as IconName,
-        run: () => router.push(`/suppliers/${s.id}`),
+        run: () => router.push(`/sellers/${s.id}`),
       })),
     ];
     const needle = q.trim().toLowerCase();

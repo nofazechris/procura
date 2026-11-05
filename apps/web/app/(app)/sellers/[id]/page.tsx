@@ -11,6 +11,7 @@ import { errorMessage, useApprovePayout, useOrders, useSupplier } from "@/lib/qu
 import { EVIDENCE_CHECKS } from "@/lib/reasons";
 import { totalOf, spentOrders } from "@/lib/derive";
 import { SupplierStatePill, supplierState } from "@/components/supplier-state";
+import { CallPanel } from "@/components/call-panel";
 import { VerifyPanel } from "@/components/verify-panel";
 
 function Stat({ v, l }: { v: string | number; l: string }) {
@@ -53,8 +54,8 @@ export default function SupplierProfilePage() {
               title={<span style={{ display: "inline-flex", alignItems: "center", gap: 14 }}><SupplierLogo name={s.name} size={46} />{s.name}</span>}
               sub={[[s.city, s.countryCode].filter(Boolean).join(", "), s.categories.join(" · ")].filter(Boolean).join(" · ")}
               actions={<>
-                <Link href="/suppliers" className="btn btn-sec btn-sm"><Icon name="prev" /> All sellers</Link>
-                <Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> New request</Link>
+                <Link href="/sellers" className="btn btn-sec btn-sm"><Icon name="prev" /> All sellers</Link>
+                <Link href="/requests/new" className="btn btn-pri"><Icon name="plus" /> New request</Link>
               </>}
             />
             <div style={{ marginBottom: 20, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -112,7 +113,7 @@ export default function SupplierProfilePage() {
                         <thead><tr><th>Reference</th><th>Total</th><th>Delivery</th><th>Status</th><th>Date</th></tr></thead>
                         <tbody>
                           {d.quotations.map((q) => (
-                            <tr key={q.id} className="row-link" onClick={() => router.push(`/procurement/${q.requestId}/compare`)}>
+                            <tr key={q.id} className="row-link" onClick={() => router.push(`/requests/${q.requestId}/compare`)}>
                               <td className="r-id">{q.supplierQuoteReference ?? q.id.slice(0, 8)}</td>
                               <td className="num">{moneyShort(q.totalCost, q.currency)}</td>
                               <td className="mut num">{q.estimatedDeliveryDays ? `${q.estimatedDeliveryDays} days` : "-"}</td>
@@ -142,7 +143,7 @@ export default function SupplierProfilePage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {s.sourceType === "demo" ? null : <VerifyPanel supplierId={id} canSpend={canSpend} />}
+                {s.sourceType === "demo" || s.sourceType === "marketplace" ? null : <><VerifyPanel supplierId={id} canSpend={canSpend} /><CallPanel supplierId={id} /></>}
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Verification evidence</h2></div>
                   {EVIDENCE_CHECKS.map((chk) => {

@@ -40,7 +40,7 @@ export function PaymentDetailBody({ p, demo }: { p: PaymentDTO; demo: boolean })
       <div className="eyebrow" style={{ margin: "18px 0 8px" }}>Linked records</div>
       <div className="card" style={{ padding: "4px 16px" }}>
         <div className="pp-stat"><span className="mut">Purchase order</span><Link className="linkbtn" href={`/orders/${p.orderId}`}>{p.orderNumber}</Link></div>
-        <div className="pp-stat"><span className="mut">Supplier</span><Link className="linkbtn" href={`/suppliers/${p.supplierId}`}>{p.supplierName}</Link></div>
+        <div className="pp-stat"><span className="mut">Supplier</span><Link className="linkbtn" href={`/sellers/${p.supplierId}`}>{p.supplierName}</Link></div>
       </div>
       <p className="mut3" style={{ fontSize: 11, textAlign: "center", marginTop: 14 }}>
         {demo ? "Demo: this transaction is simulated and was never sent to a network." : "Status reflects the actual response from the payment provider or chain."}

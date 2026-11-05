@@ -12,6 +12,8 @@ export interface ApprovableOrder {
   id: string; orderNumber: string; supplierId: string; supplierName: string;
   total: string; currency: string; paymentAsset: string; paymentAmount: string;
   destination: PayoutDestinationDTO | null;
+  /** Paid at a marketplace's own checkout, so there is no payout address to approve. */
+  marketplace?: boolean;
 }
 
 /**
@@ -29,7 +31,7 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
 
   if (!order) return <Modal open={false} onClose={onClose} label="Approve order">{null}</Modal>;
   const dest = order.destination;
-  const addressOk = dest?.status === "approved";
+  const addressOk = order.marketplace || dest?.status === "approved";
 
   async function approveAddr() {
     if (!dest) return;
@@ -55,10 +57,12 @@ export function ApproveOrderModal({ order, open, onClose, onApproved }: {
           <div className="r"><span className="mut">Seller</span><b>{order.supplierName}</b></div>
           <div className="r"><span className="mut">Order total</span><b className="num">{amount(order.total)} {order.currency}</b></div>
           <div className="r"><span className="mut">Payable as</span><b className="num">{amount(order.paymentAmount)} {order.paymentAsset}</b></div>
-          <div className="r"><span className="mut">Pays to</span><b title={dest?.address}>{dest ? shortAddress(dest.address) : "No address"}</b></div>
+          <div className="r"><span className="mut">Pays to</span><b title={dest?.address}>{order.marketplace ? "Amazon checkout" : dest ? shortAddress(dest.address) : "No address"}</b></div>
           {policy.data ? <div className="r"><span className="mut">Per-purchase limit</span><b className="num">{amount(policy.data.maxTransactionAmount, 0)} {policy.data.currency}</b></div> : null}
         </div>
-        {!dest ? (
+        {order.marketplace ? (
+          <div className="callout ok"><Icon name="check" /><div>Amazon is paid at its own checkout, from a capped session you approve with your passkey. There is no payment address to approve.</div></div>
+        ) : !dest ? (
           <div className="callout err"><Icon name="alert" /><div>This seller has no payment address. Add one before approving.</div></div>
         ) : addressOk ? (
           <div className="callout ok"><Icon name="check" /><div>The payment address is approved. Only this address can be paid.</div></div>

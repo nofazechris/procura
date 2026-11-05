@@ -52,7 +52,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
   async function startSourcing() {
     try {
       await sourcing.mutateAsync(requestId);
-      router.push(`/procurement/${requestId}/compare`);
+      router.push(`/requests/${requestId}/compare`);
     } catch (e) { show(errorMessage(e), "err"); }
   }
 
@@ -73,7 +73,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
         title="Procurement workspace"
         sub="Agent command centre: sourcing, evidence and execution for this request."
         actions={<>
-          {hasQuotes ? <Link href={`/procurement/${requestId}/compare`} className="btn btn-sec btn-sm"><Icon name="scale" /> View comparison</Link> : null}
+          {hasQuotes ? <Link href={`/requests/${requestId}/compare`} className="btn btn-sec btn-sm"><Icon name="scale" /> View comparison</Link> : null}
           {cancellable ? <button className="btn btn-sec btn-sm" onClick={() => setConfirmCancel(true)}>Cancel procurement</button> : null}
         </>}
       />
@@ -136,13 +136,13 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
               : comparison.isPending ? <p className="mut" style={{ fontSize: 13 }}>Loading…</p>
               : (cmp?.rows ?? []).length === 0 ? <p className="mut" style={{ fontSize: 13 }}>No suppliers matched.</p>
               : (cmp?.rows ?? []).map((row) => (
-                <Link key={row.quoteId} href={`/suppliers/${row.supplierId}`} className={`short-i ${row.quoteId === cmp?.recommendedQuoteId ? "rec" : ""}`} style={{ textDecoration: "none", color: "inherit" }}>
+                <Link key={row.quoteId} href={`/sellers/${row.supplierId}`} className={`short-i ${row.quoteId === cmp?.recommendedQuoteId ? "rec" : ""}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <SupplierLogo name={nameOf(row.supplierId)} size={30} />
                   <div style={{ minWidth: 0 }}><div className="nm">{nameOf(row.supplierId)}</div><div className="mut3" style={{ fontSize: 11 }}>{row.deliveryDays ? `${row.deliveryDays} days` : "Delivery not stated"}</div></div>
                   <span className="pr num">{moneyShort(row.totalCost, row.currency)}</span>
                 </Link>
               ))}
-            {hasQuotes && (cmp?.rows ?? []).length > 0 ? <Link href={`/procurement/${requestId}/compare`} className="btn btn-sec btn-sm" style={{ width: "100%", marginTop: 6 }}>Compare all</Link> : null}
+            {hasQuotes && (cmp?.rows ?? []).length > 0 ? <Link href={`/requests/${requestId}/compare`} className="btn btn-sec btn-sm" style={{ width: "100%", marginTop: 6 }}>Compare all</Link> : null}
           </div>
 
           <div className="card ws-card">
@@ -168,7 +168,7 @@ function Workspace({ requestId, request: r }: { requestId: string; request: NonN
             ) : r.status === "comparing" ? (
               <>
                 <p className="mut" style={{ fontSize: 13 }}>Review the comparison and select a supplier to prepare the purchase order.</p>
-                <Link href={`/procurement/${requestId}/compare`} className="btn btn-pri btn-sm" style={{ width: "100%", marginTop: 12 }}>Review comparison <Icon name="arr" /></Link>
+                <Link href={`/requests/${requestId}/compare`} className="btn btn-pri btn-sm" style={{ width: "100%", marginTop: 12 }}>Review comparison <Icon name="arr" /></Link>
               </>
             ) : r.status === "awaiting_approval" ? (
               <>

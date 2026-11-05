@@ -39,7 +39,7 @@ export default function ProcurementPage() {
   return (
     <>
       <PageHead title="Requests" sub="Everything you have asked Procura to find, from the first search to the order."
-        actions={<Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Create request</Link>} />
+        actions={<Link href="/requests/new" className="btn btn-pri"><Icon name="plus" /> Create request</Link>} />
       <Async query={requests}>
         {(all) => (
           <>
@@ -54,7 +54,7 @@ export default function ProcurementPage() {
               </select>
             </div>
             {all.length === 0 ? (
-              <div className="card"><EmptyState icon="pkg" title="No requests yet" action={<Link href="/procurement/new" className="btn btn-pri"><Icon name="plus" /> Create your first request</Link>}>
+              <div className="card"><EmptyState icon="pkg" title="No requests yet" action={<Link href="/requests/new" className="btn btn-pri"><Icon name="plus" /> Create your first request</Link>}>
                 Describe what you need and Procura will find options and compare them.
               </EmptyState></div>
             ) : rows.length === 0 ? (
@@ -65,14 +65,14 @@ export default function ProcurementPage() {
                   <thead><tr><th>Request ID</th><th>Description</th><th>Requested by</th><th>Budget</th><th>Status</th><th>Created</th><th /></tr></thead>
                   <tbody>
                     {rows.map((r) => (
-                      <tr key={r.id} className="row-link" onClick={() => router.push(r.status === "comparing" || r.status === "awaiting_approval" ? `/procurement/${r.id}/compare` : `/procurement/${r.id}`)}>
+                      <tr key={r.id} className="row-link" onClick={() => router.push(r.status === "comparing" || r.status === "awaiting_approval" ? `/requests/${r.id}/compare` : `/requests/${r.id}`)}>
                         <td className="r-id">{r.requestNumber}</td>
                         <td><b>{r.title}</b></td>
                         <td className="mut">{r.requestedByName ?? "-"}</td>
                         <td className="num">{moneyShort(r.budgetAmount, r.currency)}</td>
                         <td><RequestStatusPill status={r.status} /></td>
                         <td className="mut num">{shortDate(r.createdAt)}</td>
-                        <td style={{ textAlign: "right" }}><Link href={`/procurement/${r.id}`} className="btn btn-ghost btn-sm" onClick={(e) => e.stopPropagation()}>Open</Link></td>
+                        <td style={{ textAlign: "right" }}><Link href={`/requests/${r.id}`} className="btn btn-ghost btn-sm" onClick={(e) => e.stopPropagation()}>Open</Link></td>
                       </tr>
                     ))}
                   </tbody>

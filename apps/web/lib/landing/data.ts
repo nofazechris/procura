@@ -1,4 +1,4 @@
-import { orderFingerprint } from "@procura/policies";
+import { amazonCheckoutLimits, orderFingerprint } from "@procura/policies";
 import {
   buildPurchaseOrder, compareQuotations, evaluateEligibility, type BasketListing, type PaymentRoute, type Quote, type Requirement,
 } from "@procura/procurement/core";
@@ -177,12 +177,8 @@ export async function buildLandingData(): Promise<LandingData> {
     items: po.lines.map((l) => ({ description: l.description, quantity: l.quantity, unitPrice: l.unitPrice, totalPrice: l.totalPrice })),
   });
 
-  // Amazon checkout rule: a cap of the subtotal plus the larger of 20% or $5 is held, plus a $1 fee; unused cap is refunded.
-  const sub = money(po.subtotal, "USD");
-  const pct = multiply(sub, "0.20");
-  const headroom = compare(pct, money("5", "USD")) > 0 ? pct : money("5", "USD");
-  const cap = add(sub, headroom);
-  const charge = add(cap, money("1", "USD"));
+  // Amazon checkout rule (shared with the real checkout): a capped hold plus a $1 fee; unused cap is refunded.
+  const limits = amazonCheckoutLimits(po.subtotal);
 
   return {
     request: { number: "PR-0142", items: ITEMS.map(({ name, quantity, unit }) => ({ name, quantity, unit })), budget: requirement.budget, currency: "USD" },
@@ -193,7 +189,7 @@ export async function buildLandingData(): Promise<LandingData> {
       number: "PO-2041", subtotal: po.subtotal, delivery: po.deliveryCost, total: po.totalAmount, fingerprint,
       lines: po.lines.map((l) => ({ description: l.description, quantity: l.quantity, unitPrice: l.unitPrice, totalPrice: l.totalPrice })),
     },
-    session: { budget: cents(charge.amount), perTransaction: cents(charge.amount), minutes: 30, subtotal: cents(sub.amount), cap: cents(cap.amount) },
+    session: { budget: limits.charge, perTransaction: limits.charge, minutes: 30, subtotal: limits.subtotal, cap: limits.cap },
     seed: { requirement, quotes, evidence: Object.fromEntries(evidence), routes, names, listings: SAMPLE_CATALOGUE, lines },
   };
 }

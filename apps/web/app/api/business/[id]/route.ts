@@ -29,12 +29,14 @@ export const PATCH = handle(async (req: Request, ctx: { params: Promise<{ id: st
       ...(patch.industry !== undefined ? { industry: patch.industry } : {}),
       ...(patch.website !== undefined ? { website: patch.website || null } : {}),
       ...(patch.address !== undefined ? { address: patch.address || null } : {}),
+      // Preferences are merged, so a change to one never wipes the others kept from setup.
+      ...(patch.preferences !== undefined ? { preferences: { ...(before.preferences ?? {}), ...patch.preferences } } : {}),
     }).where(and(eq(businesses.id, id))).returning();
     await recordAudit(tx, {
       businessId: id, actorType: "user", actorId: access.userId, action: "business.updated",
       resourceType: "business", resourceId: id,
-      previousState: { name: before.name, industry: before.industry, website: before.website, address: before.address },
-      newState: { name: after?.name, industry: after?.industry, website: after?.website, address: after?.address },
+      previousState: { name: before.name, address: before.address, preferences: before.preferences },
+      newState: { name: after?.name, address: after?.address, preferences: after?.preferences },
     });
     return after;
   });

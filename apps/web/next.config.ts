@@ -12,6 +12,16 @@ const config: NextConfig = {
   // Native/Node-only drivers stay out of the bundle.
   serverExternalPackages: ["ws", "pg"],
   poweredByHeader: false,
+  // The pages were renamed to match the product. Old links and bookmarks keep working.
+  async redirects() {
+    return [
+      { source: "/procurement", destination: "/requests", permanent: true },
+      { source: "/procurement/:path*", destination: "/requests/:path*", permanent: true },
+      { source: "/suppliers", destination: "/sellers", permanent: true },
+      { source: "/suppliers/:path*", destination: "/sellers/:path*", permanent: true },
+      { source: "/settings/business", destination: "/settings/account", permanent: true },
+    ];
+  },
 };
 
 export default config;

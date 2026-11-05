@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import {
-  approvals, businesses, procurementRequests, purchaseOrderItems, purchaseOrders, supplierPayoutDestinations, suppliers,
+  approvals, businesses, payments, procurementRequests, purchaseOrderItems, purchaseOrders, supplierPayoutDestinations, suppliers,
 } from "@procura/database";
 import { handle, notFound, ok, parseId } from "@/lib/api";
 import { inTenant, requireAccess } from "@/lib/guard";
@@ -30,8 +30,12 @@ export const GET = handle(async (req: Request, ctx: { params: Promise<{ id: stri
     ));
     // The approved destination if there is one, otherwise the pending proposal.
     const destination = destinations.find((d) => d.status === "approved") ?? destinations.find((d) => d.status === "pending") ?? null;
+    const paymentRows = await tx.select({
+      id: payments.id, status: payments.status, network: payments.network, amount: payments.amount, asset: payments.asset,
+      reference: payments.transactionHash, confirmedAt: payments.confirmedAt,
+    }).from(payments).where(eq(payments.purchaseOrderId, id)).orderBy(desc(payments.createdAt));
     return {
-      order, items, approvals: approvalRows, supplier: supplier ?? null, request: request ?? null,
+      order, items, approvals: approvalRows, payments: paymentRows, supplier: supplier ?? null, request: request ?? null,
       business: business ?? null, destination,
     };
   });

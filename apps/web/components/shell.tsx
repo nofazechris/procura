@@ -62,7 +62,7 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [mode, router]);
 
   const paletteActions = useMemo(() => [
-    { title: "New request", icon: "plus" as const, run: () => router.push("/procurement/new") },
+    { title: "New request", icon: "plus" as const, run: () => router.push("/requests/new") },
     { title: "Ask Procura", icon: "agent" as const, run: () => router.push("/assistant") },
     { title: "Toggle light / dark", icon: "moon" as const, run: () => toggleTheme() },
     { title: "Sign out", sub: "Back to the landing page", icon: "logout" as const, run: () => void signOut() },
@@ -132,7 +132,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <div style={{ marginLeft: "auto", display: "flex", gap: 9, alignItems: "center" }}>
               <WalletChip />
               <NotificationsButton open={popup === "notif"} onToggle={() => setPopup((p) => (p === "notif" ? null : "notif"))} pendingApprovals={pending} />
-              <Link href="/procurement/new" className="btn btn-pri btn-sm top-new" aria-label="New request"><Icon name="plus" strokeWidth={2.2} /><span className="lbl">New request</span></Link>
+              <Link href="/requests/new" className="btn btn-pri btn-sm top-new" aria-label="New request"><Icon name="plus" strokeWidth={2.2} /><span className="lbl">New request</span></Link>
             </div>
           </header>
           <div className="view" id="view">{children}</div>
@@ -142,7 +142,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className={`menu ${popup === "user" ? "on" : ""}`} data-popup>
         <div className="menu-i" onClick={() => toggleTheme()}><Icon name="moon" /> Toggle light / dark</div>
         <div className="menu-i" onClick={() => { setPopup(null); setPaletteOpen(true); }}><Icon name="search" /> Command menu</div>
-        <div className="menu-i" onClick={() => router.push("/settings/business")}><Icon name="cog" /> Account settings</div>
+        <div className="menu-i" onClick={() => router.push("/settings/account")}><Icon name="cog" /> Account settings</div>
         <div className="menu-i" onClick={() => void signOut()}><Icon name="logout" /> Sign out</div>
       </div>
 

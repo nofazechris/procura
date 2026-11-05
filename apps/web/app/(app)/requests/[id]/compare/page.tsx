@@ -56,7 +56,7 @@ export default function ComparePage() {
         eyebrow={request.data ? <>{request.data.requestNumber} · {request.data.title}</> : undefined}
         title="Supplier comparison"
         sub="Compare available suppliers and choose the best purchasing option."
-        actions={<Link href={`/procurement/${id}`} className="btn btn-sec btn-sm"><Icon name="prev" /> Back to workspace</Link>}
+        actions={<Link href={`/requests/${id}`} className="btn btn-sec btn-sm"><Icon name="prev" /> Back to workspace</Link>}
       />
       <Async query={comparison}>
         {(view) => {
@@ -175,7 +175,7 @@ export default function ComparePage() {
                           onClick={() => { setAck(false); setSelected(row); }}>
                           {source(row.supplierId) === "marketplace" ? "Checkout comes next" : row.verdict === "review_required" ? "Review and select" : "Select"}
                         </button>
-                        <Link href={`/suppliers/${row.supplierId}`} className="btn btn-ghost btn-sm">Profile</Link>
+                        <Link href={`/sellers/${row.supplierId}`} className="btn btn-ghost btn-sm">Profile</Link>
                       </div>
                     </div>
                   );
