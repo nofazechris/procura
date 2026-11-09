@@ -8,6 +8,9 @@ import { sceneDataOf } from "./scene-data";
 import type { RackScene } from "./rack-scene";
 import { SignupPrompt } from "./signup-prompt";
 
+// Start fetching the 3D code the moment this file loads, in parallel with everything else.
+const sceneModule = typeof window !== "undefined" ? import("./rack-scene") : null;
+
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
 const sm = (t: number) => t * t * (3 - 2 * t);
@@ -53,12 +56,15 @@ export function Experience({ data }: { data: LandingData }) {
 
     (async () => {
       try {
-        // Canvas text needs the fonts, so wait for them (briefly) before drawing textures.
-        await Promise.race([
-          Promise.all([document.fonts.load('600 32px "Inter Variable"'), document.fonts.load('600 32px "JetBrains Mono Variable"')]),
-          new Promise((r) => setTimeout(r, 1800)),
+        // Canvas text needs the fonts, so give them a moment while the scene code downloads. A slow font
+        // must never hold the animation back, so the wait is short.
+        const [{ createRackScene }] = await Promise.all([
+          sceneModule ?? import("./rack-scene"),
+          Promise.race([
+            Promise.all([document.fonts.load('600 32px "Inter Variable"'), document.fonts.load('600 32px "JetBrains Mono Variable"')]),
+            new Promise((r) => setTimeout(r, 450)),
+          ]),
         ]);
-        const { createRackScene } = await import("./rack-scene");
         if (cancelled) return;
         scene = createRackScene(cv, sceneDataOf(data), { reducedMotion: reduced });
         onResize();
@@ -71,7 +77,7 @@ export function Experience({ data }: { data: LandingData }) {
       if (!reduced) {
         const { default: Lenis } = await import("lenis");
         if (cancelled) return;
-        lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+        lenis = new Lenis({ duration: 0.85, smoothWheel: true });
       }
 
       const io = new IntersectionObserver(([e]) => { visible = !!e?.isIntersecting; }, { rootMargin: "20% 0px" });

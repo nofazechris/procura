@@ -505,7 +505,7 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
     setPointer(nx, ny) { px = nx; py = ny; },
     resize(nw, nh, isMobile) {
       w = Math.max(1, nw); h = Math.max(1, nh); mobile = isMobile;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 1.75));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5));
       renderer.setSize(w, h, false);
       applyView();
     },
@@ -514,7 +514,7 @@ export function createRackScene(canvas: HTMLCanvasElement, data: SceneData, opts
       // Time-based so a slow GPU converges as fast as a quick one.
       const dt = lastT ? Math.min(0.25, (timeMs - lastT) / 1000) : 0.016;
       lastT = timeMs;
-      shown += (target - shown) * (opts.reducedMotion ? 1 : 1 - Math.exp(-dt * 9));
+      shown += (target - shown) * (opts.reducedMotion ? 1 : 1 - Math.exp(-dt * 13));
       if (Math.abs(target - shown) < 0.0002) shown = target;
       update(shown, timeMs);
       renderer.render(scene, camera);
