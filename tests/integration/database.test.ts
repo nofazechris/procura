@@ -43,7 +43,7 @@ beforeAll(async () => {
   await db.exec(`
     INSERT INTO "user"(id, name, email) VALUES ('u-a','Alice','a@x.test'), ('u-b','Bob','b@x.test');
     INSERT INTO businesses(id, name, slug, country_code, default_currency) VALUES
-      ('${A}','Northstar Kitchen','northstar','NG','USD'), ('${B}','Rival Foods','rival','NG','USD');
+      ('${A}','Alice','alice','NG','USD'), ('${B}','Bob','bob','NG','USD');
     INSERT INTO business_members(business_id, user_id, role) VALUES ('${A}','u-a','owner'), ('${B}','u-b','owner');
     INSERT INTO suppliers(id, business_id, name) VALUES
       ('00000000-0000-4000-8000-00000000000a','${A}','Greenfield'), ('00000000-0000-4000-8000-00000000000b','${B}','Hidden Supplier');
@@ -116,7 +116,7 @@ describe("tenant isolation (RLS)", () => {
     expect(rows.map((r) => r.business_id)).toEqual([A]);
 
     const bizs = await asApp({ user: "u-a" }, async () => (await db.query<{ name: string }>(`select name from businesses`)).rows);
-    expect(bizs.map((r) => r.name)).toEqual(["Northstar Kitchen"]);
+    expect(bizs.map((r) => r.name)).toEqual(["Alice"]);
   });
 
   it("a user cannot add themselves to a business they are not in", async () => {

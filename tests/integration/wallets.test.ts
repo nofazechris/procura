@@ -26,7 +26,7 @@ beforeAll(async () => {
   await db.exec(`
     INSERT INTO "user"(id, name, email) VALUES ('u-a','Alice','a@x.test'), ('u-b','Bob','b@x.test');
     INSERT INTO businesses(id, name, slug, country_code, default_currency) VALUES
-      ('${A}','Northstar Kitchen','northstar','NG','USD'), ('${B}','Rival Foods','rival','NG','USD');
+      ('${A}','Alice','alice','NG','USD'), ('${B}','Bob','bob','NG','USD');
     INSERT INTO business_members(business_id, user_id, role) VALUES ('${A}','u-a','owner'), ('${B}','u-b','owner');
     INSERT INTO business_wallets(business_id, linked_by, address, chain_id) VALUES ('${B}','u-b','${ADDR2}', 2368);
   `);

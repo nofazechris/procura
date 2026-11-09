@@ -24,7 +24,7 @@ beforeAll(async () => {
   await db.exec(`
     INSERT INTO "user"(id, name, email) VALUES ('u-a','Alice','a@x.test'), ('u-b','Bob','b@x.test');
     INSERT INTO businesses(id, name, slug, country_code, default_currency) VALUES
-      ('${A}','Northstar Kitchen','northstar','NG','USD'), ('${B}','Rival Foods','rival','NG','USD');
+      ('${A}','Alice','alice','NG','USD'), ('${B}','Bob','bob','NG','USD');
     INSERT INTO passport_agents(business_id, agent_type, passport_agent_id, passport_owner_id, registered_by)
       VALUES ('${B}','procura-agent','agent_b','owner_b','u-b');
   `);

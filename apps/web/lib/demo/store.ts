@@ -1,6 +1,6 @@
 /**
- * Demo mode data (Design PRD s14-15). An in-memory store seeded with the fictional Northstar
- * Kitchen scenario. It runs the REAL eligibility, comparison and purchase-order engine from
+ * Demo mode data (Design PRD s14-15). An in-memory store seeded with a fictional shopper's
+ * desk-setup scenario. It runs the REAL eligibility, comparison and purchase-order engine from
  * @procura/procurement/core on sample data, so the demo shows true logic. Only persistence and
  * the Kite payment are simulated. Nothing here touches the network or a database.
  *
@@ -47,9 +47,9 @@ interface DemoState {
   counters: { request: number; order: number };
 }
 
-export const DEMO_USER = { userId: "demo-user", name: "Chris Godwin", email: "chris@northstar.demo" };
+export const DEMO_USER = { userId: "demo-user", name: "Chris Godwin", email: "chris@demo.example" };
 export const DEMO_BUSINESS: BusinessSummaryDTO = {
-  id: "demo-business", name: "Northstar Kitchen", slug: "northstar-kitchen", defaultCurrency: "USD", role: "owner",
+  id: "demo-business", name: "Chris Godwin", slug: "chris-godwin", defaultCurrency: "USD", role: "owner",
 };
 
 let current: DemoState | null = null;
@@ -81,16 +81,14 @@ async function seed(): Promise<DemoState> {
   const s: DemoState = {
     requests: [], suppliers: [], evidence: [], destinations: [], quotes: [], orders: [], orderItems: {},
     approvals: [], payments: [], activity: [],
-    policy: { id: "demo-policy", currency: "USD", maxTotalSpend: D6(20000), maxTransactionAmount: D6(2500), approvalRequired: true, approvalRequiredAbove: D6(500) },
+    policy: { id: "demo-policy", currency: "USD", maxTotalSpend: D6(500), maxTransactionAmount: D6(150), approvalRequired: true, approvalRequiredAbove: D6(50) },
     business: {
-      id: "demo-business", name: "Northstar Kitchen", slug: "northstar-kitchen", industry: "Restaurant group", countryCode: "NG",
-      defaultCurrency: "USD", website: "https://northstarkitchen.example", address: "14 Adeola Odeku St, Victoria Island, Lagos",
-      preferences: { categories: ["Food & ingredients", "Packaging", "Beverages"], quality: "Balanced", delivery: "Balanced" },
+      id: "demo-business", name: "Chris Godwin", slug: "chris-godwin", industry: "Personal", countryCode: "NG",
+      defaultCurrency: "USD", website: null, address: null,
+      preferences: { categories: ["Electronics", "Office & desk", "Gifts"], quality: "Balanced" },
     },
     members: [
-      { id: "m1", userId: "demo-user", name: "Chris Godwin", email: "chris@northstar.demo", role: "owner", status: "active" },
-      { id: "m2", userId: "u2", name: "Ada Nwosu", email: "ada@northstar.demo", role: "procurement_manager", status: "active" },
-      { id: "m3", userId: "u3", name: "Tunde Afolabi", email: "tunde@northstar.demo", role: "finance_manager", status: "active" },
+      { id: "m1", userId: "demo-user", name: "Chris Godwin", email: "chris@demo.example", role: "owner", status: "active" },
     ],
     counters: { request: 142, order: 2040 },
   };
@@ -113,24 +111,24 @@ async function seed(): Promise<DemoState> {
     { productName: "Desk lamp", category: "office", quantity: "1.000000", unit: "piece" },
     { productName: "Notebook", category: "stationery", quantity: "3.000000", unit: "packs" },
   ]);
-  addRequest(141, "Packaging supplies", "awaiting_approval", 1000, "Ada Nwosu", ago(0, 5), [
-    { productName: "Kraft boxes, medium", category: "packaging", quantity: "400.000000", unit: "units" },
-    { productName: "Food containers", category: "packaging", quantity: "1000.000000", unit: "units" },
+  addRequest(141, "Phone accessories", "awaiting_approval", 60, "Chris Godwin", ago(0, 5), [
+    { productName: "Phone case", category: "electronics", quantity: "1.000000", unit: "case" },
+    { productName: "Screen protector", category: "electronics", quantity: "2.000000", unit: "packs" },
   ]);
-  addRequest(140, "Cleaning and sanitation", "draft", 600, "Chris Godwin", ago(1), [
-    { productName: "Sanitiser, 5L", category: "cleaning", quantity: "12.000000", unit: "cartons" },
+  addRequest(140, "Cleaning cloths", "draft", 40, "Chris Godwin", ago(1), [
+    { productName: "Microfibre cloths", category: "home", quantity: "2.000000", unit: "packs" },
   ]);
-  addRequest(139, "Beverage restock", "sourcing", 1400, "Ada Nwosu", ago(2), [
-    { productName: "Bottled water", category: "beverages", quantity: "60.000000", unit: "cases" },
+  addRequest(139, "Water bottle", "sourcing", 30, "Chris Godwin", ago(2), [
+    { productName: "Insulated water bottle", category: "home", quantity: "1.000000", unit: "bottle" },
   ]);
-  addRequest(138, "Office equipment", "completed", 2500, "Chris Godwin", ago(6), [
-    { productName: "Office desk, oak", category: "equipment", quantity: "4.000000", unit: "units" },
+  addRequest(138, "Desk chair", "completed", 140, "Chris Godwin", ago(6), [
+    { productName: "Ergonomic desk chair", category: "office", quantity: "1.000000", unit: "chair" },
   ]);
-  addRequest(137, "Uniform order", "completed", 750, "Ada Nwosu", ago(10), [
-    { productName: "Chef jacket", category: "uniforms", quantity: "20.000000", unit: "units" },
+  addRequest(137, "Gift for a friend", "completed", 35, "Chris Godwin", ago(10), [
+    { productName: "Coffee beans, 1kg", category: "gifts", quantity: "1.000000", unit: "bag" },
   ]);
-  addRequest(136, "Table linens", "cancelled", 420, "Ada Nwosu", ago(14), [
-    { productName: "Table linen set", category: "linens", quantity: "30.000000", unit: "sets" },
+  addRequest(136, "Picture frames", "cancelled", 42, "Chris Godwin", ago(14), [
+    { productName: "Picture frame set", category: "home", quantity: "2.000000", unit: "sets" },
   ]);
 
   // Sellers for the sample request come from the real demo provider.
@@ -138,9 +136,9 @@ async function seed(): Promise<DemoState> {
   await runSourcingInto(s, "demo-req-142", provider, ago(0, 2));
 
   const extra = [
-    { id: "demo-sup-rightway", name: "Rightway Packaging", city: "Lagos", categories: ["packaging"] },
-    { id: "demo-sup-techpoint", name: "TechPoint Office", city: "Ikeja", categories: ["equipment", "office"] },
-    { id: "demo-sup-uniforma", name: "Uniforma Ltd", city: "Ikoyi", categories: ["uniforms"] },
+    { id: "demo-sup-rightway", name: "Lagos Phone Hub", city: "Lagos", categories: ["electronics", "phones"] },
+    { id: "demo-sup-techpoint", name: "TechPoint Office", city: "Ikeja", categories: ["office", "furniture"] },
+    { id: "demo-sup-uniforma", name: "Bean and Bloom Coffee", city: "Ikoyi", categories: ["gifts", "coffee"] },
   ];
   for (const e of extra) {
     s.suppliers.push({
@@ -168,15 +166,15 @@ async function seed(): Promise<DemoState> {
       id: `${id}-l${i}`, description: d, quantity: six(q), unitPrice: six(p), totalPrice: multiply(money(p, "USD"), q).amount + "0000", currency: "USD",
     }));
   };
-  histOrder(2039, "demo-sup-rightway", "Rightway Packaging", "demo-req-141", "PR-0141", "Packaging supplies", 880, "pending_approval", ago(0, 5),
-    [["Kraft boxes, medium", "400", "1.20"], ["Food containers", "1000", "0.32"], ["Branded labels", "2000", "0.04"]]);
-  histOrder(2035, "demo-sup-techpoint", "TechPoint Office", "demo-req-138", "PR-0138", "Office equipment", 2410, "fulfilled", ago(6),
-    [["Office desk, oak", "4", "320.00"], ["Ergonomic chair", "6", "140.00"], ["Monitor, 27 inch", "2", "145.00"]]);
-  histOrder(2031, "demo-sup-uniforma", "Uniforma Ltd", "demo-req-137", "PR-0137", "Uniform order", 750, "fulfilled", ago(10),
-    [["Chef jacket", "20", "22.00"], ["Apron, branded", "40", "5.50"], ["Cap", "30", "3.00"]]);
-  [9200, 11500, 10100, 13400, 12800].forEach((amt, i) => {
+  histOrder(2039, "demo-sup-rightway", "Lagos Phone Hub", "demo-req-141", "PR-0141", "Phone accessories", 38.5, "pending_approval", ago(0, 5),
+    [["Phone case", "1", "12.50"], ["Screen protector", "2", "13.00"]]);
+  histOrder(2035, "demo-sup-techpoint", "TechPoint Office", "demo-req-138", "PR-0138", "Desk chair", 118, "fulfilled", ago(6),
+    [["Ergonomic desk chair", "1", "118.00"]]);
+  histOrder(2031, "demo-sup-uniforma", "Bean and Bloom Coffee", "demo-req-137", "PR-0137", "Gift for a friend", 32, "fulfilled", ago(10),
+    [["Coffee beans, 1kg", "1", "26.00"], ["Gift tin", "1", "6.00"]]);
+  [92, 115, 101, 134, 128].forEach((amt, i) => {
     const m = 5 - i;
-    histOrder(1900 + i, "demo-sup-techpoint", "TechPoint Office", "demo-req-138", "PR-0138", "Monthly purchasing", amt, "fulfilled", monthsAgo(m), [["Monthly purchasing", "1", String(amt)]]);
+    histOrder(1900 + i, "demo-sup-techpoint", "TechPoint Office", "demo-req-138", "PR-0138", "Everyday purchases", amt, "fulfilled", monthsAgo(m), [["Everyday purchases", "1", String(amt)]]);
   });
 
   // PO-2041 comes from the real engine against the real comparison.
@@ -185,7 +183,7 @@ async function seed(): Promise<DemoState> {
     createOrderInto(s, "demo-req-142", cmp.comparison.recommendedQuoteId, false, ago(0, 1));
   }
 
-  // Approval rows for the seeded packaging order.
+  // Approval rows for the seeded phone-accessories order.
   s.approvals.push(approvalFor(s, "demo-order-2039", ago(0, 5)));
 
   const log = (action: string, resourceType: string, resourceId: string | null, hours: number, state: Record<string, unknown> | null, actor: "user" | "system" = "user") =>

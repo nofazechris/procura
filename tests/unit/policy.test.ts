@@ -23,7 +23,7 @@ const policy: SpendingPolicy = {
 const order = { supplierId: SUPPLIER, total: money("1630.00", "USD"), categories: ["food"] };
 
 describe("evaluateOrderPolicy", () => {
-  it("allows the Northstar demo order and reports why", () => {
+  it("allows the sample order and reports why", () => {
     const d = evaluateOrderPolicy(policy, order, "14820.00");
     expect(d.allowed).toBe(true);
     expect(d.requiresApproval).toBe(true); // 1630 > 500 threshold
