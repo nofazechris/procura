@@ -41,7 +41,7 @@ Create a `.env` at the repo root and set:
 | `MIGRATION_DATABASE_URL` | Direct URL for `neondb_owner` |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL` | The app's public address, such as `http://localhost:3000` |
-| `REQUIRE_EMAIL_VERIFICATION` | `false` only for local development without an email provider |
+| `REQUIRE_EMAIL_VERIFICATION` | `false` for now. There is no email provider yet, so verification and password-reset emails cannot be sent |
 | `SERV_API_KEY`, `SERV_BASE_URL`, `SERV_MODEL` | SERV Reasoning, from console.openserv.ai. Without a key the agent is off |
 | `KPASS_BIN`, `PASSPORT_HOME`, `PASSPORT_BUSINESS_ID` | The `kpass` CLI path, the folder holding its login, and the one account allowed to use it |
 | `ALLOW_FIXED_USD_PEG` | `true` only for demos: treats 1 USD as 1 USDC.e. Leave `false` otherwise |

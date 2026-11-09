@@ -143,7 +143,7 @@ export default function SupplierProfilePage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                {s.sourceType === "demo" || s.sourceType === "marketplace" ? null : <><VerifyPanel supplierId={id} canSpend={canSpend} /><CallPanel supplierId={id} /></>}
+                {s.sourceType === "demo" || s.sourceType === "marketplace" ? null : <><VerifyPanel supplierId={id} canSpend={canSpend} /><CallPanel supplierId={id} sellerName={s.name} /></>}
                 <div className="card" style={{ padding: 20 }}>
                   <div className="sec-head"><h2>Verification evidence</h2></div>
                   {EVIDENCE_CHECKS.map((chk) => {

@@ -328,3 +328,4 @@ export async function paidCall(input: PaidCallInput): Promise<PaidCallResult> {
   const r = await run(args, [1, 2, 3, 4, 6, 7]);
   return readPaidResult(r);
 }
+export { run as runKpass };

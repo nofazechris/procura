@@ -59,10 +59,10 @@ Pure, deterministic and model-free. SERV will only ever choose among what this l
 - **Services** (`services/`): sourcing is idempotent; ordering refuses ineligible quotes; approval needs a human-approved payout address and records the order fingerprint.
 
 A payout address is only ever proposed by a provider. A person approves it (`approvals:decide`).
-| 6 Kite Passport | Partly done. Agent identity registration and spending-session requests with policy-checked limits and passkey approval are built on the `kpass` CLI (Kite has no HTTP API). Executing payments is not: the Passport backend is production and the wallet is empty. Multi-tenant use needs a per-business worker. |
+| 6 Kite Passport | Built. Agent identity, policy-checked spending sessions with passkey approval, real Amazon checkout from the Passport wallet, paid seller checks and real phone calls, all on the `kpass` CLI (Kite has no HTTP API). Each paid path is tested end to end with a fake `kpass`; none has yet run with real funds. |
 | 7 Worker | Not started. |
 | 8 Security and tests | Partly: database, policy, money and state-machine tests exist. |
-| 9 Deployment | Not started. |
+| 9 Deployment | Files ready (`Dockerfile`, `render.yaml`, [deploy.md](deploy.md)). Needs a host that can run the `kpass` CLI. Not deployed yet. |
 
 ## Frontend
 
@@ -73,11 +73,26 @@ A payout address is only ever proposed by a provider. A person approves it (`app
 - **Sessions:** `app/(app)/layout.tsx` resolves the session and business on the server for every protected screen. Role checks in the UI only hide controls; the API enforces them.
 - **Local development without Neon:** `scripts/dev-db.mjs` serves PGlite over a socket and the app drops to the `procura_app` role per transaction, so Row Level Security is enforced locally too.
 
+## Real checkout and real calls
+
+Both go through `kpass` and both are designed so that nothing can move money or ring a phone by accident.
+
+**Paying an Amazon order** (`apps/web/lib/server/checkout-live.ts`, `passport-shop.ts`):
+
+1. Needs your approval, then the explicit "Pay with Kite" confirmation.
+2. Wallet must hold the whole up-front charge: the ceiling (items plus up to the larger of 20% or $5, or a lower ceiling you choose or the wallet forces) plus Kite's $1 fee. What the order does not use is refunded.
+3. An active session at least as large as the charge, and Procura's own gate: approval fingerprint unchanged, limits, no earlier payment.
+4. Delivery details complete, then the Passport cart is cleared, filled with exactly the order's products and re-read. If a price or item differs, nothing is charged.
+5. The attempt is recorded as `submitted` and the order moves to `payment pending` before `shop:checkout` runs, so a crash cannot allow a second payment. An unknown outcome leaves it `pending`; a clean refusal leaves it `failed` and retryable.
+6. Success records the transaction hash, marks the order `paid` and counts against the monthly limit. A practice checkout never does.
+
+**Phoning a seller** (`apps/web/lib/server/calls.ts`, `packages/procurement/src/calls.ts`): StablePhone through `session execute`, $0.54 a call. Only to the seller's saved international number; never to a demo seller or a marketplace; the task opens with fixed safety rules and an AI disclosure; any line that promises payment is removed on the server; three minutes at most; not recorded; at most two calls an hour per seller and five per user. Tested in `tests/integration/real-checkout.test.ts`.
+
 ## Known gaps
 
-- Email provider (verification, invitations, reset links print to the server console in development).
-- Team invitations, editing onboarding preferences, billing.
-- Executing payments through Kite Passport (identity, session request and approval are built), a per-business Passport worker for real multi-tenant use, and wallet escrow (Phase 6).
+- Email provider (verification, invitations, reset links print to the server console in development). Email verification is switched off for now.
+- Billing, and editing delivery details outside checkout.
+- A per-user Passport worker for real multi-user use: one `kpass` login serves one account today.
 - Background worker and realtime events (Phase 7): sourcing currently runs inline in the request.
 - No automated browser tests yet; the screens were verified manually.
 

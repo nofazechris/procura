@@ -11,7 +11,8 @@ import { useApp, useCan } from "@/lib/app-context";
 import { amazonCheckoutLimits, settleCheckout } from "@procura/policies/core";
 import { amount, dateTime, money, shortAddress, shortDate } from "@/lib/format";
 import { downloadBytes, purchaseOrderPdf } from "@/lib/pdf";
-import { errorDetails, errorMessage, useCheckout, useOrder, useRejectOrder } from "@/lib/queries";
+import { LiveCheckoutDialog } from "@/components/live-checkout";
+import { errorDetails, errorMessage, useCheckout, useOrder, useOrderStatus, useRejectOrder } from "@/lib/queries";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,9 @@ export default function OrderDetailPage() {
   const { show } = useToast();
   const reject = useRejectOrder();
   const checkout = useCheckout();
+  const [paying, setPaying] = useState(false);
+  const [checkStatus, setCheckStatus] = useState(false);
+  const status = useOrderStatus(id, checkStatus);
   const canDecide = useCan("approvals:decide");
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -32,6 +36,8 @@ export default function OrderDetailPage() {
         const pending = o.status === "pending_approval";
         const marketplace = d.supplier?.sourceType === "marketplace";
         const practice = (d.payments ?? []).find((p) => p.network === "simulation" && p.status === "confirmed") ?? null;
+        const real = (d.payments ?? []).find((p) => p.network !== "simulation" && ["submitted", "pending", "confirmed"].includes(p.status)) ?? null;
+        const canPay = (o.status === "approved" || o.status === "awaiting_payment") && !real;
         const limits = marketplace && o.currency === "USD" ? amazonCheckoutLimits(o.subtotal) : null;
         const settlement = limits ? settleCheckout(limits, o.totalAmount) : null;
         const runCheckout = async () => {
@@ -44,7 +50,7 @@ export default function OrderDetailPage() {
         const timeline = [
           { t: "Order created", s: dateTime(o.createdAt), on: true },
           { t: "Approved by a person", s: o.approvedAt ? dateTime(o.approvedAt) : "Waiting", on: !!o.approvedAt },
-          { t: practice ? "Practice payment recorded" : "Payment confirmed", s: practice ? `Reference ${practice.reference ?? ""} · nothing was charged` : paid ? "Confirmed on the network" : "Needs a funded Kite Passport session", on: paid || !!practice },
+          { t: real ? (real.status === "confirmed" ? "Paid" : "Payment sent") : practice ? "Practice payment recorded" : "Payment confirmed", s: real ? (real.status === "confirmed" ? `Paid from your buyer's wallet · ${real.reference ?? ""}` : "Waiting for confirmation") : practice ? `Reference ${practice.reference ?? ""} · nothing was charged` : paid ? "Confirmed on the network" : "Needs a funded wallet and an approved session", on: paid || !!practice || real?.status === "confirmed" },
           { t: "Delivered", s: o.status === "fulfilled" ? "Fulfilled" : "Not yet", on: o.status === "fulfilled" },
         ];
         return (
@@ -133,7 +139,28 @@ export default function OrderDetailPage() {
               <div className="po-section">
                 <div className="eyebrow" style={{ marginBottom: 12 }}>Progress</div>
                 <div className="vtl">{timeline.map((s) => <div key={s.t} className={`vtl-i ${s.on ? "on" : ""}`}><span className="nd" /><div className="vt">{s.t}</div><div className="vs">{s.s}</div></div>)}</div>
-                {practice ? (
+                {real ? (
+                  <div className={`callout ${real.status === "confirmed" ? "ok" : "info"}`} style={{ marginTop: 14, alignItems: "flex-start" }}>
+                    <Icon name={real.status === "confirmed" ? "check" : "clock"} />
+                    <div>
+                      <b>{real.status === "confirmed" ? "Paid from your buyer's wallet." : "Payment sent, not confirmed yet."}</b> Kite order <b>{real.reference ?? "unknown"}</b>.
+                      {status.data?.order ? (
+                        <div style={{ marginTop: 8, display: "grid", gap: 3, fontSize: 12.5 }}>
+                          <span>Order: <b>{status.data.order.orderStatus}</b>{status.data.order.paymentStatus ? ` · payment ${status.data.order.paymentStatus}` : ""}</span>
+                          {status.data.order.total ? <span>Taken: <b className="num">{status.data.order.total}</b></span> : null}
+                          {status.data.order.refundAmount ? <span>Refunded to your wallet: <b className="num">${status.data.order.refundAmount}</b></span> : null}
+                          {status.data.order.merchantOrderIds.length ? <span>Amazon order: <b>{status.data.order.merchantOrderIds.join(", ")}</b></span> : null}
+                        </div>
+                      ) : status.isError ? <div style={{ marginTop: 6, fontSize: 12.5 }}>{errorMessage(status.error)}</div> : null}
+                      <div style={{ marginTop: 10 }}>
+                        <button className="btn btn-sec btn-sm" disabled={status.isFetching} onClick={() => { if (checkStatus) void status.refetch(); else setCheckStatus(true); }}>
+                          {status.isFetching ? "Asking Kite…" : "Check order status"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+                {practice && !real ? (
                   <div className="callout ok" style={{ marginTop: 14 }}>
                     <Icon name="check" />
                     <div>
@@ -148,22 +175,26 @@ export default function OrderDetailPage() {
                       ) : null}
                     </div>
                   </div>
-                ) : o.status === "approved" && mode === "live" ? (
+                ) : null}
+                {canPay && mode === "live" && marketplace && canDecide ? (
                   <div className="callout info" style={{ marginTop: 14, alignItems: "flex-start" }}>
                     <Icon name="shield" />
                     <div>
-                      <b>Practice checkout.</b> Real payment needs a funded Kite Passport session, and the wallet is empty, so this runs the full check without moving money.
-                      {limits ? <> A real Amazon checkout would hold up to <b className="num">{money(limits.charge, "USD")}</b> ({money(limits.cap, "USD")} cap plus a {money(limits.fee, "USD")} fee) and refund what the order does not use.</> : null}
-                      {canDecide ? (
-                        <div style={{ marginTop: 10 }}>
-                          <button className="btn btn-pri btn-sm" disabled={checkout.isPending} onClick={() => void runCheckout()}>
-                            <Icon name="bolt" /> {checkout.isPending ? "Checking…" : "Run practice checkout"}
+                      <b>Pay for this order.</b> Your buyer pays Amazon from its own Kite Passport wallet, inside a spending session you approve with your passkey.
+                      {limits ? <> It holds up to <b className="num">{money(limits.charge, "USD")}</b> up front ({money(limits.cap, "USD")} ceiling plus a {money(limits.fee, "USD")} fee) and refunds what the order does not use.</> : null}
+                      <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button className="btn btn-pri btn-sm" onClick={() => setPaying(true)}><Icon name="card" /> Pay with Kite</button>
+                        {!practice ? (
+                          <button className="btn btn-ghost btn-sm" disabled={checkout.isPending} onClick={() => void runCheckout()}>
+                            {checkout.isPending ? "Checking…" : "Try a practice run first"}
                           </button>
-                        </div>
-                      ) : null}
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                ) : o.status === "approved" ? (
+                ) : canPay && mode === "live" && !marketplace ? (
+                  <div className="callout info" style={{ marginTop: 14 }}><Icon name="alert" /><div>Paying a seller directly is not switched on yet. Amazon orders can be paid from your buyer&apos;s wallet.</div></div>
+                ) : o.status === "approved" && mode === "demo" ? (
                   <div className="callout info" style={{ marginTop: 14 }}><Icon name="alert" /><div>In the demo, open Approvals to simulate the Passport payment.</div></div>
                 ) : null}
               </div>
@@ -174,6 +205,8 @@ export default function OrderDetailPage() {
                 <button className="btn btn-ghost btn-sm" style={{ color: "var(--err)" }} onClick={() => setRejecting(true)}>Reject this order</button>
               </div>
             ) : null}
+
+            <LiveCheckoutDialog orderId={o.id} open={paying} onClose={() => setPaying(false)} />
 
             <ApproveOrderModal open={approving} onClose={() => setApproving(false)}
               order={{

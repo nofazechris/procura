@@ -10,7 +10,7 @@ import {
 } from "./demo/store";
 import type {
   ActivityDTO, ApprovalDTO, BusinessDTO, ComparisonView, MemberDTO, OrderDetailDTO, OrderDTO, PaymentDTO, PolicyDTO,
-  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO, WalletBalancesDTO, WalletDTO, PassportDTO, PassportSessionDTO, VerifyPlanDTO, VerifyRunDTO, CallScriptDTO,
+  RequestDetailDTO, RequestDTO, SourcingSummaryDTO, SupplierDetailDTO, SupplierDTO, WalletBalancesDTO, WalletDTO, PassportDTO, PassportSessionDTO, VerifyPlanDTO, VerifyRunDTO, CallScriptDTO, CallInfoDTO, CallStatusDTO, LivePlanDTO, LiveReceiptDTO, OrderStatusDTO,
 } from "./dto";
 
 /** Demo throws ServiceError; live throws ApiClientError. Present both the same way. */
@@ -309,3 +309,39 @@ export const useCallScript = (supplierId: string) =>
   useMutation<CallScriptDTO, unknown, { requestId?: string }>({
     mutationFn: (i) => api(`/suppliers/${supplierId}/call-script`, { method: "POST", body: i }),
   });
+
+/** Real calls to a seller. The calls are placed through Kite Passport, so they need an approved session. */
+export const useCallInfo = (supplierId: string) =>
+  useModeQuery<CallInfoDTO>(["call-info", supplierId], () => api(`/suppliers/${supplierId}/call`), async () => ({
+    enabled: false, callable: false, hasPhone: false, phoneHint: null, price: "0.54", maxMinutes: 3, calls: [],
+  }));
+
+export interface PlaceCallInput { sessionId: string; script: { opening: string; questions: string[]; mustConfirm: string[]; closing: string }; confirmed: true }
+export const usePlaceCall = (supplierId: string) =>
+  useRefreshingMutation<PlaceCallInput, { callId: string; phone: string; price: string }>((i) => api(`/suppliers/${supplierId}/call`, { method: "POST", body: i }), NOT_IN_DEMO);
+
+/** Polls one call until it is finished. */
+export const useCallStatus = (supplierId: string, callId: string | null, sessionId: string | null) => {
+  const { mode, business } = useApp();
+  return useQuery<CallStatusDTO>({
+    queryKey: [mode, business.id, "call-status", callId],
+    queryFn: () => api(`/suppliers/${supplierId}/call?callId=${encodeURIComponent(callId!)}&sessionId=${encodeURIComponent(sessionId!)}`),
+    enabled: mode === "live" && !!callId && !!sessionId,
+    refetchInterval: (q) => (q.state.data?.status?.completed || q.state.data?.status?.status === "failed" ? false : 15_000),
+    staleTime: 5_000,
+  });
+};
+
+/** Paying an approved Amazon order from the Passport wallet. */
+export const useLivePlan = (orderId: string, enabled: boolean) =>
+  useModeQuery<LivePlanDTO>(["live-plan", orderId], () => api(`/orders/${orderId}/checkout/live`), NOT_IN_DEMO, enabled);
+
+export interface LiveCheckoutInput {
+  sessionId: string; maxTotal?: string; confirmed: true;
+  shipping?: { name: string; email: string; phone: string; line1: string; line2?: string; city: string; state: string; postal: string; country: string };
+}
+export const useLiveCheckout = (orderId: string) =>
+  useRefreshingMutation<LiveCheckoutInput, LiveReceiptDTO>((i) => api(`/orders/${orderId}/checkout/live`, { method: "POST", body: i }), NOT_IN_DEMO);
+
+export const useOrderStatus = (orderId: string, enabled: boolean) =>
+  useModeQuery<OrderStatusDTO>(["order-status", orderId], () => api(`/orders/${orderId}/checkout/status`), NOT_IN_DEMO, enabled);

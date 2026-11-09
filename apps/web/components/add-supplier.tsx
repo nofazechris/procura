@@ -60,7 +60,7 @@ export function AddSupplierModal({ open, onClose }: { open: boolean; onClose: ()
         </div>
         {field("email", "Contact email", { type: "email", placeholder: "sales@example.com" }, "Needed for the email check.")}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {field("phone", "Phone", { placeholder: "+234 …" })}
+          {field("phone", "Phone", { placeholder: "+2348012345678" }, "International format. Needed to call.")}
           {field("website", "Website", { placeholder: "https://example.com" })}
         </div>
         {field("categories", "What they sell", { placeholder: "stationery, printing" }, "Separate with commas.")}

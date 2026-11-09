@@ -4,15 +4,22 @@
  * the top bar, a blocked screen), so there is no settings page to hunt for.
  */
 export type BuyerPanel = "wallet" | "fund" | "session";
+export interface BuyerPanelOptions {
+  /** For a session: the amount it should cover, so the form starts with enough. */
+  amount?: string;
+}
 
 const EVENT = "procura:buyer";
 
-export function openBuyerPanel(panel: BuyerPanel): void {
-  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent<BuyerPanel>(EVENT, { detail: panel }));
+export function openBuyerPanel(panel: BuyerPanel, options: BuyerPanelOptions = {}): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENT, { detail: { panel, ...options } }));
 }
 
-export function onBuyerPanel(handler: (panel: BuyerPanel) => void): () => void {
-  const listener = (e: Event) => handler((e as CustomEvent<BuyerPanel>).detail);
+export function onBuyerPanel(handler: (panel: BuyerPanel, options: BuyerPanelOptions) => void): () => void {
+  const listener = (e: Event) => {
+    const d = (e as CustomEvent<{ panel: BuyerPanel } & BuyerPanelOptions>).detail;
+    handler(d.panel, d.amount ? { amount: d.amount } : {});
+  };
   window.addEventListener(EVENT, listener);
   return () => window.removeEventListener(EVENT, listener);
 }

@@ -1,0 +1,2 @@
+DROP INDEX "payments_one_live_per_po";--> statement-breakpoint
+CREATE UNIQUE INDEX "payments_one_live_per_po" ON "payments" USING btree ("purchase_order_id") WHERE "payments"."status" in ('prepared','awaiting_authorisation','authorised','submitted','pending','confirmed') and "payments"."network" <> 'simulation';

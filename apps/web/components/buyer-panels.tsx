@@ -21,7 +21,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numer
 export function BuyerPanels() {
   const { mode } = useApp();
   const [panel, setPanel] = useState<BuyerPanel | null>(null);
-  useEffect(() => onBuyerPanel((p) => { if (mode === "live") setPanel(p); }), [mode]);
+  const [amount, setAmount] = useState<string | undefined>(undefined);
+  useEffect(() => onBuyerPanel((p, o) => { if (mode === "live") { setAmount(o.amount); setPanel(p); } }), [mode]);
   // A link such as /dashboard?buyer=fund opens the dialog straight away.
   useEffect(() => {
     const want = new URLSearchParams(window.location.search).get("buyer");
@@ -35,7 +36,7 @@ export function BuyerPanels() {
     <>
       <Modal open={panel === "wallet"} onClose={close} label="Your wallet" wide><div style={{ padding: 22 }}><WalletPanel /></div></Modal>
       <Modal open={panel === "fund"} onClose={close} label="Fund your buyer" wide><div style={{ padding: 22 }}><FundPanel plain /></div></Modal>
-      <Modal open={panel === "session"} onClose={close} label="Spending session" wide><div style={{ padding: 22 }}><SessionPanel /></div></Modal>
+      <Modal open={panel === "session"} onClose={close} label="Spending session" wide><div style={{ padding: 22 }}><SessionPanel suggest={amount} /></div></Modal>
     </>
   );
 }
@@ -137,14 +138,14 @@ function SessionRow({ s }: { s: PassportSessionDTO }) {
   );
 }
 
-function SessionPanel() {
+function SessionPanel({ suggest }: { suggest?: string }) {
   const passport = usePassport();
   const policy = usePolicy();
   const register = useRegisterAgent();
   const request = useRequestSession();
   const { show } = useToast();
-  const [total, setTotal] = useState("100");
-  const [perTx, setPerTx] = useState("100");
+  const [total, setTotal] = useState(suggest ?? "100");
+  const [perTx, setPerTx] = useState(suggest ?? "100");
   const [ttl, setTtl] = useState(60);
   const p = passport.data;
   const rejections = (errorDetails(request.error) as { rejections?: { code: string; message: string }[] } | undefined)?.rejections;
@@ -154,7 +155,10 @@ function SessionPanel() {
     return (
       <div style={{ display: "grid", gap: 10 }}>
         <h3 style={{ margin: 0 }}>Spending session</h3>
-        <div className="callout"><Icon name="lock" /><div>Paying opens once Kite Passport is switched on for this account. Until then your buyer can search and compare, but it cannot pay.</div></div>
+        <div className="callout"><Icon name="lock" /><div>
+          Paying opens once Kite Passport is switched on for this account. Until then your buyer can search and compare, but it cannot pay.
+          {p?.canManage && p.businessId ? <> It has one login per server, so it is enabled for a single account. To enable this one, set <code style={{ overflowWrap: "anywhere" }}>PASSPORT_BUSINESS_ID={p.businessId}</code> in the server environment, then restart.</> : null}
+        </div></div>
       </div>
     );
   }

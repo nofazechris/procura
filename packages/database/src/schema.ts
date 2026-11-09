@@ -457,10 +457,11 @@ export const payments = pgTable(
       sql`(${t.status} <> 'confirmed') or (${t.confirmedAt} is not null and ${t.transactionHash} is not null)`,
     ),
     // At most one live payment (in flight or confirmed) per purchase order. A failed or cancelled
-    // attempt frees the slot; everything else blocks a duplicate.
+    // attempt frees the slot; everything else blocks a duplicate. A practice checkout moved no money,
+    // so it never blocks the real payment.
     uniqueIndex("payments_one_live_per_po")
       .on(t.purchaseOrderId)
-      .where(sql`${t.status} in ('prepared','awaiting_authorisation','authorised','submitted','pending','confirmed')`),
+      .where(sql`${t.status} in ('prepared','awaiting_authorisation','authorised','submitted','pending','confirmed') and ${t.network} <> 'simulation'`),
   ],
 );
 

@@ -1,31 +1,63 @@
 # Procura
 
-A safe AI buyer for small businesses. Describe what you need to buy; an agent finds options
-(live Amazon search through Kite Passport, plus supplier checks), compares them on evidence and
-price, and explains its pick. When it is time to pay, the agent can only spend what you approve:
-Kite Passport gives it a verifiable identity and a capped spending session that you activate
-with your passkey. The agent never holds your card or your keys.
+A safe AI buyer. Tell it what you need. It researches the options, you confirm, it pays from a capped
+spending session you approve with your passkey, and when a seller has no website it can phone them.
+It never holds your card or your keys, and it cannot spend a cent you have not approved.
 
-- **App:** Next.js 16 (App Router), React 19, TypeScript, TanStack Query, Lucide
+```
+research  ->  confirm  ->  pay  ->  call, if needed
+```
+
+1. **Research.** Live Amazon search through Kite Passport (free, buys nothing), a comparison on price and
+   evidence, and optional paid seller checks (sanctions, company registry, email) that turn into evidence.
+2. **Confirm.** Nothing happens without you. You approve the order, and the approval is sealed with a
+   fingerprint of everything payable, so a change of even one cent voids it.
+3. **Pay.** The agent pays Amazon from its own Kite Passport wallet, inside a session you approve with a
+   passkey. Passport enforces the session's limits, and Procura checks everything first.
+4. **Call, if needed.** For a seller with no website, an AI calls them. It says it is an AI, only asks
+   questions, never agrees to buy, and only after you read the script and confirm.
+
+Built for the Kite track: *agents with a verifiable identity and spending limits you control, so they can
+shop and pay on your behalf, safely.*
+
+## What is real
+
+| Piece | State |
+|---|---|
+| Amazon search, comparison, evidence rules, approvals, limits | Live, tested |
+| Kite Passport identity, spending sessions, passkey approval | Live, tested against the real service |
+| Practice checkout (full payment gate, nothing charged) | Live, tested |
+| Real Amazon checkout from the Passport wallet | Built and tested with a fake `kpass`. Needs a funded wallet to run for real |
+| Seller checks (sanctions, registry, email) | Built and tested with fake replies. Parsers follow the services' documented fields; check the first real reply |
+| Real phone calls (StablePhone) | Built and tested with a fake `kpass`. Needs a funded wallet to run for real |
+| Funding the buyer from your wallet | Built. The USDC transfer prompt needs a browser wallet to try |
+
+Real checkout holds the order total plus a buffer up front and refunds what is not used (Kite's rule:
+cap = items + the larger of 20% or $5, plus a $1 fee). With a small wallet Procura lowers the ceiling to
+what the wallet can hold, as long as it still covers the items and the fee.
+
+## Stack
+
+- **App:** Next.js 16 (App Router), React 19, TypeScript, TanStack Query, three.js
 - **Data:** Neon Postgres with Row Level Security (Drizzle ORM)
 - **Auth:** Better Auth (self-hosted)
-- **Reasoning:** SERV Reasoning (connected when `SERV_API_KEY` is set; see below)
-- **Identity and spending limits:** Kite Passport (agent identity and capped sessions work; checkout is next)
+- **Reasoning:** SERV Reasoning, to read a request and explain a comparison and draft a call script
+- **Identity, spending limits and payments:** Kite Passport, driven through its `kpass` CLI
 
-See [docs/architecture.md](docs/architecture.md) for what is built and what is not.
+See [docs/architecture.md](docs/architecture.md) for the design, [docs/deploy.md](docs/deploy.md) to run it
+somewhere other than your laptop, and [docs/demo-script.md](docs/demo-script.md) for a walkthrough.
 
 ## Layout
 
 ```
-apps/web            Next.js app: screens, components, API route handlers
-packages/shared     Money (no floats), statuses, state machines, Zod schemas, permissions
-packages/policies   Deterministic financial policy engine, order fingerprint
-packages/procurement Evidence, eligibility, comparison, purchase orders, demo supplier provider, services
-packages/database   Drizzle schema, migrations, tenant-scoped client
-tests/              unit + integration (in-process Postgres via PGlite)
-scripts/dev-db.mjs  Local Postgres for development, no Neon needed
-prototype/          the original clickable design
-docs/               architecture, Neon setup
+apps/web             Next.js app: screens, components, API route handlers
+packages/shared      Money (no floats), statuses, state machines, Zod schemas, permissions
+packages/policies    Deterministic spending policy, payment gate, checkout rules, order fingerprint
+packages/procurement Evidence, eligibility, comparison, verification and call rules, services
+packages/database    Drizzle schema, migrations, tenant-scoped client
+tests/               unit and integration tests (in-process Postgres via PGlite)
+scripts/dev-db.mjs   Local Postgres for development, no Neon needed
+docs/                architecture, setup, deploy, demo script
 ```
 
 ## Run it locally
@@ -36,59 +68,33 @@ pnpm dev:db        # terminal 1: local Postgres on :5433 (applies migrations, ke
 pnpm dev           # terminal 2: the app on http://localhost:3000
 ```
 
-`.env` is already set for local development (gitignored). For a real deployment see
-[docs/neon-setup.md](docs/neon-setup.md), which lists every variable.
+Create a `.env` at the repo root. [docs/neon-setup.md](docs/neon-setup.md) lists every variable by name
+and purpose. For local use with no email provider, set `REQUIRE_EMAIL_VERIFICATION=false`. No env file
+is committed to this repository.
 
-### Landing page, sign-in and first run
+## How the product flows
 
-The landing page tells the product's story on a fictional sample scenario, computed by the real
-engine: a shop buying a label printer, a charger and label rolls. A scroll-driven 3D rack (three.js,
-procedural geometry, no model files) plays the whole purchase: request, find, prove, compare,
-order, your passkey, and a capped payment. Below it, four interactive 3D sections run the *real*
-rules in your browser: the basket rule that picks listings, the eligibility engine, the comparison
-engine with a budget plane, and the payment gate with attacks. There is no demo dashboard: "See it
-run" asks the visitor to create an account.
+- **Landing page.** A scroll-driven 3D story plays a whole purchase on a sample scenario computed by the real
+  engine. Below it, interactive sections run the real rules in your browser. There is no demo dashboard.
+- **Setup.** After sign-up a short wizard asks where you are, how the buyer should choose, your limits, and
+  requires you to connect a wallet. Home then shows a "Get set up" dialog until the buyer can pay.
+- **Wallet, funding and sessions.** These open as dialogs from Home and the top bar. Kite cannot pull money
+  from your wallet, so you fund the buyer by sending USDC on Base to its Passport address. A spending
+  session is the limit you approve with your passkey.
+- **Limits.** Monthly limit, largest purchase, when it must ask you, and how it chooses between options.
 
-The same rack plays on a slow loop behind the sign-in and sign-up forms. After sign-up, a
-two-pane setup wizard opens over the dashboard where the rack builds itself step by step as you
-answer (business, what you buy, how it chooses, limits, wallet, ready). It cannot be dismissed
-until the business exists, and the wallet step is optional. Afterwards the dashboard shows a "Get
-set up" checklist.
+## Safety rules the code enforces
 
-### The agent (SERV Reasoning)
-
-With `SERV_API_KEY` set, the agent does two jobs, through `POST /v1/chat/completions` with strict
-JSON-schema output (`apps/web/lib/server/serv.ts`):
-
-- **Reads a plain-language request** ("50 bags of rice, budget $2,000, by Friday") and fills in the
-  request form. A person reviews it before anything is created. Every value is re-validated on the
-  server; anything unclear is dropped and reported, never guessed.
-- **Explains a comparison** in plain English. It is given only what the deterministic engine
-  computed and may cite only an eligible quote. The engine's ranking stays the authority.
-
-The model never sets a spending limit, approves, or pays. Calls are rate limited per user and
-recorded in the audit log (model and token usage, not the text). Defaults: base URL
-`https://inference-api.openserv.ai`, model `gpt-5.4-mini` (override with `SERV_BASE_URL` / `SERV_MODEL`).
-
-### Kite Passport (agent identity and spending limits)
-
-Settings, Passport. Kite Passport has **no public HTTP API**; the `kpass` CLI is the only way in, so
-Procura drives it as a child process (`apps/web/lib/server/passport.ts`: argument arrays, no shell,
-the login token is never read or returned).
-
-- **Verifiable identity:** Procura's agent (`procura-agent`) is registered under the owner's Passport
-  account, and the id Passport issues is recorded and shown.
-- **Spending limits you control:** a person requests a session with a per-payment limit, a total and a
-  duration. Procura first refuses anything wider than the business's own spending policy
-  (`evaluateSessionRequest`), then asks Passport, which enforces the caps. The session becomes
-  active only when Passport reports the person approved it with their passkey; nothing a client
-  sends can do that.
-- **Not wired yet:** executing payments. The Passport backend here is **production** and the
-  wallet is empty, so approving a session sets a limit and moves no money.
-
-Setup: `KPASS_BIN`, `PASSPORT_HOME` (the folder holding its gitignored `.kite-passport` login) and
-`PASSPORT_BUSINESS_ID`. One login serves one business, so only that business can use it; real
-multi-tenant use needs a per-business Passport worker or an HTTP API from Kite.
+- The model only drafts and explains. It never sets a limit, approves or pays.
+- Money is decimal strings and integers, never floats. Unknown evidence is never read as verified.
+- A real payment needs, in order: your approval, an unchanged order fingerprint, your limits, a wallet that
+  holds the up-front charge, an active session big enough for it, a cart that matches the order exactly, and
+  your explicit confirmation. Passport then enforces the session again.
+- Each real attempt is recorded before money can move. If the outcome is unknown, the payment stays pending
+  and the order cannot be paid a second time.
+- A call goes only to the number saved on the seller. The script is cleaned again on the server, any line
+  that promises payment is removed, and the call is capped at three minutes and is not recorded.
+- Env values and the Passport login are server-side only, and the login token is never read or returned.
 
 ## Commands
 
@@ -102,30 +108,14 @@ multi-tenant use needs a per-business Passport worker or an HTTP API from Kite.
 
 ## Screens
 
-Landing, sign in / sign up / password recovery, overview (with the setup wizard on first login), procurement (list, new,
-workspace, comparison), suppliers (directory, profile), purchase orders (list, detail, PDF
-export), approvals, payments (list, detail), intelligence, activity, AI assistant, and settings
-(business, team, agent permissions, integrations). Command menu on Ctrl/Cmd+K.
-
-## API
-
-All responses use `{ success, data?, error? }`. Every route authenticates, resolves the caller's
-business membership, and checks a role permission on the server.
-
-| Route | Purpose |
-|---|---|
-| `/api/auth/*` | Better Auth: sign up, sign in, verify, reset |
-| `GET, POST /api/business`, `GET, PATCH /api/business/:id`, `GET .../members` | Businesses and team |
-| `GET, PATCH /api/policy` | Spending limits |
-| `GET, POST /api/procurement`, `GET /:id`, `POST /:id/sourcing`, `GET /:id/comparison`, `POST /:id/cancel` | Requests and sourcing |
-| `GET /api/suppliers`, `GET /:id`, `POST /:id/payout-destinations/:destId/approve` | Suppliers, evidence, payment addresses |
-| `GET, POST /api/orders`, `GET /:id`, `POST /:id/approve`, `POST /:id/reject` | Purchase orders |
-| `GET /api/approvals`, `GET /api/payments`, `GET /api/activity` | Approvals, payments, audit trail |
-| `GET /api/health` | Liveness and database check |
+Landing, sign in and sign up, Home, Requests (new, details, compare), Orders (details, PDF, pay), Sellers
+(directory, profile with checks and calls), Spending, Activity, Ask Procura, Waiting for you, and Limits.
+Command menu on Ctrl or Cmd+K.
 
 ## Security notes
 
 - Secrets are server-side only. Nothing sensitive is in a `NEXT_PUBLIC_` variable.
-- On Neon the app must connect as the non-owner `procura_app` role or RLS does not protect tenants.
-- The AI never approves or executes a payment; the policy engine, a human and Kite Passport do.
-- Demo suppliers are fictional and labelled `source_type = 'demo'` everywhere they appear.
+- On Neon the app must connect as the non-owner `procura_app` role, or Row Level Security does not protect tenants.
+- One `kpass` login serves one account, so only the account named in `PASSPORT_BUSINESS_ID` can pay. Real
+  multi-user use needs a per-user Passport worker or an HTTP API from Kite.
+- The audit log is append-only by design. Test accounts cannot be deleted.

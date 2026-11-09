@@ -186,3 +186,22 @@ export interface CallScriptDTO {
   opening: string; questions: string[]; mustConfirm: string[]; closing: string; notes: string[];
   model: string; placed: false; price: string; currency: "USD";
 }
+
+/** Whether a real call can be placed to a seller, and the calls already made. */
+export interface CallInfoDTO {
+  enabled: boolean; callable: boolean; hasPhone: boolean; phoneHint: string | null; price: string; maxMinutes: number;
+  calls: { callId: string; at: string; phone: string }[];
+}
+export interface CallStatusDTO { status: { status: string; completed: boolean; answeredBy: string | null; seconds: number | null; summary: string | null; transcript: string | null; error: string | null } | null }
+
+/** What paying an order for real would hold, and what is still missing. */
+export interface LivePlanDTO {
+  subtotal: string; total: string; walletUsd: string | null;
+  limits: { subtotal: string; cap: string; fee: string; charge: string } | null; tightened: boolean; shortBy: string | null;
+  lines: { title: string; quantity: number; unitPrice: string }[];
+  shipping: { name: string; email: string; phone: string; line1: string; line2: string; city: string; state: string; postalCode: string; country: string; missing: string[]; complete: boolean } | null;
+  sessions: { id: string; taskSummary: string; maxPerTx: string; maxTotal: string; expiresAt: string | null }[];
+  blockers: string[];
+}
+export interface LiveReceiptDTO { paymentId: string; orderId: string; status: "paid" | "pending"; orderStatus: string; txHash: string | null; held: string; ceiling: string; note: string }
+export interface OrderStatusDTO { known: boolean; paymentStatus: string; order?: { orderStatus: string; paymentStatus: string | null; total: string | null; merchantOrderIds: string[]; refundAmount: string | null } | null }

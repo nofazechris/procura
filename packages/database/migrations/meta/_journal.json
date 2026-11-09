@@ -43,6 +43,13 @@
       "when": 1793787399108,
       "tag": "0005_passport_agents",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794234053667,
+      "tag": "0006_practice_payments_do_not_block",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+.next
+**/.next
+.data
+.env
+.env.*
+.kite-passport
+**/.kite-passport
+.git
+.agents
+.claude
+.cline
+.cursor
+agent-data
+workspace
+*.log

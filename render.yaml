@@ -1,0 +1,41 @@
+# Render blueprint for Procura. Secrets are never stored here: every `sync: false` value is entered in the
+# Render dashboard. This file has not been deployed yet. See docs/deploy.md.
+services:
+  - type: web
+    name: procura
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: passport
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PASSPORT_HOME
+        value: /data/passport
+      - key: KPASS_BIN
+        value: /root/.kpass/bin/kpass
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "false"
+      - key: ALLOW_FIXED_USD_PEG
+        value: "true"
+      - key: SERV_BASE_URL
+        value: https://inference-api.openserv.ai
+      - key: SERV_MODEL
+        value: gpt-5.4-mini
+      - key: DATABASE_URL
+        sync: false
+      - key: MIGRATION_DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: SERV_API_KEY
+        sync: false
+      - key: PASSPORT_BUSINESS_ID
+        sync: false

@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { procurementItems, procurementRequests, recordAudit, suppliers, businesses } from "@procura/database";
+import { CALL_PRICE } from "@procura/procurement";
 import { ServiceError } from "@procura/shared";
 import { handle, notFound, ok, parseId, readJson } from "@/lib/api";
 import { inTenant, requireAccess } from "@/lib/guard";
@@ -13,8 +14,6 @@ export const maxDuration = 60;
 
 const Body = z.object({ requestId: z.string().uuid().optional() });
 
-/** What a real call through Kite would cost, from its catalog: StablePhone, per call, in USD. */
-const CALL_PRICE = "0.54";
 
 /**
  * Drafts what the agent would say on a call to a seller. This is a rehearsal for a person to read:
