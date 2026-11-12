@@ -4,7 +4,7 @@ Procura pays and shops by running Kite's `kpass` command-line tool on the server
 run: **not on serverless hosting** (Vercel, Netlify and similar), because it needs a long-lived process, the
 CLI installed, and a disk that keeps the CLI's login between restarts. Render, Railway, Fly or a small VM all
 work. The repo includes a `Dockerfile` and a `render.yaml` blueprint. Neither has been run end to end yet, so
-treat the first deploy as something to watch.
+the Docker image was deployed to Render on 12 November 2026 (free plan, Passport off) and builds and runs.
 
 ## What you need
 
@@ -32,6 +32,15 @@ treat the first deploy as something to watch.
    Passport is not enabled for a business) and set `PASSPORT_BUSINESS_ID` to it, then redeploy. Only that
    account can use Passport, because one CLI login serves one account.
 4. In the app, connect a wallet, fund the buyer, and approve a spending session. Search first, which is free.
+
+## Running on the free plan
+
+The free plan has no persistent disk and no shell, so the Kite login cannot be kept or created there. Leave
+`PASSPORT_HOME` unset: the app then runs with Kite Passport off. Signup, setup, the dashboard, limits and
+practice checkout work; Amazon search, payments, seller checks and calls report "Kite Passport is not
+configured on this server". The first request after the service sleeps takes about 30 seconds. A paid plan with
+a disk mounted at `/data` (and `PASSPORT_HOME=/data/passport`) turns Passport on, as in the steps above.
+Setting a start command in the dashboard replaces the Dockerfile's `CMD`, so leave **Docker Command** empty.
 
 ## Settings that matter
 

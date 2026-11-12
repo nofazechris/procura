@@ -12,3 +12,8 @@ dist
 *.tsbuildinfo
 
 .kite-passport/
+
+# demo video build output
+video/build/
+video/out/
+video/assets/rack/
