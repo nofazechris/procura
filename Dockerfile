@@ -13,10 +13,10 @@ RUN pnpm install --frozen-lockfile && pnpm build
 
 # Kite Passport CLI. Its login lives in PASSPORT_HOME/.kite-passport on a persistent disk and is never baked into the image.
 RUN curl -fsSL https://cli.gokite.ai/install.sh | bash
+# PASSPORT_HOME is set by the host (render.yaml sets it on a plan with a disk). Left unset, Kite Passport is off.
 ENV KPASS_BIN=/root/.kpass/bin/kpass \
-    PASSPORT_HOME=/data/passport \
     NODE_ENV=production \
     PORT=3000
 
 EXPOSE 3000
-CMD ["sh", "-c", "mkdir -p \"$PASSPORT_HOME\" && pnpm --filter @procura/web exec next start -p ${PORT}"]
+CMD ["sh", "-c", "if [ -n \"$PASSPORT_HOME\" ]; then mkdir -p \"$PASSPORT_HOME\"; fi; exec pnpm --filter @procura/web exec next start -p ${PORT}"]
