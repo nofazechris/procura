@@ -3,7 +3,7 @@
 # See docs/deploy.md. This file has not been run end to end yet.
 FROM node:22-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates bash \
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates bash jq \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable
 
